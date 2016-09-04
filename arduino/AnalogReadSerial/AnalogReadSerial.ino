@@ -21,12 +21,17 @@ void loop() {
   int sensorValue = analogRead(A0);
   delay(1000);
   int sensorValue1 = analogRead(A1);
+  delay(1000);
+  int sensorValue2 = analogRead(A2);
   // print out the value you read:
-  Serial.print(sensorValue1);  
+  Serial.print(sensorValue);  
   // by this way data could be print in a row
   Serial.print(',');
   // if it is println, the next print will start from the beginning of the next row
-  Serial.println(sensorValue); 
+  Serial.print(sensorValue1); 
+  Serial.print(',');
+  // if it is println, the next print will start from the beginning of the next row
+  Serial.println(sensorValue2); 
   //Serial.print('\t') //this prints a tab
   delay(3000);        // delay in between reads for stability
 }

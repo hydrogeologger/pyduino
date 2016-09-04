@@ -14,6 +14,9 @@ import time
 #    the same as the current script reading interval. because the existing buffer in 
 #    arduino may cause the time deviation between the time arduino has been read and 
 #    the time raspberry has recorded the data
+# It is found so far that arduino will store 500 undisplayed data, if these data has
+#    yet retrived, arduino will stop running as indicated by RX stopped flashing.
+#http://stackoverflow.com/questions/15184932/how-to-upload-source-code-to-arduino-from-bash
 
 
 
@@ -22,3 +25,4 @@ ard = serial.Serial(port,9600,timeout=5)
 msg = ard.readline()
 for i in range(1000): msg = ard.readline();print i,msg
 
+ard.close()
