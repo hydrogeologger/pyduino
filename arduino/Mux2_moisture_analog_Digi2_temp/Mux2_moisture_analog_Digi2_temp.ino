@@ -19,7 +19,20 @@ will prevent such )
 //Initialize the Mux Shield
 MuxShield muxShield;
 
+
+// the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
+//Arrays to store analog values after recieving them
+//int IO1AnalogVals[16];
+int IO2AnalogVals[16];
+//int IO3AnalogVals[16];
+//digitalWrite(A1, LOW);
+//digitalWrite(A0, LOW);
+// Defining the waiting time between each readings;
+int delay_mmsec=200;
+int number_sensors=16;
+
+
 // -------------------- needed by digital sensor --------------------
 #include <OneWire.h>
 OneWire  ds(3);  // on digita pin 2 (a 4.7K resistor is necessary)
@@ -45,52 +58,22 @@ void setup()
     // -------------------- needed by digital sensor-------------------
 }
 
-//Arrays to store analog values after recieving them
-//int IO1AnalogVals[16];
-int IO2AnalogVals[16];
-//int IO3AnalogVals[16];
 
 void loop()
 {
-  //digitalWrite(A1, LOW);
-  //digitalWrite(A0, LOW);
-  // Defining the waiting time between each readings;
-  int delay_mmsec=200;
-  int number_sensors=16;
-  for (int i=0; i<number_sensors; i++)
-  {
-    //Analog read on all 16 inputs on IO1, IO2, and IO3
-    //IO1AnalogVals[i] =0;
-    //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
-    IO2AnalogVals[i] = muxShield.analogReadMS(2,i);
-    //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
-    delay(delay_mmsec);
-  }
-  
-  //Print IO1 values for inspection
-  Serial.print("IO2 analog");
-  Serial.print(seperator);
-  for (int i=0; i<number_sensors; i++)
-  {
-    //Serial.print(IO1AnalogVals[i]);
-    Serial.print(IO2AnalogVals[i]);
-    Serial.print(seperator);
-  }
-  Serial.println();
-  delay(1000);
-
-
 // -------------------------------- required by onewire  -------------------
   byte i;
   byte present = 0;
   byte type_s;
   byte data[12];
   byte addr[8];
-  float celsius, fahrenheit;
+  //float celsius, fahrenheit;
+  float celsius;
 
   if ( !ds.search(addr)) {
-    Serial.println("No more addresses.");
-    //Serial.println();
+    Serial.print(",No more addresses.,");
+    read_muxschield();
+    Serial.println();
     ds.reset_search();
     delay(3000);
     return;
@@ -170,13 +153,38 @@ void loop()
     //// default is 12 bit resolution, 750 ms conversion time
   }
   celsius = (float)raw / 16.0;
-  fahrenheit = celsius * 1.8 + 32.0;
-  Serial.print(",  Temperature = ");
+  //fahrenheit = celsius * 1.8 + 32.0;
+  Serial.print(",Temp.,");
   Serial.print(celsius);
-  Serial.print(" Celsius, ");
-  Serial.print(fahrenheit);
-  Serial.println(" Fahrenheit");
+  Serial.print(" ,Celsius, ");
+  //Serial.print(fahrenheit);
+  //Serial.println(" ,Fahrenheit");
   
+}
+
+void read_muxschield(){
+// -------------------- needed by mux schield -----------------------
+  for (int i=0; i<number_sensors; i++)
+  {
+    //Analog read on all 16 inputs on IO1, IO2, and IO3
+    //IO1AnalogVals[i] =0;
+    //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
+    IO2AnalogVals[i] = muxShield.analogReadMS(2,i);
+    //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
+    delay(delay_mmsec);
+  }
+  
+  //Print IO1 values for inspection
+  Serial.print("IO2 analog");
+  Serial.print(seperator);
+  for (int i=0; i<number_sensors; i++)
+  {
+    //Serial.print(IO1AnalogVals[i]);
+    Serial.print(IO2AnalogVals[i]);
+    Serial.print(seperator);
+  }
+  //Serial.println();
+  delay(1000);
 }
  //
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
