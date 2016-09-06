@@ -29,7 +29,7 @@ int IO2AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
 // Defining the waiting time between each readings;
-int delay_mmsec=200;
+int delay_mmsec=100;
 int number_sensors=16;
 
 

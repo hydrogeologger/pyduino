@@ -24,6 +24,8 @@ import time
 # In [1]: cd /home/chenming/pydrino/python
 #    execute the file
 # In [2]: execfile('read_arduino.py')
+# In [3]: pwd
+#    pwd shows the current directory
 
 ### --------------------------input section ---------------------------
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
