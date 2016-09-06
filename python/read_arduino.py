@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import serial
-import syslog
+#import syslog
 import time
 # this script reads off from arduino on the go.
 # it is currently confirmed that arduino behaves similarly as all the scale sensors
@@ -31,7 +31,8 @@ import time
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
-port = '/dev/ttyUSB0'
+#port = '/dev/ttyUSB0'
+port = 'COM3'
 
 # whether the result will be displayed on the screen
 screen_display=True
