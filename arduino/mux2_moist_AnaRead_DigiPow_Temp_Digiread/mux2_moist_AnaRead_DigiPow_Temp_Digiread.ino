@@ -25,8 +25,11 @@ MuxShield muxShield;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them
+int number_sensors=3;
+// define toggles for I/O3, which are used for output;
+//int toggle[16]=LOW;
 //int IO1AnalogVals[16];
-int IO2AnalogVals[16];
+int IO2AnalogVals[3];
 //int IO3AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
@@ -35,7 +38,7 @@ int IO2AnalogVals[16];
 int delay_mmsec=100;
 
 // the powered sensor reading, there are two properties, on and off
-int delay_sensor_reading=1000;
+int delay_sensor_reading=2000;
 // finish writting 
 int delay_after_writting=1000;
 
@@ -43,9 +46,7 @@ int delay_reading_each_ports=1000;
 
 
 
-int number_sensors=16;
-// define toggles for I/O3, which are used for output;
-//int toggle[16]=LOW;
+
 
 // -------------------- needed by digital sensor --------------------
 #include <OneWire.h>
@@ -86,7 +87,7 @@ void loop()
   if ( !ds.search(addr)) {
     Serial.print(",No more addresses.,");
     read_muxschield();
-    Serial.println();
+    // Serial.println();
     ds.reset_search();
     delay(3000);
     return;
