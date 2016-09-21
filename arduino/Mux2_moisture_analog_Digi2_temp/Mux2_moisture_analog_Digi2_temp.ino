@@ -1,3 +1,4 @@
+
 /*This code combines: 
  1. mux schield 2 with 16 moisture sensor installed at port I/O 2,
  2. digital pin at port 2 with 10 temperature sensor (DS18B20) installed
@@ -8,11 +9,11 @@
 so that interferences between neighbouring ports are prevented. (once interference 
 occurrs, the downstream ports will have decreasing ghost values over the distance
 from the the port with sensor installed. although having a sensor installed downstream
-will prevent such )
+will prevent such ) 
  2. A 4.7k ohm (currenly red brown orange black green brown with light blue background )
  pull up resistor needs to be installed between 5V and signal
  
- */
+ */  
 
 // -------------------- needed by mux schield -----------------------
 #include <MuxShield.h>

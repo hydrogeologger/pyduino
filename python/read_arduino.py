@@ -32,7 +32,8 @@ import time
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
 #port = '/dev/ttyUSB0'
-port = 'COM3'
+port = '/dev/ttyACM0'
+#port = 'COM3'
 
 # whether the result will be displayed on the screen
 screen_display=True
@@ -41,7 +42,7 @@ screen_display=True
 save_to_file=True
 
 # the Filename of the csv file for storing file
-file_name= 'arduino_data.csv'
+file_name= 'arduino_data_digi.csv'
 
 # the time interval between each reading from arduino in seconds
 # be careful about the data collection interval in arduino, it is always good 
@@ -52,25 +53,25 @@ file_name= 'arduino_data.csv'
 # existing data, cause the inconsistency between the data collection in arduino and 
 # data save in python
 # similar situation applies for commercial scales.
-sleep_time_seconds=1
+sleep_time_seconds=15
 
 # number of readings, give a large value if you want to read the data in months
 #   but it should not be too big,
-no_reading=100000;
+no_reading=100000
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 seperator=','
 ### --------------------------- Processing data --------------------
 # open up the arduino port
-ard = serial.Serial(port,9600,timeout=1000)
+ard = serial.Serial(port,9600,timeout=None)
 
 # the '0' at the end of the script helps save instantly.
 # http://stackoverflow.com/questions/18984092/python-2-7-wr
 if save_to_file: fid= open(file_name,'a',0)
 
 for i in xrange(no_reading): 
-    time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     msg = ard.readline()
+    time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     if screen_display: print i,seperator,time_now,seperator,msg
     if save_to_file: fid.write(time_now+seperator+msg)
     time.sleep(sleep_time_seconds)

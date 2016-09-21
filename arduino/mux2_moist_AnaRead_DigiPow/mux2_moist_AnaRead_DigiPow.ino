@@ -24,7 +24,7 @@ MuxShield muxShield;
 
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
-//Arrays to store analog values after recieving them
+//Arrays to store analog values after recieving them  
 int number_sensors=12;
 // define toggles for I/O3, which are used for output;
 //int toggle[16]=LOW;
@@ -40,7 +40,7 @@ int IO2AnalogVals[12];
 int delay_sensor_reading=1000;
 
 
-int delay_after_reading_each_ports=60000;
+int delay_after_reading_each_ports=5000;
 
 // finish writting 
 //int delay_after_writting=1000;
@@ -50,7 +50,8 @@ int delay_after_writting=1000;
 
 //int delay_after_moisture_done=60000;  // this is not working 
 
-int delay_after_moisture_done=1000; 
+//int delay_after_moisture_done=60000; //not working
+int delay_after_moisture_done=1000; //not working
 //int delay_after_moisture_done=600000;
 
 // -------------------- needed by digital sensor --------------------
@@ -80,104 +81,15 @@ void setup()
 
 void loop()
 {
-// -------------------------------- required by onewire  -------------------
-  byte i;
-  byte present = 0;
-  byte type_s;
-  byte data[12];
-  byte addr[8];
-  //float celsius, fahrenheit;
-  float celsius;
 
-  if ( !ds.search(addr)) {
-    Serial.print(",No more addresses.,");
     read_muxschield();
-     Serial.println();
-    ds.reset_search();
+    // Serial.println();
+    for (int i=0;i<120;i++)
+    {
     delay(delay_after_moisture_done);
-    return;
-  }
-
-  Serial.print("ROM =");
-  for( i = 0; i < 8; i++) {
-    Serial.write(' ');
-    Serial.print(addr[i], HEX);
-  }
-
-  if (OneWire::crc8(addr, 7) != addr[7]) {
-      Serial.println("CRC is not valid!");
-      return;
-  }
-  //Serial.println();
-
-  // the first ROM byte indicates which chip
-  switch (addr[0]) {
-    case 0x10:
-      //Serial.println("  Chip = DS18S20");  // or old DS1820
-      type_s = 1;
-      break;
-    case 0x28:
-      //Serial.println("  Chip = DS18B20");
-      type_s = 0;
-      break;
-    case 0x22:
-      //Serial.println("  Chip = DS1822");
-      type_s = 0;
-      break;
-    default:
-      //Serial.println("Device is not a DS18x20 family device.");
-      return;
-  } 
-
-  ds.reset();
-  ds.select(addr);
-  ds.write(0x44);        // start conversion, use ds.write(0x44,1) with parasite power on at the end
-
-  delay(100);     // maybe 750ms is enough, maybe not
-  // we might do a ds.depower() here, but the reset will take care of it.
-
-  present = ds.reset();
-  ds.select(addr);    
-  ds.write(0xBE);         // Read Scratchpad
-
-  //Serial.print("  Data = ");
-  //Serial.print(present, HEX);
-  //Serial.print(" ");
-  for ( i = 0; i < 9; i++) {           // we need 9 bytes
-    data[i] = ds.read();
-    //Serial.print(data[i], HEX);
-    //Serial.print(" ");
-  }
-  //Serial.print(" CRC=");
-  //Serial.print(OneWire::crc8(data, 8), HEX);
-  //Serial.println();
-
-  // Convert the data to actual temperature
-  // because the result is a 16 bit signed integer, it should
-  // be stored to an "int16_t" type, which is always 16 bits
-  // even when compiled on a 32 bit processor.
-  int16_t raw = (data[1] << 8) | data[0];
-  if (type_s) {
-    raw = raw << 3; // 9 bit resolution default
-    if (data[7] == 0x10) {
-      // "count remain" gives full 12 bit resolution
-      raw = (raw & 0xFFF0) + 12 - data[6];
+    Serial.print(i);
+    Serial.print(seperator);
     }
-  } else {
-    byte cfg = (data[4] & 0x60);
-    // at lower res, the low bits are undefined, so let's zero them
-    if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
-    else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
-    else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
-    //// default is 12 bit resolution, 750 ms conversion time
-  }
-  celsius = (float)raw / 16.0;
-  //fahrenheit = celsius * 1.8 + 32.0;
-  Serial.print(",Temp.,");
-  Serial.print(celsius);
-  Serial.print(" ,Celsius, ");
-  //Serial.print(fahrenheit);
-  //Serial.println(" ,Fahrenheit");
   
 }
 
@@ -210,7 +122,8 @@ void read_muxschield(){
     Serial.print(IO2AnalogVals[i]);
     Serial.print(seperator);
   }
-  //Serial.println();
+  
+  Serial.println();
   delay(delay_after_writting);
 }
  //
