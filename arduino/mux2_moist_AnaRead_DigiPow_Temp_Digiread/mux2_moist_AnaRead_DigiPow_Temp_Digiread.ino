@@ -40,7 +40,7 @@ int IO2AnalogVals[12];
 int delay_sensor_reading=1000;
 
 
-int delay_after_reading_each_ports=60000;
+int delay_after_reading_each_ports_min=1;
 
 // finish writting 
 //int delay_after_writting=1000;
@@ -198,7 +198,7 @@ void read_muxschield(){
     muxShield.digitalWriteMS(3,i,LOW);
 
     //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
-    delay(delay_after_reading_each_ports);
+    delay_min(delay_after_reading_each_ports_min);
   }
   
   //Print IO1 values for inspection
@@ -212,6 +212,29 @@ void read_muxschield(){
   }
   //Serial.println();
   delay(delay_after_writting);
+}
+
+/* delay in minutes 
+the reason of having these functions, as compared to delay(60*60*1000) is the fact 
+  that the later is not working, persumablly the maxmum value in arduino is 65536*/ 
+void delay_min(int min){
+  for (int i=0;i<min;i++)
+  {
+    for (int j=0;j<60;j++)
+    {
+      delay(1000)
+    }
+  }
+}
+
+
+
+/* delay in minutes */ 
+void delay_sec(int sec){
+    for (int j=0;j<sec;j++)
+    {
+      delay(1000)
+    }
 }
  //
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
