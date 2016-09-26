@@ -53,7 +53,7 @@ file_name= 'arduino_data_digi.csv'
 # existing data, cause the inconsistency between the data collection in arduino and 
 # data save in python
 # similar situation applies for commercial scales.
-sleep_time_seconds=15
+sleep_time_seconds=1
 
 # number of readings, give a large value if you want to read the data in months
 #   but it should not be too big,

@@ -29,7 +29,8 @@ int number_sensors=12;
 // define toggles for I/O3, which are used for output;
 //int toggle[16]=LOW;
 //int IO1AnalogVals[16];
-int IO2AnalogVals[12];
+int IO2AnalogVals1[12];
+int IO2AnalogVals2[12];
 //int IO3AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
@@ -40,7 +41,8 @@ int IO2AnalogVals[12];
 int delay_sensor_reading=1000;
 
 
-int delay_after_reading_each_ports=5000;
+//int delay_after_reading_each_ports=5000;
+int delay_after_reading_each_ports=100;
 
 // finish writting 
 //int delay_after_writting=1000;
@@ -55,8 +57,8 @@ int delay_after_moisture_done=1000; //not working
 //int delay_after_moisture_done=600000;
 
 // -------------------- needed by digital sensor --------------------
-#include <OneWire.h>
-OneWire  ds(3);  // on digita pin 2 (a 4.7K resistor is necessary)
+//#include <OneWire.h>
+//OneWire  ds(3);  // on digita pin 2 (a 4.7K resistor is necessary)
 
 
 void setup()
@@ -84,12 +86,12 @@ void loop()
 
     read_muxschield();
     // Serial.println();
-    for (int i=0;i<120;i++)
-    {
-    delay(delay_after_moisture_done);
-    Serial.print(i);
-    Serial.print(seperator);
-    }
+    //for (int i=0;i<120;i++)
+    //{
+    //delay(delay_after_moisture_done);
+    //Serial.print(i);
+    //Serial.print(seperator);
+    //}
   
 }
 
@@ -105,29 +107,69 @@ void read_muxschield(){
     //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
     muxShield.digitalWriteMS(3,i,HIGH);
     delay(delay_sensor_reading);
-    IO2AnalogVals[i] = muxShield.analogReadMS(2,i);
+    IO2AnalogVals1[i] = muxShield.analogReadMS(2,i);
+    IO2AnalogVals2[i] = muxShield.analogReadMS(2,i);
     delay(delay_sensor_reading);
     muxShield.digitalWriteMS(3,i,LOW);
 
     //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
-    delay(delay_after_reading_each_ports);
+    //delay(delay_after_reading_each_ports);
+    delay_min(1);
   }
   
   //Print IO1 values for inspection
-  Serial.print("IO2 analog");
+  Serial.print("IO2 analog_2");
   Serial.print(seperator);
   for (int i=0; i<number_sensors; i++)
   {
     //Serial.print(IO1AnalogVals[i]);
-    Serial.print(IO2AnalogVals[i]);
+    Serial.print(IO2AnalogVals2[i]);
     Serial.print(seperator);
   }
   
   Serial.println();
+
+
+
+//  Serial.print("IO2 analog_2");
+//  Serial.print(seperator);
+//  for (int i=0; i<number_sensors; i++)
+//  {
+    //Serial.print(IO1AnalogVals[i]);
+//    Serial.print(IO2AnalogVals2[i]);
+//    Serial.print(seperator);
+//  }
+  
+//  Serial.println();
+
   delay(delay_after_writting);
 }
  //
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
 //brown green black red brown orange with light blue background 15k Ohms 1% 15 ppm//
 //need to check the resistance from volt meter//
+
+/* delay in minutes 
+the reason of having these functions, as compared to delay(60*60*1000) is the fact 
+  that the later is not working, persumablly the maxmum value in arduino is 65536*/
+void delay_min(int min1){
+  for (int i=0;i<min1;i++)
+  {
+    for (int j=0;j<60;j++)
+    {
+      delay(1000);
+    }
+  }
+}
+
+
+
+/* delay in minutes */ 
+void delay_sec(int sec){
+    for (int j=0;j<sec;j++)
+    {
+      delay(1000);
+    }
+}
+
 
