@@ -25,12 +25,12 @@ MuxShield muxShield;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=12;
+int number_sensors=16;
 // define toggles for I/O3, which are used for output;
 //int toggle[16]=LOW;
 //int IO1AnalogVals[16];
-int IO2AnalogVals1[12];
-int IO2AnalogVals2[12];
+int IO2AnalogVals1[16];
+int IO2AnalogVals2[16];
 //int IO3AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
@@ -38,7 +38,7 @@ int IO2AnalogVals2[12];
 
 
 // the powered sensor reading, there are two properties, on and off
-int delay_sensor_reading=1000;
+int delay_sensor_reading=500;
 
 
 //int delay_after_reading_each_ports=5000;
@@ -46,14 +46,14 @@ int delay_after_reading_each_ports=100;
 
 // finish writting 
 //int delay_after_writting=1000;
-int delay_after_writting=1000;
+int delay_after_writting=500;
 
 //int delay_after_moisture_done=1000;  // this is working 
 
 //int delay_after_moisture_done=60000;  // this is not working 
 
 //int delay_after_moisture_done=60000; //not working
-int delay_after_moisture_done=1000; //not working
+int delay_after_moisture_done=500; //not working
 //int delay_after_moisture_done=600000;
 
 // -------------------- needed by digital sensor --------------------
@@ -109,12 +109,12 @@ void read_muxschield(){
     delay(delay_sensor_reading);
     IO2AnalogVals1[i] = muxShield.analogReadMS(2,i);
     IO2AnalogVals2[i] = muxShield.analogReadMS(2,i);
-    delay(delay_sensor_reading);
+    delay(500);
     muxShield.digitalWriteMS(3,i,LOW);
 
     //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
     //delay(delay_after_reading_each_ports);
-    delay_min(1);
+    //delay_min(1);
   }
   
   //Print IO1 values for inspection
@@ -142,7 +142,7 @@ void read_muxschield(){
   
 //  Serial.println();
 
-  delay(delay_after_writting);
+ // delay(delay_after_writting);
 }
  //
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
