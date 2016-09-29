@@ -34,42 +34,73 @@ void loop() {
   // read the input on analog pin 0
   //for (int i=0; i<number_sensors;i++){
     i=0;
+    Serial.print(i);
+    Serial.print(seperator);
     digitalWrite(2,HIGH);
     delay(1000);
-    digitalWrite(3,HIGH);    
+    //digitalWrite(3,HIGH);    
+
+
+
     for (int j=0;j<50;j++){
+     analogRead(analog_pins[i]);
+    delay(100);
+    }
+
+
+    
+    for (int j=0;j<20;j++){
     AnalogVals1[i]=analogRead(analog_pins[i]);
     AnalogVals2[i]=analogRead(analog_pins[i]);
-    Serial.print(i);
-    Serial.print(seperator);
-    Serial.print(j);
-    Serial.print(seperator);
     Serial.print(AnalogVals2[i]);
     Serial.print(seperator);
-    Serial.println();
+    //Serial.println();
     delay(200);
     }
+
+
+    
     digitalWrite(2,LOW);
-    digitalWrite(3,LOW);    
+    Serial.print(i);
+    Serial.println();
+
+
+
+    
+    //digitalWrite(3,LOW);    
     //     
     i=1;
-    digitalWrite(4,HIGH);
+        Serial.print(i);
+        Serial.print(seperator);
+    digitalWrite(3,HIGH);
     delay(1000);
-    digitalWrite(5,HIGH);    
+    //digitalWrite(5,HIGH);    
+
+
+
+
     for (int j=0;j<50;j++){
+     analogRead(analog_pins[i]);
+    delay(100);
+    }
+
+
+    
+    for (int j=0;j<20;j++){
     AnalogVals1[i]=analogRead(analog_pins[i]);
     AnalogVals2[i]=analogRead(analog_pins[i]);
-    Serial.print(i);
-    Serial.print(seperator);
-    Serial.print(j);
-    Serial.print(seperator);
     Serial.print(AnalogVals2[i]);
     Serial.print(seperator);
-    Serial.println();
-    delay(200);
+    //Serial.println();
+    delay(100);
     }
-    digitalWrite(4,LOW);
-    digitalWrite(5,LOW);  
+
+
+    
+    Serial.print(i);
+    Serial.println();
+    digitalWrite(3,LOW);
+    //digitalWrite(5,LOW);  
   //}
   
   
