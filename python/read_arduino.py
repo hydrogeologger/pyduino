@@ -2,6 +2,7 @@
 import serial
 #import syslog
 import time
+import numpy as np
 # this script reads off from arduino on the go.
 # it is currently confirmed that arduino behaves similarly as all the scale sensors
 # 1. having internal buffers
@@ -41,6 +42,11 @@ screen_display=True
 # whether save the result as a file 
 save_to_file=True
 
+# whether plot the result on the go
+#plot=True
+plot=False
+#number_of_columns=4;
+
 # the Filename of the csv file for storing file
 file_name= 'arduino_data_digi.csv'
 
@@ -53,7 +59,7 @@ file_name= 'arduino_data_digi.csv'
 # existing data, cause the inconsistency between the data collection in arduino and 
 # data save in python
 # similar situation applies for commercial scales.
-sleep_time_seconds=1
+sleep_time_seconds=0.001
 
 # number of readings, give a large value if you want to read the data in months
 #   but it should not be too big,
@@ -61,6 +67,7 @@ no_reading=100000
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 seperator=','
+
 ### --------------------------- Processing data --------------------
 # open up the arduino port
 ard = serial.Serial(port,9600,timeout=None)
@@ -69,12 +76,37 @@ ard = serial.Serial(port,9600,timeout=None)
 # http://stackoverflow.com/questions/18984092/python-2-7-wr
 if save_to_file: fid= open(file_name,'a',0)
 
+
+if plot:
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+    msg = ard.readline()
+    msg = ard.readline()
+    number_of_column=len(msg.split(seperator))-1
+    data = [[0. for _ in range(no_reading)] for _ in range(number_of_column)]
+    #http://stackoverflow.com/questions/11874767/real-time-plotting-in-while-loop-with-matplotlib
+    plt.axis([0, 100, 0, 900])
+    plt.ion()
+    msg_parse=msg.split(',')
+    x = np.arange(10)
+    ys = [_+x+(_*x)**2 for _ in range(number_of_column)]
+
+
 for i in xrange(no_reading): 
     msg = ard.readline()
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
-    if screen_display: print i,seperator,time_now,seperator,msg
+    if screen_display: print i,seperator,time_now,seperator,msg.rstrip()
     if save_to_file: fid.write(time_now+seperator+msg)
     time.sleep(sleep_time_seconds)
+    if plot:
+        colors = iter(cm.rainbow(np.linspace(0, 1, len(ys))))
+        for j in xrange(number_of_column):
+            data[j][i]=float(msg_parse[j])
+            plt.scatter(range(i),data[j][0:i],color=next(colors))
+            plt.axis([0, i+100, 0, 800])
+            plt.pause(0.0001)
+        
+      
 
 fid.close()
 ser.close()

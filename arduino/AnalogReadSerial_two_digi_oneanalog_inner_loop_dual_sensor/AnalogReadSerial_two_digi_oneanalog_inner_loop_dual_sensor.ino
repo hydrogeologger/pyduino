@@ -9,10 +9,11 @@
 static const uint8_t analog_pins[] = {A0,A1,A2,A3,A4,A5};
 int AnalogVals1[3];
 int AnalogVals2[3];
+int i;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=3;
+int number_sensors=1;
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 9600 bits per second:
@@ -30,24 +31,46 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-  // read the input on analog pin 0:
-
-  
-  for (int i=0; i<number_sensors;i++){
-    digitalWrite(i+2,HIGH);
-    delay(100);
+  // read the input on analog pin 0
+  //for (int i=0; i<number_sensors;i++){
+    i=0;
+    digitalWrite(2,HIGH);
+    delay(1000);
+    digitalWrite(3,HIGH);    
+    for (int j=0;j<50;j++){
     AnalogVals1[i]=analogRead(analog_pins[i]);
     AnalogVals2[i]=analogRead(analog_pins[i]);
-    delay(100);
-    digitalWrite(i+2,LOW);
-  }
-  
-  
-    for (int i=0; i<number_sensors; i++)
-  {
-    //Serial.print(IO1AnalogVals[i]);
+    Serial.print(i);
+    Serial.print(seperator);
+    Serial.print(j);
+    Serial.print(seperator);
     Serial.print(AnalogVals2[i]);
     Serial.print(seperator);
-  }
     Serial.println();
+    delay(200);
+    }
+    digitalWrite(2,LOW);
+    digitalWrite(3,LOW);    
+    //     
+    i=1;
+    digitalWrite(4,HIGH);
+    delay(1000);
+    digitalWrite(5,HIGH);    
+    for (int j=0;j<50;j++){
+    AnalogVals1[i]=analogRead(analog_pins[i]);
+    AnalogVals2[i]=analogRead(analog_pins[i]);
+    Serial.print(i);
+    Serial.print(seperator);
+    Serial.print(j);
+    Serial.print(seperator);
+    Serial.print(AnalogVals2[i]);
+    Serial.print(seperator);
+    Serial.println();
+    delay(200);
+    }
+    digitalWrite(4,LOW);
+    digitalWrite(5,LOW);  
+  //}
+  
+  
 }
