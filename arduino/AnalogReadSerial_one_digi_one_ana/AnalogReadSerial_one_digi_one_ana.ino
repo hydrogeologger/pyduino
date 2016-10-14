@@ -7,7 +7,9 @@
  */
 
 static const uint8_t analog_pins[]  = {A0,A1,A2,A3,A4,A5};
-static const uint8_t digital_pins[] = {2,3,4,5,6,7,8};
+//static const uint8_t digital_pins[] = {2,3,4,5,6,7};
+// the array below works for digital sensor arrays
+int digital_pins[] = {2, 3, 4, 5, 6, 7};
 int AnalogVals1[6];
 int AnalogVals2[6];
 int i;
@@ -25,8 +27,8 @@ void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
   // let all of the pins as output
-  pinMode(0,OUTPUT);
-  pinMode(1,OUTPUT);
+//  pinMode(0,OUTPUT);
+//  pinMode(1,OUTPUT);
   pinMode(2,OUTPUT);
   pinMode(3,OUTPUT);
   pinMode(4,OUTPUT);
@@ -45,7 +47,7 @@ void loop() {
 
     for (int j=0;j<dummy_readings;j++){
       analogRead(analog_pins[i]);
-      delay(100);
+      //delay(100);
     }
 
     for (int j=0;j<number_readings;j++){
@@ -59,8 +61,8 @@ void loop() {
     
     for (int i=0; i<number_sensors;i++)
     {
-    Serial.print(i);
-    Serial.print(seperator);
+    //Serial.print(i);
+    //Serial.print(seperator);
     Serial.print(AnalogVals1[i]);
     Serial.print(seperator);
     delay(200);
@@ -103,5 +105,19 @@ void loop() {
 //    digitalWrite(3,LOW);
 //    //digitalWrite(5,LOW);  
 //  //}
-  
+
+/* I tested 
+16_10_14  one sensor,on port 1: water soaked value: 608
+                                short circuit value: 614
+
+         one sensor,on port 3: water soaked value: 608
+                               short circuit value: 614
+         one sensor,on port 4: water soaked value: 608
+                               short circuit value: 614
+         one sensor,on port 5: water soaked value: 608
+                               short circuit value: 614
+         one sensor,on port 6: water soaked value: 608
+                               short circuit value: 614
+system working
+  */
  
