@@ -16,7 +16,7 @@ int i;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=6;
+int number_sensors=3;
 // the setup routine runs once when you press reset:
 
 
@@ -68,8 +68,22 @@ void loop() {
     delay(200);
     }
     
-    Serial.println();
+    
     }
+    
+/* delay in minutes 
+the reason of having these functions, as compared to delay(60*60*1000) is the fact 
+  that the later is not working, persumablly the maxmum value in arduino is 65536*/ 
+void delay_min(int min){
+  for (int i=0;i<min;i++)
+  {
+    for (int j=0;j<6;j++)
+    {
+      delay(10000);ng1318
+      
+    }
+  }
+}
 //    //digitalWrite(3,LOW);    
 //    //     
 //    i=1;
