@@ -16,7 +16,7 @@ int i;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=3;
+int number_sensors=6;
 // the setup routine runs once when you press reset:
 
 
@@ -67,7 +67,8 @@ void loop() {
     Serial.print(seperator);
     delay(200);
     }
-    
+    Serial.println();
+    delay_min(10);
     
     }
     
@@ -79,7 +80,7 @@ void delay_min(int min){
   {
     for (int j=0;j<6;j++)
     {
-      delay(10000);ng1318
+      delay(10000);
       
     }
   }
