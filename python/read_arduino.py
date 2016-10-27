@@ -32,7 +32,7 @@ import numpy as np
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
-port = '/dev/ttyUSB0'
+port = '/dev/ttyUSB1'
 #port = '/dev/ttyACM0'
 #port = 'COM3'
 
