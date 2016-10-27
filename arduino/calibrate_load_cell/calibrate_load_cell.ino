@@ -40,6 +40,7 @@ HX711 scale(DOUT, CLK);
 
 //float calibration_factor = -7050; //-7050 worked for my 440lb max scale setup
 float calibration_factor = 77650;
+int length_of_temp =0;
 //75160.00
 void setup() {
   Serial.begin(9600);
@@ -70,12 +71,13 @@ void loop() {
   delay(5000);
   if(Serial.available())
   {
+    //char temp = Serial.read();
     char temp = Serial.read();
-    length_of_temp=sizeof(floatbuf);
-    if (length_of_temp == 1)
-    {
+    length_of_temp=sizeof(temp);
+ //   if (length_of_temp == 1)
+   // {
         if(temp == '+' || temp == 'a')
-	{
+	//{
           calibration_factor += 10;
         else if(temp == '-' || temp == 'z')
           calibration_factor -= 10;
@@ -93,11 +95,11 @@ void loop() {
           calibration_factor += 10000;         
         else if (temp == 't')
           scale.tare();
-	}
-    else 
-        toCharArray(floatbuf, sizeof(floatbuf));
-	int f = toInt(floatbuf);
-	calibration_factor=f;
+	//}
+   // else 
+   //     temp.toCharArray(temp, sizeof(temp));
+//	int f = (temp);
+//	calibration_factor=f;
     }
 }
 
