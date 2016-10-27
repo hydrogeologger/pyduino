@@ -12,11 +12,13 @@ static const uint8_t analog_pins[]  = {A0,A1,A2,A3,A4,A5};
 int digital_pins[] = {2, 3, 4, 5, 6, 7};
 int AnalogVals1[6];
 int AnalogVals2[6];
+//float AnalogVals1[6];
+//float AnalogVals2[6];
 int i;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=3;
+int number_sensors=6;
 // the setup routine runs once when you press reset:
 
 
@@ -65,10 +67,11 @@ void loop() {
     //Serial.print(seperator);
     Serial.print(AnalogVals1[i]);
     Serial.print(seperator);
+
     delay(200);
     }
     
-    
+      Serial.println();
     }
     
 /* delay in minutes 
@@ -79,7 +82,7 @@ void delay_min(int min){
   {
     for (int j=0;j<6;j++)
     {
-      delay(10000);ng1318
+      delay(10000);
       
     }
   }
@@ -132,6 +135,18 @@ void delay_min(int min){
                                short circuit value: 614
          one sensor,on port 6: water soaked value: 608
                                short circuit value: 614
+
+16_10_14  one sensor,on port 1: water soaked value: 608
+                                short circuit value: 614
+
+         one sensor,on port 3: water soaked value: 
+                               short circuit value: 
+         one sensor,on port 4: water soaked value: 
+                               short circuit value: 
+         one sensor,on port 5: water soaked value: 
+                               short circuit value:
+         one sensor,on port 6: water soaked value: 
+                               short circuit value: 
 system working
   */
  
