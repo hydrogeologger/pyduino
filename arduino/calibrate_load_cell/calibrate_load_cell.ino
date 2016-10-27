@@ -69,37 +69,56 @@ void loop() {
   Serial.print(calibration_factor);
   Serial.println();
   delay(5000);
-  if(Serial.available())
-  {
+
     //char temp = Serial.read();
-    char temp = Serial.read();
-    length_of_temp=sizeof(temp);
- //   if (length_of_temp == 1)
-   // {
-        if(temp == '+' || temp == 'a')
-	//{
-          calibration_factor += 10;
-        else if(temp == '-' || temp == 'z')
+    // be careful here! if it is a string, use double quote, if it is a char, use single quote
+    // http://stackoverflow.com/questions/5697047/convert-serial-read-into-a-useable-string-using-arduino
+
+char tmp;
+String temp="";
+  while(Serial.available()) { 
+    tmp = Serial.read(); 
+    temp.concat(tmp); 
+    delay (10); 
+  } 
+    
+  //  char tmp= Serial.read();
+   // String temp="";
+//    temp.concat(tmp);
+    //temp.trim();
+    Serial.println(temp);
+    //length_of_temp=sizeof(temp);
+    length_of_temp=temp.length() ;
+    Serial.println(length_of_temp);
+    if (temp.length() == 1)
+    {
+        if( temp.equals("+")   )
+           {Serial.println(temp);
+           calibration_factor += 10;}
+        else if(temp == "-" )
           calibration_factor -= 10;
-        else if(temp == 'w' || temp == 'z')
+        else if(temp == "w" )
           calibration_factor -= 100;
-        else if(temp == 'e' || temp == 'z')
+        else if(temp == "e" )
           calibration_factor += 100;      
-        else if(temp == 'q' || temp == 'z')
+        else if(temp == "q" )
           calibration_factor -= 1000;
-        else if(temp == 'r' || temp == 'z')
+        else if(temp == "r" )
           calibration_factor += 1000;    
-        else if(temp == 'Q' || temp == 'z')
+        else if(temp == "Q" )
           calibration_factor -= 10000;
-        else if(temp == 'R' || temp == 'z')
+        else if(temp == "L" )
           calibration_factor += 10000;         
-        else if (temp == 't')
+        else if (temp == "t")
           scale.tare();
-	//}
-   // else 
+	}
+     else if(length_of_temp!=0) 
    //     temp.toCharArray(temp, sizeof(temp));
 //	int f = (temp);
-//	calibration_factor=f;
+    {
+    Serial.println( temp.toInt());
+   	calibration_factor=temp.toInt();
     }
+    
 }
 
