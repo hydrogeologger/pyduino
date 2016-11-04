@@ -1,35 +1,3 @@
-/*
- Example using the SparkFun HX711 breakout board with a scale
- By: Nathan Seidle
- SparkFun Electronics
- Date: November 19th, 2014
- License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
-
- This is the calibration sketch. Use it to determine the calibration_factor that the main example uses. It also
- outputs the zero_factor useful for projects that have a permanent mass on the scale in between power cycles.
-
- Setup your scale and start the sketch WITHOUT a weight on the scale
- Once readings are displayed place the weight on the scale
- Press +/- or a/z to adjust the calibration_factor until the output readings match the known weight
- Use this calibration_factor on the example sketch
-
- This example assumes pounds (lbs). If you prefer kilograms, change the Serial.print(" lbs"); line to kg. The
- calibration factor will be significantly different but it will be linearly related to lbs (1 lbs = 0.453592 kg).
-
- Your calibration factor may be very positive or very negative. It all depends on the setup of your scale system
- and the direction the sensors deflect from zero state
- This example code uses bogde's excellent library: https://github.com/bogde/HX711
- bogde's library is released under a GNU GENERAL PUBLIC LICENSE
- Arduino pin 2 -> HX711 CLK
- 3 -> DOUT
- 5V -> VCC
- GND -> GND
-
- Most any pin on the Arduino Uno will be compatible with DOUT/CLK.
-
- The HX711 board can be powered from 2.7V to 5V so the Arduino 5V power should be fine.
-
-*/
 
 #include "HX711.h"
 
@@ -50,16 +18,21 @@ HX711 scale_2(DOUT3, CLK3);
 HX711 scale_3(DOUT4, CLK4);
 HX711 scale_4(DOUT5, CLK5);
 
+
+HX711 scales
+
 //float calibration_factor = -7050; //-7050 worked for my 440lb max scale setup
-//float calibration_factor_1= 22500;
-//float calibration_factor_2= 77650;
+//float calibration_factor_1= 22000;
+//float calibration_factor_2= 73500;
 //float calibration_factor_3= 77650;
 //float calibration_factor_4= 77650;
 //float calibration_factor_5= 77650;
 
 
-float calibration_factor[5]= {22500,22500,22500,22500,22500};
-
+//float calibration_factor[5]= {23500,71600,71600,71600,71600};
+//float calibration_factor[5]= {23500,72500,72500,72500,72500};
+//float calibration_factor[5]= {23000,72800,72800,72800,72800};
+float calibration_factor[5]= {23080,72800,72800,72800,72800};
 
 
 float reading_0  = 0;
@@ -68,6 +41,12 @@ float reading_2  = 0;
 float reading_3  = 0;
 float reading_4  = 0;
 float reading_1_4= 0;
+
+float scale_data[5];
+
+
+int number_readings=20;
+int dummy_readings=30;
 
 void setup() {
   Serial.begin(9600);
@@ -78,15 +57,15 @@ void setup() {
   Serial.println("Press - or z to decrease calibration factor");
 
   scale_0.set_scale();
-  scale_0.tare(); //Reset the scale to 0
+  //scale_0.tare(); //Reset the scale to 0
   scale_1.set_scale();
-  scale_1.tare(); //Reset the scale to 0
+  //scale_1.tare(); //Reset the scale to 0
   scale_2.set_scale();
-  scale_2.tare(); //Reset the scale to 0
+  //scale_2.tare(); //Reset the scale to 0
   scale_3.set_scale();
-  scale_3.tare(); //Reset the scale to 0
+  //scale_3.tare(); //Reset the scale to 0
   scale_4.set_scale();
-  scale_4.tare(); //Reset the scale to 0
+ // scale_4.tare(); //Reset the scale to 0
 
   long zero_factor_0 = scale_0.read_average(); //Get a baseline reading
   long zero_factor_1 = scale_1.read_average(); //Get a baseline reading
@@ -106,12 +85,37 @@ void loop() {
   scale_3.set_scale(calibration_factor[3]); //Adjust to this calibration factor
   scale_4.set_scale(calibration_factor[4]); //Adjust to this calibration factor
 
-  reading_0=scale_0.get_units(); 
-  reading_1=scale_1.get_units(); 
-  reading_2=scale_2.get_units(); 
-  reading_3=scale_3.get_units(); 
-  reading_4=scale_4.get_units(); 
-  
+
+  for (int i=0;i<5;i++){
+  scale_data[i]=0;
+  }
+
+
+  // dummy readings
+  for (int j=0;j<dummy_readings;j++){
+    scale_0.get_units(); 
+    scale_1.get_units(); 
+    scale_2.get_units(); 
+    scale_3.get_units(); 
+    scale_4.get_units(); 
+  }
+
+
+  for (int j=0;j<number_readings;j++){
+    scale_data[0]+= scale_0.get_units();
+    scale_data[1]+= scale_1.get_units();
+    scale_data[2]+= scale_2.get_units();
+    scale_data[3]+= scale_3.get_units();
+    scale_data[4]+= scale_4.get_units();
+    delay(10);
+  }
+
+  reading_0=scale_data[0]/number_readings;
+  reading_1=scale_data[1]/number_readings;
+  reading_2=scale_data[2]/number_readings;
+  reading_3=scale_data[3]/number_readings;
+  reading_4=scale_data[4]/number_readings;
+
 
   reading_1_4=reading_1+reading_2+reading_3+reading_4;
 
@@ -153,6 +157,7 @@ void loop() {
   Serial.print(calibration_factor[4]);
 
   Serial.println();
+  //delay(300000);
   delay(5000);
 
     //char temp = Serial.read();
@@ -181,7 +186,7 @@ String temp="";
     String firstValue = temp.substring(0, commaIndex);
     int firstValue_int=firstValue.toInt();
     String secondValue = temp.substring(commaIndex+1); 
-    int secondValue_int=secondValue.toInt();
+    float secondValue_int=secondValue.toFloat();
     
     Serial.print(temp);
       Serial.print(',');
@@ -192,6 +197,7 @@ String temp="";
     Serial.print(firstValue);
       Serial.print(',');
     Serial.println(secondValue);
+    
     if (firstValue_int==5)
       {
        calibration_factor[1]=secondValue_int;
@@ -199,13 +205,21 @@ String temp="";
        calibration_factor[3]=secondValue_int;
        calibration_factor[4]=secondValue_int;
       }
-    else
-      {
+     else if (secondValue_int==0)
+       {
+        scale_0.tare();
+        scale_1.tare();
+        scale_2.tare();
+        scale_3.tare();
+        scale_4.tare();
+       }
+       else
+       {
        calibration_factor[firstValue_int]=secondValue_int;
-      }
+       }
+    
+      
+   
     }
 
 }
-
-
-
