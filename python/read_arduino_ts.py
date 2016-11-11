@@ -99,7 +99,7 @@ def thermometer(temp):
             conn.request("POST", "/update", params, headers)
             response = conn.getresponse()
             #print temp
-            print response.status, response.reason
+            #print response.status, response.reason
             data = response.read()
             conn.close()
         except:
