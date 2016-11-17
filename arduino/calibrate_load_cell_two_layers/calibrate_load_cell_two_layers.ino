@@ -19,7 +19,6 @@ HX711 scale_3(DOUT4, CLK4);
 HX711 scale_4(DOUT5, CLK5);
 
 
-HX711 scales
 
 //float calibration_factor = -7050; //-7050 worked for my 440lb max scale setup
 //float calibration_factor_1= 22000;
@@ -102,11 +101,11 @@ void loop() {
 
 
   for (int j=0;j<number_readings;j++){
-    scale_data[0]+= scale_0.get_units();
-    scale_data[1]+= scale_1.get_units();
-    scale_data[2]+= scale_2.get_units();
-    scale_data[3]+= scale_3.get_units();
-    scale_data[4]+= scale_4.get_units();
+    scale_data[0]+= scale_0.get_units(10);
+    scale_data[1]+= scale_1.get_units(10);
+    scale_data[2]+= scale_2.get_units(10);
+    scale_data[3]+= scale_3.get_units(10);
+    scale_data[4]+= scale_4.get_units(10);
     delay(10);
   }
 
