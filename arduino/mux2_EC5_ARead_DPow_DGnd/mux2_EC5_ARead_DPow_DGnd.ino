@@ -29,7 +29,8 @@ int number_sensors=11;
 // define toggles for I/O3, which are used for output;
 //int toggle[16]=LOW;
 //int IO1AnalogVals[16];
-int IO2AnalogVals[11];
+//int IO2AnalogVals[11];
+float IO2AnalogVals[11];
 //int IO3AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
@@ -37,28 +38,22 @@ int IO2AnalogVals[11];
 
 
 // the powered sensor reading, there are two properties, on and off
-int delay_sensor_reading=100;
+int delay_sensor_reading=10;
 
+
+// input the number of dummy readings 
 int number_dummy_readings=100;
 
+
+//
+int number_readings=25;
 
 int delay_after_reading_each_ports=3000;
 
 // finish writting 
-//int delay_after_writting=1000;
 int delay_after_writting=1000;
 
-//int delay_after_moisture_done=1000;  // this is working 
 
-//int delay_after_moisture_done=60000;  // this is not working 
-
-//int delay_after_moisture_done=60000; //not working
-int delay_after_moisture_done=1000; //not working
-//int delay_after_moisture_done=600000;
-
-// -------------------- needed by digital sensor --------------------
-//#include <OneWire.h>
-//OneWire  ds(3);  // on digita pin 2 (a 4.7K resistor is necessary)
 
 
 void setup()
@@ -71,7 +66,6 @@ void setup()
      // However: if both the resistor and the following code
 
     //Set I/O 1, I/O 2, and I/O 3 as analog inputs
-    muxShield.setMode(2,DIGITAL_OUT);
     muxShield.setMode(1,ANALOG_IN);
     muxShield.setMode(3,DIGITAL_OUT);
     Serial.begin(9600);
@@ -84,14 +78,7 @@ void loop()
 {
 
     read_muxschield();
-    // Serial.println();
-    //for (int i=0;i<120;i++)
-    //{
-    //delay(delay_after_moisture_done);
-    //Serial.print(i);
-    //Serial.print(seperator);
-    //}
-  
+    delay_min(30);
 }
 
 
@@ -99,62 +86,44 @@ void loop()
 /* this subroutine reads all ports from I/O2, as powered by I/O 3.*/
 void read_muxschield(){
 // -------------------- needed by mux schield -----------------------
+
   for (int i=0; i<number_sensors; i++)
   {
-    //Analog read on all 16 inputs on IO1, IO2, and IO3
-    //IO1AnalogVals[i] =0;
-    //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
-    muxShield.digitalWriteMS(2,i,HIGH);
-    delay(100);
     muxShield.digitalWriteMS(3,i,HIGH);
     delay(100);
+    for (int j=0;j<number_dummy_readings;j++){
+        muxShield.analogReadMS(1,i);
+    }
+    IO2AnalogVals[i]=0;
+    for (int j=0;j<number_readings;j++)
+    {
+        delay(delay_sensor_reading);
+        IO2AnalogVals[i] += muxShield.analogReadMS(1,i);
+    }
+    IO2AnalogVals[i] = IO2AnalogVals[i]/number_readings;
+    muxShield.digitalWriteMS(3,i,LOW);
+  }
     Serial.print("IO2 analog");
     Serial.print(seperator);
-    Serial.print(i);
-    Serial.print(seperator);
-
-    for (int j=0;j<number_dummy_readings;j++){
-    //delay(50);
-    muxShield.analogReadMS(1,i);
+    for (int i=0; i<number_sensors; i++){
+      Serial.print(IO2AnalogVals[i]);
+      Serial.print(seperator);
     }
-
-
-    for (int j=0;j<20;j++){
-    delay(delay_sensor_reading);
-    muxShield.analogReadMS(1,i);
-    IO2AnalogVals[i] = muxShield.analogReadMS(1,i);
-    Serial.print(IO2AnalogVals[i]);
-    Serial.print(seperator);
-    }
-
-
-    
-    Serial.print(i);
-    Serial.print(seperator);
     Serial.println();
-    delay(500);
-
-    muxShield.digitalWriteMS(2,i,LOW);
-    muxShield.digitalWriteMS(3,i,LOW);
-
-    //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
-    delay(delay_after_reading_each_ports);
-  }
-  
-//  //Print IO1 values for inspection
-//  Serial.print("IO2 analog");
-//  Serial.print(seperator);
-//  for (int i=0; i<number_sensors; i++)
-//  {
-//    //Serial.print(IO1AnalogVals[i]);
-//    Serial.print(IO2AnalogVals[i]);
-//    Serial.print(seperator);
-//  }
-//  
-//  Serial.println();
-//  delay(delay_after_writting);
 }
- //
+
+
+void delay_min(int min){
+  for (int i=0;i<min;i++)
+  {
+    for (int j=0;j<6;j++)
+    {
+      delay(10000);
+
+    }
+  }
+}
+
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
 //brown green black red brown orange with light blue background 15k Ohms 1% 15 ppm//
 //need to check the resistance from volt meter//
