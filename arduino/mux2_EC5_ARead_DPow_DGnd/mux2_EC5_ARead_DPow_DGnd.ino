@@ -25,28 +25,20 @@ MuxShield muxShield;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=11;
+int const number_sensors=11;
 // define toggles for I/O3, which are used for output;
-//int toggle[16]=LOW;
-//int IO1AnalogVals[16];
-//int IO2AnalogVals[11];
-float IO2AnalogVals[11];
-//int IO3AnalogVals[16];
-//digitalWrite(A1, LOW);
-//digitalWrite(A0, LOW);
+float IO2AnalogVals[number_sensors];
 // Defining the waiting time between each readings;
 
 
 // the powered sensor reading, there are two properties, on and off
 int delay_sensor_reading=10;
 
-
 // input the number of dummy readings 
 int number_dummy_readings=100;
 
-
 //
-int number_readings=25;
+int number_readings=26;
 
 int delay_after_reading_each_ports=3000;
 
