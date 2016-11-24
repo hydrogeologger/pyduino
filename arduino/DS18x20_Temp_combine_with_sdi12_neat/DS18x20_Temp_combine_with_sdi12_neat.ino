@@ -46,6 +46,7 @@ void setup(void) {
 
 void loop(void) {
 read_temp_sensors();
+//delay_min(30);
 }
 
 
@@ -56,7 +57,7 @@ void sdi12_init(void) {
   mySDI12.begin(); 
   delay(500); // allow things to settle
 
-  Serial.println("Scanning all addresses, please wait..."); 
+  //Serial.println("Scanning all addresses, please wait..."); 
   /*
       Quickly Scan the Address Space
    */
@@ -84,9 +85,9 @@ void sdi12_init(void) {
     while(true);
   } // stop here
   
-  Serial.println(); 
-  Serial.println("Time Elapsed (s), Sensor Address and ID, Measurement 1, Measurement 2, ... etc."); 
-  Serial.println("-------------------------------------------------------------------------------");
+  //Serial.println(); 
+  //Serial.println("Time Elapsed (s), Sensor Address and ID, Measurement 1, Measurement 2, ... etc."); 
+  //Serial.println("-------------------------------------------------------------------------------");
 }
 
 void read_temp_sensors(void) {
@@ -96,23 +97,31 @@ void read_temp_sensors(void) {
   byte type_s;
   byte data[12];
   byte addr[8];
-  float celsius, fahrenheit;
+  float celsius;//, //fahrenheit;
   
   if ( !ds.search(addr)) {
-    Serial.println("No more addresses.");
-    Serial.println();
+    //Serial.println("No more addresses.");
+    //Serial.println();
+    Serial.print(delimiter);
     sdi12_loop();
     ds.reset_search();
-    delay(250);
+    delay_min(30);
+    
     return;
   }
-  
+
+  /*
   //Serial.print("ROM =");
   for( i = 0; i < 8; i++) {
     Serial.write(delimiter);
     Serial.print(addr[i], HEX);
+    //Serial.print(addr[i].remove(5), HEX);
   }
-
+  */
+  // here only the second addr is print as it is suffice to distinguish the address
+  Serial.write(delimiter);
+  Serial.print(addr[1], HEX);
+    
   if (OneWire::crc8(addr, 7) != addr[7]) {
       Serial.println("CRC is not valid!");
       return;
@@ -182,13 +191,13 @@ void read_temp_sensors(void) {
     //// default is 12 bit resolution, 750 ms conversion time
   }
   celsius = (float)raw / 16.0;
-  Serial.print(delimiter)
-  Serial.print("  Temperature = ");
-  Serial.print(delimiter)
+  //Serial.print(delimiter);
+  //Serial.print("  Temperature = ");
+  Serial.print(delimiter);
   Serial.print(celsius);
-  Serial.print(delimiter)
-  Serial.print(" Celsius, ");
-  Serial.print(delimiter)
+  //Serial.print(delimiter);
+  //Serial.print(" Celsius, ");
+  //Serial.print(delimiter);
 
 
 }
@@ -197,12 +206,12 @@ void sdi12_loop(void){
 
   // scan address space 0-9
   for(char i = '0'; i <= '9'; i++) if(isTaken(i)){
-    Serial.print(millis()/1000);
-    Serial.print(",");
+    //Serial.print(millis()/1000);  //print the time since start
+    //Serial.print(",");
     printInfo(i);   
     takeMeasurement_sdi12(i);
   }
-
+  Serial.println();
   //// scan address space a-z
   //for(char i = 'a'; i <= 'z'; i++) if(isTaken(i)){
   //  Serial.print(millis()/1000);
@@ -274,7 +283,9 @@ void printBufferToScreen(){
     }
     delay(100); 
   }
+ buffer.replace("\n","");  // to remove the cartriage from the buffer
  Serial.print(buffer);
+ Serial.print(delimiter);
 }
 
 
@@ -351,9 +362,13 @@ char printInfo(char i){
 
   while(mySDI12.available()){
     char c = mySDI12.read();
-    if((c!='\n') && (c!='\r')) Serial.write(c);
+    if((c!='\n') && (c!='\r')) 
+    {
+      Serial.write(c); //print sensor info and type
+    }
     delay(5); 
   } 
+  //Serial.print(delimiter);
 }
 
 // converts allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
@@ -373,5 +388,14 @@ char decToChar(byte i){
   if((i >= 37) && (i <= 62)) return i + 'A' - 37;
 }
 
+void delay_min(int min){
+  for (int i=0;i<min;i++)
+  {
+    for (int j=0;j<6;j++)
+    {
+      delay(10000);
 
+    }
+  }
+}
 
