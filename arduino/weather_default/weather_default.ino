@@ -212,7 +212,7 @@ void loop()
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
 
-  delay(5000);
+  delay_min(5);
 }
 
 //Calculates each of the variables that wunderground is expecting
@@ -430,5 +430,16 @@ void printWeather()
     Serial.print(",");
     Serial.println("#");
 
+}
+
+void delay_min(int min){
+  for (int i=0;i<min;i++)
+  {
+    for (int j=0;j<6;j++)
+    {
+      delay(10000);
+
+    }
+  }
 }
 
