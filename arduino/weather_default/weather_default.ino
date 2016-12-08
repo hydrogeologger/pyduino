@@ -128,7 +128,6 @@ void wspeedIRQ()
 void setup()
 {
     Serial.begin(9600);
-    Serial.println("Weather Shield Example");
 
     pinMode(STAT1, OUTPUT); //Status LED Blue
     pinMode(STAT2, OUTPUT); //Status LED Green
@@ -158,7 +157,6 @@ void setup()
     // turn on interrupts
     interrupts();
 
-    Serial.println("Weather Shield online!");
 
 }
 
@@ -398,36 +396,36 @@ void printWeather()
 {
     calcWeather(); //Go calc all the various sensors
 
-    Serial.println();
-    Serial.print("$,winddir=");
+    //Serial.println();
+    Serial.print("$,WdDir,");
     Serial.print(winddir);
-    Serial.print(",windspeedmph=");
-    Serial.print(windspeedmph, 1);
-    Serial.print(",windgustmph=");
-    Serial.print(windgustmph, 1);
-    Serial.print(",windgustdir=");
+    Serial.print(",WdSpdkph,");
+    Serial.print(windspeedmph*1.609, 1);
+    Serial.print(",WdGstkph,");
+    Serial.print(windgustmph*1.609, 1);
+    Serial.print(",WdGstDir,");
     Serial.print(windgustdir);
-    Serial.print(",windspdmph_avg2m=");
-    Serial.print(windspdmph_avg2m, 1);
-    Serial.print(",winddir_avg2m=");
+    Serial.print(",WdSpdKphAvg2m,");
+    Serial.print(windspdmph_avg2m*1.609, 1);
+    Serial.print(",WdDirAvg2m,");
     Serial.print(winddir_avg2m);
-    Serial.print(",windgustmph_10m=");
-    Serial.print(windgustmph_10m, 1);
-    Serial.print(",windgustdir_10m=");
+    Serial.print(",WdGstKph10m,");
+    Serial.print(windgustmph_10m*1.609, 1);
+    Serial.print(",WdGstDir10m,");
     Serial.print(windgustdir_10m);
-    Serial.print(",humidity=");
+    Serial.print(",rh,");
     Serial.print(humidity, 1);
-    Serial.print(",tempf=");
-    Serial.print(tempf, 1);
-    Serial.print(",rainin=");
-    Serial.print(rainin, 2);
-    Serial.print(",dailyrainin=");
-    Serial.print(dailyrainin, 2);
-    Serial.print(",pressure=");
+    Serial.print(",TC,");
+    Serial.print( (tempf-32.)*.5556, 1);
+    Serial.print(",RainMM,");
+    Serial.print(rainin*25.4, 2);
+    Serial.print(",DlyRainMM,");
+    Serial.print(dailyrainin*25.4, 2);
+    Serial.print(",P,");
     Serial.print(pressure, 2);
-    Serial.print(",batt_lvl=");
+    Serial.print(",batt,");
     Serial.print(batt_lvl, 2);
-    Serial.print(",light_lvl=");
+    Serial.print(",lt,");
     Serial.print(light_lvl, 2);
     Serial.print(",");
     Serial.println("#");
