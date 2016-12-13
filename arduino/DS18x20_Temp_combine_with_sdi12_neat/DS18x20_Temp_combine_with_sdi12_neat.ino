@@ -105,8 +105,8 @@ void read_temp_sensors(void) {
     Serial.print(delimiter);
     sdi12_loop();
     ds.reset_search();
-    delay_min(30);
-    
+    //delay_min(30);
+    delay(100);
     return;
   }
 
@@ -284,6 +284,7 @@ void printBufferToScreen(){
     delay(100); 
   }
  buffer.replace("\n","");  // to remove the cartriage from the buffer
+ buffer.replace("\r","");  // added to make sure all cartriage is removed
  Serial.print(buffer);
  Serial.print(delimiter);
 }
