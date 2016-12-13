@@ -4,8 +4,8 @@ import httplib, urllib
 def ts_upload(temp,key1):
     while True:
         fields={}
-        for i in np.arange(len(temp)):
-            fields['field'+str(i)]=temp[i]
+        for i in np.arange(len(temp))+1:
+            fields['field'+str(i)]=temp[i-1]
         fields['key']=key1
         params = urllib.urlencode(fields)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}

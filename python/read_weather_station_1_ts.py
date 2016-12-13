@@ -32,7 +32,7 @@ import class_thingspeak as ts
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
-port = '/dev/ttyUSB2'  # USB1 is for all the EC 5 moisture sensors
+port = '/dev/ttyUSB1'  # USB1 is for all the EC 5 moisture sensors
 #port = '/dev/ttyACM0'
 #port = 'COM3'
 
@@ -48,7 +48,7 @@ plot=False
 #number_of_columns=4;
 
 # the Filename of the csv file for storing file
-file_name= 'arduino_weather_station_2.csv'
+file_name= 'arduino_weather_station_1.csv'
 
 # the time interval between each reading from arduino in seconds
 # be careful about the data collection interval in arduino, it is always good 
@@ -68,6 +68,8 @@ no_reading=100000
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 seperator=','
 
+
+
 __author__ = 'chenming'
 # This program logs a Raspberry Pi's CPU temperature to a Thingspeak Channel
 # To use, get a Thingspeak.com account, set up a channel, and capture the Channel Key at https://thingspeak.com/docs/tutorials/
@@ -79,19 +81,14 @@ import httplib, urllib
 #key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
 #key1 = '0AJ9RH5MI2180ZRP'  # the key for weather on the roof
 #key1 = 'I1TJ4V3DGNVQE3MV' # load cell calibration
-#key1  = '45LM6BV9GT0ARZAN'    # weather_station_1
-
-key1  =  'N6MMMYT7CHR5ZS8I'   # weather_station_2
-
-key2  =  'RJWQWYHOR88HD3TY'   #weather_station_2_wind
+key1  = '45LM6BV9GT0ARZAN'    # weather_station_1
+key2  = 'UPCBN6O9CZAL8TL8'  #weather_station_1_wind
 
 
 ### --------------------------- Processing data --------------------
 # open up the arduino port
 ard = serial.Serial(port,9600,timeout=None)
-
-# the '0' at the end of the script helps save instantly.
-# http://stackoverflow.com/questions/18984092/python-2-7-wr
+# the '0' at the end of the script helps save instantly.  # http://stackoverflow.com/questions/18984092/python-2-7-wr
 if save_to_file: fid= open(file_name,'a',0)
 
 
@@ -106,8 +103,9 @@ for i in xrange(no_reading):
     upload_array=read_float[[0,1,8,9,10,11,12,14] ]
     ts.ts_upload(upload_array,key1) # in total there are 8 channels
 
+    time.sleep(30)
 
-    upload_array=read_float[[2,3,4,5,6,7,13]]
+    upload_array=read_float[[2,3,4,5,6,7,13] ]
     ts.ts_upload(upload_array,key2) # in total there are 8 channels
 
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")

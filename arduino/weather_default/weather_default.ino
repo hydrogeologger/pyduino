@@ -212,7 +212,8 @@ void loop()
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
 
-  delay_min(5);
+  delay_min(10);
+  //delay(10000);
 }
 
 //Calculates each of the variables that wunderground is expecting
@@ -435,9 +436,9 @@ void printWeather()
 void delay_min(int min){
   for (int i=0;i<min;i++)
   {
-    for (int j=0;j<6;j++)
+    for (int j=0;j<12;j++)
     {
-      delay(10000);
+      delay(5000);
 
     }
   }
