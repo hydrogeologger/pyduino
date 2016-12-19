@@ -68,60 +68,6 @@ no_reading=100000
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 seperator=','
 
-
-
-__author__ = 'chenming'
-# This program logs a Raspberry Pi's CPU temperature to a Thingspeak Channel
-# To use, get a Thingspeak.com account, set up a channel, and capture the Channel Key at https://thingspeak.com/docs/tutorials/
-# Then paste your channel ID in the code for the value of "key" below.
-# Then run as sudo python pitemp.py (access to the CPU temp requires sudo access)
-# You can see my channel at https://thingspeak.com/channels/41518
-
-import httplib, urllib
-import time
-<<<<<<< HEAD
-key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
-=======
-#key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
-key = '0GFSJFWI170KT32J'
-
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
-
-#Report Raspberry Pi internal temperature to Thingspeak Channel
-def thermometer(temp):
-    while True:
-        #Calculate CPU temperature of Raspberry Pi in Degrees C
-        #temp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3 # Get Raspberry Pi CPU temp
-        #temp=float(temp)
-        #temp2=float(temp2)
-        #temp3=float(temp3)
-        #temp4=float(temp4)
-        #temp5=float(temp5)
-        #temp6=float(temp6)
-<<<<<<< HEAD
-        params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key })
-=======
-        #params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key })
-        params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2], 'key':key })
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
-        headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
-        conn = httplib.HTTPConnection("api.thingspeak.com:80")
-        try:
-            conn.request("POST", "/update", params, headers)
-            response = conn.getresponse()
-            #print temp
-<<<<<<< HEAD
-            print response.status, response.reason
-=======
-            #print response.status, response.reason
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
-            data = response.read()
-            conn.close()
-        except:
-            print "connection failed"
-        break
-
-
 ### --------------------------- Processing data --------------------
 # open up the arduino port
 ard = serial.Serial(port,9600,timeout=None)
@@ -135,6 +81,7 @@ if plot:
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
     msg = ard.readline()
+    msg = ard.readline()
     number_of_column=len(msg.split(seperator))-1
     data = [[0. for _ in range(no_reading)] for _ in range(number_of_column)]
     #http://stackoverflow.com/questions/11874767/real-time-plotting-in-while-loop-with-matplotlib
@@ -147,11 +94,6 @@ if plot:
 
 for i in xrange(no_reading): 
     msg = ard.readline()
-
-
-    current_read=msg.split(',')[:-1]
-    read_float=[float(i) for i in current_read]
-    thermometer(read_float)
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     if screen_display: print i,seperator,time_now,seperator,msg.rstrip()
     if save_to_file: fid.write(time_now+seperator+msg)

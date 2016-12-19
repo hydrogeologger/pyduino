@@ -3,6 +3,8 @@ import serial
 #import syslog
 import time
 import numpy as np
+import class_thingspeak as ts
+import numpy as np
 # this script reads off from arduino on the go.
 # it is currently confirmed that arduino behaves similarly as all the scale sensors
 # 1. having internal buffers
@@ -32,7 +34,7 @@ import numpy as np
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
-port = '/dev/ttyUSB1'
+port = '/dev/ttyUSB2'  # USB1 is for all the EC 5 moisture sensors
 #port = '/dev/ttyACM0'
 #port = 'COM3'
 
@@ -48,7 +50,7 @@ plot=False
 #number_of_columns=4;
 
 # the Filename of the csv file for storing file
-file_name= 'arduino_data_digi.csv'
+file_name= 'arduino_data_scale.csv'
 
 # the time interval between each reading from arduino in seconds
 # be careful about the data collection interval in arduino, it is always good 
@@ -79,47 +81,10 @@ __author__ = 'chenming'
 
 import httplib, urllib
 import time
-<<<<<<< HEAD
-key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
-=======
 #key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
-key = '0GFSJFWI170KT32J'
+#key1 = '0AJ9RH5MI2180ZRP'  # the key for weather on the roof
+key1 = 'I1TJ4V3DGNVQE3MV' # load cell calibration
 
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
-
-#Report Raspberry Pi internal temperature to Thingspeak Channel
-def thermometer(temp):
-    while True:
-        #Calculate CPU temperature of Raspberry Pi in Degrees C
-        #temp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3 # Get Raspberry Pi CPU temp
-        #temp=float(temp)
-        #temp2=float(temp2)
-        #temp3=float(temp3)
-        #temp4=float(temp4)
-        #temp5=float(temp5)
-        #temp6=float(temp6)
-<<<<<<< HEAD
-        params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key })
-=======
-        #params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key })
-        params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2], 'key':key })
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
-        headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
-        conn = httplib.HTTPConnection("api.thingspeak.com:80")
-        try:
-            conn.request("POST", "/update", params, headers)
-            response = conn.getresponse()
-            #print temp
-<<<<<<< HEAD
-            print response.status, response.reason
-=======
-            #print response.status, response.reason
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
-            data = response.read()
-            conn.close()
-        except:
-            print "connection failed"
-        break
 
 
 ### --------------------------- Processing data --------------------
@@ -131,31 +96,21 @@ ard = serial.Serial(port,9600,timeout=None)
 if save_to_file: fid= open(file_name,'a',0)
 
 
-if plot:
-    import matplotlib.pyplot as plt
-    import matplotlib.cm as cm
-    msg = ard.readline()
-    number_of_column=len(msg.split(seperator))-1
-    data = [[0. for _ in range(no_reading)] for _ in range(number_of_column)]
-    #http://stackoverflow.com/questions/11874767/real-time-plotting-in-while-loop-with-matplotlib
-    plt.axis([0, 100, 0, 900])
-    plt.ion()
-    msg_parse=msg.split(',')
-    x = np.arange(10)
-    ys = [_+x+(_*x)**2 for _ in range(number_of_column)]
-
 
 for i in xrange(no_reading): 
     msg = ard.readline()
-
-
-    current_read=msg.split(',')[:-1]
-    read_float=[float(i) for i in current_read]
-    thermometer(read_float)
+    current_read=msg.split(',')[1:-1]
+    #print current_read
+    #read_float=[float(i) for i in current_read]
+    #read_float=float(current_read[-1])
+    read_float=np.array([float(current_read[_]) for _ in [-2,-1]])
+    ts.ts_upload(read_float/18088.39,key1) # in total there are 8 channels
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     if screen_display: print i,seperator,time_now,seperator,msg.rstrip()
     if save_to_file: fid.write(time_now+seperator+msg)
+
     time.sleep(sleep_time_seconds)
+
     if plot:
         colors = iter(cm.rainbow(np.linspace(0, 1, len(ys))))
         for j in xrange(number_of_column):

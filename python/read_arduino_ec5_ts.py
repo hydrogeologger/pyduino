@@ -32,7 +32,7 @@ import numpy as np
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
-port = '/dev/ttyUSB1'
+port = '/dev/ttyUSB1'  # USB1 is for all the EC 5 moisture sensors
 #port = '/dev/ttyACM0'
 #port = 'COM3'
 
@@ -48,7 +48,7 @@ plot=False
 #number_of_columns=4;
 
 # the Filename of the csv file for storing file
-file_name= 'arduino_data_digi.csv'
+file_name= 'arduino_data_ec5.csv'
 
 # the time interval between each reading from arduino in seconds
 # be careful about the data collection interval in arduino, it is always good 
@@ -79,42 +79,25 @@ __author__ = 'chenming'
 
 import httplib, urllib
 import time
-<<<<<<< HEAD
-key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
-=======
 #key = 'UR338L6I57M3PO39'  # Thingspeak channel to update
-key = '0GFSJFWI170KT32J'
-
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
+key1 = '0AJ9RH5MI2180ZRP'  # the key for weather on the roof
 
 #Report Raspberry Pi internal temperature to Thingspeak Channel
-def thermometer(temp):
+def ts_upload(temp,key1):
     while True:
         #Calculate CPU temperature of Raspberry Pi in Degrees C
-        #temp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3 # Get Raspberry Pi CPU temp
-        #temp=float(temp)
-        #temp2=float(temp2)
-        #temp3=float(temp3)
-        #temp4=float(temp4)
-        #temp5=float(temp5)
-        #temp6=float(temp6)
-<<<<<<< HEAD
-        params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key })
-=======
-        #params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key })
-        params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2], 'key':key })
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
+        fields={}
+        for i in np.arange(len(temp)):
+            fields['field'+str(i)]=temp[i]
+        fields['key']=key1
+        params = urllib.urlencode(fields)
+        #params = urllib.urlencode({'field2': temp[0],'field3':temp[1],'field4': temp[2],'field5':temp[3], 'field6': temp[4],'field7':temp[5], 'key':key1 })
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
         conn = httplib.HTTPConnection("api.thingspeak.com:80")
         try:
             conn.request("POST", "/update", params, headers)
             response = conn.getresponse()
-            #print temp
-<<<<<<< HEAD
             print response.status, response.reason
-=======
-            #print response.status, response.reason
->>>>>>> ff9fcaa3c4446dc93335bd3c9f409e91104d76bb
             data = response.read()
             conn.close()
         except:
@@ -149,13 +132,15 @@ for i in xrange(no_reading):
     msg = ard.readline()
 
 
-    current_read=msg.split(',')[:-1]
+    current_read=msg.split(',')[1:-1]
     read_float=[float(i) for i in current_read]
-    thermometer(read_float)
+    ts_upload(read_float[0:9],key1) # in total there are 8 channels
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     if screen_display: print i,seperator,time_now,seperator,msg.rstrip()
     if save_to_file: fid.write(time_now+seperator+msg)
+
     time.sleep(sleep_time_seconds)
+
     if plot:
         colors = iter(cm.rainbow(np.linspace(0, 1, len(ys))))
         for j in xrange(number_of_column):
