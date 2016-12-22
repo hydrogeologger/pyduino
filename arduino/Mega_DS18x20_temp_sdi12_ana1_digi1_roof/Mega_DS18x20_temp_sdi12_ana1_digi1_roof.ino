@@ -74,7 +74,7 @@ Serial.print(seperator);
 read_temp_sensors();
 ana_digi_loop();
 sdi12_loop();
-//delay_min(30);
+delay_min(30);
 }
 
 
@@ -415,9 +415,9 @@ char decToChar(byte i){
 void delay_min(int min){
   for (int i=0;i<min;i++)
   {
-    for (int j=0;j<6;j++)
+    for (int j=0;j<12;j++)
     {
-      delay(10000);
+      delay(5000);
 
     }
   }
