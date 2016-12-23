@@ -171,34 +171,41 @@ for i in xrange(no_reading):
         for i in ht11_ind:
             parsed_data['ht11'+current_read[i+1]+'rh']=float(current_read[i+2])
             parsed_data['ht11'+current_read[i+1]+'t']=float(current_read[i+3])
-
-        pht.log(parsed_data['tp2']
-             ,parsed_data['tp12']
-             ,parsed_data['tp32']
-             ,parsed_data['tp8a']
-             ,parsed_data['tp21']
-             ,parsed_data['tpe5']
-             ,parsed_data['tp35']
-             ,parsed_data['tpa3']
-             ,parsed_data['tp4b']
-             ,parsed_data['tpc7']
-             ,parsed_data['tp9f']
-             ,parsed_data['mo0']
-             ,parsed_data['mo1']
-             ,parsed_data['mo2']
-             ,parsed_data['mo3']
-             ,parsed_data['mo4']
-             ,parsed_data['mo5']
-             ,parsed_data['mo6']
-             ,parsed_data['mo7']
-             ,parsed_data['mo8']
-             ,parsed_data['mo9']
-             ,parsed_data['mo10']
-             ,parsed_data['mo11']
-             ,parsed_data['ht1126rh']
-             ,parsed_data['ht1126t' ]
-             ,parsed_data['ht1127rh']
-             ,parsed_data['ht1127t' ])
+        log_attempts=1
+        while log_attempts<10:
+            try:
+                pht.log(parsed_data['tp2']
+                     ,parsed_data['tp12']
+                     ,parsed_data['tp32']
+                     ,parsed_data['tp8a']
+                     ,parsed_data['tp21']
+                     ,parsed_data['tpe5']
+                     ,parsed_data['tp35']
+                     ,parsed_data['tpa3']
+                     ,parsed_data['tp4b']
+                     ,parsed_data['tpc7']
+                     ,parsed_data['tp9f']
+                     ,parsed_data['mo0']
+                     ,parsed_data['mo1']
+                     ,parsed_data['mo2']
+                     ,parsed_data['mo3']
+                     ,parsed_data['mo4']
+                     ,parsed_data['mo5']
+                     ,parsed_data['mo6']
+                     ,parsed_data['mo7']
+                     ,parsed_data['mo8']
+                     ,parsed_data['mo9']
+                     ,parsed_data['mo10']
+                     ,parsed_data['mo11']
+                     ,parsed_data['ht1126rh']
+                     ,parsed_data['ht1126t' ]
+                     ,parsed_data['ht1127rh']
+                     ,parsed_data['ht1127t' ])
+                break
+            except: # catch all errors
+                log_attempts+=1
+                time.sleep(30)
+                continue
         time_now=time.strftime("%d/%b/%Y %H:%M:%S")
         if screen_display: print i,seperator,time_now,seperator,msg.rstrip()
         if save_to_file: fid.write(time_now+seperator+msg)
