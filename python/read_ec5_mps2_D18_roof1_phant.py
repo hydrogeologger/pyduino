@@ -134,31 +134,38 @@ for i in xrange(no_reading):
         for i in sutp_ind:
             parsed_data['su'+current_read[i+1][0]]=float(current_read[i+2])
             parsed_data['tp'+current_read[i+1][0]]=float(current_read[i+3])
-          
-        pht.log(parsed_data['tpf0']
-            ,parsed_data['tp11']
-            ,parsed_data['tp8d']
-            ,parsed_data['tpa3']
-            ,parsed_data['mo0']
-            ,parsed_data['mo1']
-            ,parsed_data['mo2']
-            ,parsed_data['mo3']
-            ,parsed_data['mo4']
-            ,parsed_data['mo5']
-            ,parsed_data['mo6']
-            ,parsed_data['mo7']
-            ,parsed_data['mo8']
-            ,parsed_data['mo9']
-            ,parsed_data['mo10']
-            ,parsed_data['mo11']
-            ,parsed_data['su1']
-            ,parsed_data['tp1']
-            ,parsed_data['su2']
-            ,parsed_data['tp2']
-            ,parsed_data['su3']
-            ,parsed_data['tp3']
-            ,parsed_data['su4']
-            ,parsed_data['tp4'])
+        log_attempts=1
+        while log_attempts<10:
+            try:          
+                pht.log(parsed_data['tpf0']
+                    ,parsed_data['tp11']
+                    ,parsed_data['tp8d']
+                    ,parsed_data['tpa3']
+                    ,parsed_data['mo0']
+                    ,parsed_data['mo1']
+                    ,parsed_data['mo2']
+                    ,parsed_data['mo3']
+                    ,parsed_data['mo4']
+                    ,parsed_data['mo5']
+                    ,parsed_data['mo6']
+                    ,parsed_data['mo7']
+                    ,parsed_data['mo8']
+                    ,parsed_data['mo9']
+                    ,parsed_data['mo10']
+                    ,parsed_data['mo11']
+                    ,parsed_data['su1']
+                    ,parsed_data['tp1']
+                    ,parsed_data['su2']
+                    ,parsed_data['tp2']
+                    ,parsed_data['su3']
+                    ,parsed_data['tp3']
+                    ,parsed_data['su4']
+                    ,parsed_data['tp4'])
+                break
+            except: # catch all errors
+                log_attempts+=1
+                time.sleep(30)
+                continue
         time_now=time.strftime("%d/%b/%Y %H:%M:%S")
         if screen_display: print i,seperator,time_now,seperator,msg.rstrip()
         if save_to_file: fid.write(time_now+seperator+msg)
