@@ -43,7 +43,7 @@ void loop() {
     }
 
     AnalogVals1[i]=AnalogVals1[i]/float(number_readings);
-    digitalWrite(digital_pins[i],LOW);
+    digitalWrite(digital_pins[i],HIGH);
  }
 
     for (int i=0; i<number_sensors;i++)
