@@ -104,8 +104,6 @@ void read_muxschield(){
     //Analog read on all 16 inputs on IO1, IO2, and IO3
     //IO1AnalogVals[i] =0;
     //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
-    muxShield.digitalWriteMS(2,i,HIGH);
-    delay(100);
     muxShield.digitalWriteMS(3,i,HIGH);
     delay(100);
     Serial.print("IO2 analog");
@@ -134,10 +132,8 @@ void read_muxschield(){
     Serial.println();
     delay(500);
 
-    muxShield.digitalWriteMS(2,i,LOW);
     muxShield.digitalWriteMS(3,i,LOW);
 
-    //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
     delay(delay_after_reading_each_ports);
   }
   
