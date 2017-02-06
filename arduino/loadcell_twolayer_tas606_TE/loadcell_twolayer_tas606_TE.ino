@@ -1,4 +1,4 @@
-#include "HX711.h"
+  #include "HX711.h"
 
 //#define DOUT1  3
 //#define CLK1   2
@@ -57,58 +57,8 @@ void loop() {
   //char temp = Serial.read();
   // be careful here! if it is a string, use double quote, if it is a char, use single quote
   // http://stackoverflow.com/questions/5697047/convert-serial-read-into-a-useable-string-using-arduino
- 
 
  te_scale_read();
-
-
-
-  char tmp;
-  String temp="";
-  while(Serial.available()) { 
-      tmp = Serial.read(); 
-      temp.concat(tmp); 
-      delay (10); 
-  } 
-    
-  //  char tmp= Serial.read();
-  // String temp="";
-  //    temp.concat(tmp);
-  //temp.trim();
-  //length_of_temp=temp.length() ;
-  //Serial.println(length_of_temp);
-  if (temp.length()!=0)
-  {
-      int commaIndex = temp.indexOf(',');
-      String firstValue = temp.substring(0, commaIndex);
-      int firstValue_int=firstValue.toInt();
-      String secondValue = temp.substring(commaIndex+1); 
-      float secondValue_int=secondValue.toFloat();
-      
-      Serial.print(temp);
-      Serial.print(',');
-      Serial.print(firstValue_int);
-      Serial.print(',');
-      Serial.print(secondValue_int);
-      Serial.print(',');
-      Serial.print(firstValue);
-      Serial.print(',');
-      Serial.println(secondValue);
-      
-      if (firstValue_int==5)
-        {
-         calibration_factor[1]=secondValue_int;
-         calibration_factor[2]=secondValue_int;
-        }
-      else if (secondValue_int==0)
-        {
-          scale_1.tare();
-        }
-       else
-         {
-         calibration_factor[firstValue_int]=secondValue_int;
-         }
-   }   // temp length
 
 }   //loop
 
@@ -129,7 +79,7 @@ void te_scale_read() {
 
   digitalWrite(2, LOW);
   Serial.print(",te");
-  Serial.print(secondValue_int);
+  Serial.print(te_scale);
   Serial.print(',');
 }
 
