@@ -48,7 +48,7 @@ void setup() {
   pinMode(6, OUTPUT);
   // switch to turn on and off power for te scale rack
   pinMode(3, OUTPUT);
-
+pinMode(2, OUTPUT);
 
 }
 
@@ -72,15 +72,15 @@ void te_scale_read() {
   
   float  te_scale=0.;
   for (int j=0;j<number_readings;j++){
-    te_scale += float(analogRead(3));
+    te_scale += float(analogRead(A0));
     delay(10);
   }
   te_scale = te_scale/float(number_readings);
-
+   delay(3000);
   digitalWrite(2, LOW);
   Serial.print(",te");
   Serial.print(te_scale);
-  Serial.print(',');
+  Serial.println(',');
 }
 
 void tas606_read() {
