@@ -1,9 +1,9 @@
-
 char delimiter =',';
 
 
 //---------------------below required by module heat_suction_sensor----------------------------------------------------#
 #include <OneWire.h>
+OneWire  ds(4);  // on pin 10 (a 4.7K resistor is necessary)
 // OneWire DS18S20, DS18B20, DS1822 Temperature Example
 //
 // http://www.pjrc.com/teensy/td_libs_OneWire.html
@@ -17,11 +17,8 @@ byte heat_suction_sensor_2_addr[8];
 
 int  heat_suction_sensor_heat_sw_1= 6;
 int  heat_suction_sensor_heat_sw_2= 5;
-OneWire  ds(4);  // on pin 10 (a 4.7K resistor is necessary)
-
-// heating time
-int heating_time_s=60;
-int cooling_time_s=60;
+int  temp_sampling_no =20;
+int  temp_sampling_interval_ms=6000;
 
 //---------------------above required by module heat_suction_sensor----------------------------------------------------#
 
@@ -65,33 +62,39 @@ pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion 
 
 void loop() {
 
-heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1); 
+heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_no,temp_sampling_interval_ms); 
 delay(2000);
-heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2); 
-
+heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_no,temp_sampling_interval_ms); 
+delay(2000);
 }
 
-void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw){
+void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampling_no, int sampling_interval_ms){
 
+  Serial.print("SucHeat");
+  Serial.print(delimiter);
+  Serial.print(heat_suction_sensor_addr[0],HEX);
+  Serial.print(heat_suction_sensor_addr[1],HEX);
+  Serial.print(delimiter);
+  Serial.print("Heating");
+  Serial.print(delimiter);
 //  int heat_sw;
 //  byte heat_suction_sensor_addr[8];
   digitalWrite(heat_sw, HIGH);
-  for (int i=0; i<=20; i++)
+  for (int i=0; i<=sampling_no; i++)
   {
-      delay (3000);
+      delay (sampling_interval_ms);
       read_DS18B20_by_addr(heat_suction_sensor_addr) ;
   }
-  Serial.println();
 
-  Serial.println("now heat is dessipating");
-
+  Serial.print("Dsping");
+  Serial.print(delimiter);
   digitalWrite(heat_sw, LOW);
-  for (int i=0; i<=20; i++)
+  for (int i=0; i<=sampling_no; i++)
   {
-      delay (3000);
+      delay (sampling_interval_ms);
       read_DS18B20_by_addr(heat_suction_sensor_addr) ;
   }
-      Serial.println();
+      //Serial.println();
 }  // heat_suction_sensor
 
 
