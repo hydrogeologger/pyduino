@@ -8,7 +8,7 @@ from phant import Phant
 # 
 
 field_name=['suht_28e5_begin','suht_28e5_peak','suht_28e5_end','suht_2847_begin','suht_2847_peak','suht_2847_end',
-    'saltrh_2_tp','saltrh_2_rh','saltrh_3_tp','saltrh_3_rh','mo7','mo8','mo9','mo10'];
+    'saltrh_2_tp','saltrh_2_rh','saltrh_3_tp','saltrh_3_rh','mo_7','mo_8','mo_9','mo_10']
 
 pht = Phant(publicKey='9J2rX3QZ94s5RJ9LjrbN', 
     fields=field_name ,privateKey='xz6exl8ypjCAvaK6W4PB')
@@ -81,7 +81,7 @@ if save_to_file: fid= open(file_name,'a',0)
 for i in xrange(no_reading): 
     msg = ard.readline()
     current_read=msg.split(delimiter)[0:-1]
-    if current_read[0]=='SucHeat' and len([i for i,x in enumerate(current_read) if x == 'SucHeat'])==1:
+    if current_read[0]=='Soil1' and len([i for i,x in enumerate(current_read) if x == 'Soil1'])==1:
 
         # parse "SucHeat"
         sucheat_ind=[i for i,x in enumerate(current_read) if x == 'SucHeat']
@@ -108,6 +108,7 @@ for i in xrange(no_reading):
 
 
         # start uploading results;
+        ## notice: during debuging phase, it is suggested to run the script line-by-line to avoid bugs that can be passed by try and catch 
         log_attempts=1
         while log_attempts<10:
             try:

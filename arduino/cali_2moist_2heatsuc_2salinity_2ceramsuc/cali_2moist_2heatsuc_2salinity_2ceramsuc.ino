@@ -17,10 +17,10 @@ byte heat_suction_sensor_2_addr[8];
 
 int  heat_suction_sensor_heat_sw_1= 6;
 int  heat_suction_sensor_heat_sw_2= 5;
-//int  temp_sampling_number =20;
-//int  temp_sampling_interval_ms=6000;
 int  temp_sampling_number =20;
-int  temp_sampling_interval_ms=1000;
+int  temp_sampling_interval_ms=6000;
+//int  temp_sampling_number =20;
+//int  temp_sampling_interval_ms=100;
 
 //---------------------above required by module heat_suction_sensor----------------------------------------------------#
 
@@ -91,7 +91,7 @@ pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion 
 
 
 void loop() {
-
+Serial.print("Soil1,");
 heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_number,temp_sampling_interval_ms); 
 delay(2000);
 heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_number,temp_sampling_interval_ms); 
@@ -103,6 +103,7 @@ delay(2000);
 read_analog_moisture_sensor();
 delay(2000);
 Serial.println();
+delay_min(30);
 }
 
 void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampling_number, int sampling_interval_ms){
