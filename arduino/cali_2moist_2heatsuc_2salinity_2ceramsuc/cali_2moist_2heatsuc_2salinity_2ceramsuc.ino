@@ -17,7 +17,7 @@ byte heat_suction_sensor_2_addr[8];
 
 int  heat_suction_sensor_heat_sw_1= 6;
 int  heat_suction_sensor_heat_sw_2= 5;
-int  temp_sampling_no =20;
+int  temp_sampling_number =20;
 int  temp_sampling_interval_ms=6000;
 
 //---------------------above required by module heat_suction_sensor----------------------------------------------------#
@@ -32,11 +32,34 @@ dht DHT;
 //---------------------above required by module salinity_humidity_sensor----------------------------------------------------#
 
 
+
+//-------------------below required by analog digital for moisture ---------------------
+
+static const uint8_t moist_analog_pins[]  = {A1,A2,A3,A4};
+int moist_digital_pins[] = {7,8,9,10};
+int moist_number_readings=7;
+int moist_dummy_readings=3;
+int const moist_number_sensors=sizeof(moist_analog_pins);
+float moist_data[moist_number_sensors];
+
+//-------------------above required by analog digital for moisture ---------------------
+
 void setup() {
   Serial.begin(9600); // open serial port, set the baud rate as 9600 bps
   pinMode(3, OUTPUT);
-//---------------------below required by module heat_suction_sensor----------------------------------------------------#
 
+
+
+//---------------------below required by module analog moisture sensor----------------------------------------------------#
+
+  for (int i=0; i<moist_number_sensors;i++){
+      pinMode(moist_digital_pins[i],OUTPUT);
+  }
+//---------------------above required by module analog moisture sensor----------------------------------------------------#
+
+
+
+//---------------------below required by module heat_suction_sensor----------------------------------------------------#
 // define the address
 //const char  addr='28E5A34A8007F';
 heat_suction_sensor_1_addr[0]=0x28;
@@ -67,19 +90,20 @@ pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion 
 
 void loop() {
 
-//heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_no,temp_sampling_interval_ms); 
-//delay(2000);
-//heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_no,temp_sampling_interval_ms); 
-//delay(2000);
-
-read_salinity_humidity_sensor(DHT22_PIN_1);
+heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_number,temp_sampling_interval_ms); 
+delay(2000);
+heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_number,temp_sampling_interval_ms); 
 delay(2000);
 read_salinity_humidity_sensor(DHT22_PIN_2);
+delay(2000);
+read_salinity_humidity_sensor(DHT22_PIN_1);
+delay(2000);
+read_analog_moisture_sensor();
 delay(2000);
 Serial.println();
 }
 
-void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampling_no, int sampling_interval_ms){
+void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampling_number, int sampling_interval_ms){
 
   Serial.print("SucHeat");
   Serial.print(delimiter);
@@ -91,7 +115,7 @@ void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampli
 //  int heat_sw;
 //  byte heat_suction_sensor_addr[8];
   digitalWrite(heat_sw, HIGH);
-  for (int i=0; i<=sampling_no; i++)
+  for (int i=0; i<=sampling_number; i++)
   {
       delay (sampling_interval_ms);
       read_DS18B20_by_addr(heat_suction_sensor_addr) ;
@@ -100,7 +124,7 @@ void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampli
   Serial.print("Dsping");
   Serial.print(delimiter);
   digitalWrite(heat_sw, LOW);
-  for (int i=0; i<=sampling_no; i++)
+  for (int i=0; i<=sampling_number; i++)
   {
       delay (sampling_interval_ms);
       read_DS18B20_by_addr(heat_suction_sensor_addr) ;
@@ -186,6 +210,48 @@ void read_DS18B20_by_addr(byte addr[8]) {
   
   return;
 }
+
+
+
+void read_analog_moisture_sensor() {
+  // read the input on analog pin 0
+  for (int i=0; i<moist_number_sensors;i++){
+    moist_data[i]=0;
+    digitalWrite(moist_digital_pins[i],HIGH);
+    delay(1000);
+
+    for (int j=0;j<moist_dummy_readings;j++){
+      analogRead(moist_analog_pins[i]);
+      //delay(100);
+    }
+
+    for (int j=0;j<moist_number_readings;j++){
+      moist_data[i]+=analogRead(moist_analog_pins[i]);
+      delay(10);
+    }
+
+    moist_data[i]=moist_data[i]/moist_number_readings;
+    digitalWrite(moist_digital_pins[i],LOW);
+  }
+    
+    for (int i=0; i<moist_number_sensors;i++)
+    {
+    Serial.print("Mo");
+    Serial.print(delimiter);
+    //Serial.print((char)moist_analog_pins[i]);   // how to convert this to strings?
+    Serial.print(moist_digital_pins[i]);
+    Serial.print(delimiter); 
+    Serial.print(moist_data[i]);
+    Serial.print(delimiter);
+
+    }
+    
+    //delay_min(30);
+    }
+
+
+
+
 
 void delay_min(int min){
   for (int i=0;i<min;i++)
