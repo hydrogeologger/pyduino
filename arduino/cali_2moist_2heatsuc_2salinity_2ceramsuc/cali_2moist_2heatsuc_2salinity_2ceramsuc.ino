@@ -17,8 +17,10 @@ byte heat_suction_sensor_2_addr[8];
 
 int  heat_suction_sensor_heat_sw_1= 6;
 int  heat_suction_sensor_heat_sw_2= 5;
+//int  temp_sampling_number =20;
+//int  temp_sampling_interval_ms=6000;
 int  temp_sampling_number =20;
-int  temp_sampling_interval_ms=6000;
+int  temp_sampling_interval_ms=1000;
 
 //---------------------above required by module heat_suction_sensor----------------------------------------------------#
 
