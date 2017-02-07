@@ -23,8 +23,13 @@ int  temp_sampling_interval_ms=6000;
 //---------------------above required by module heat_suction_sensor----------------------------------------------------#
 
 
+//---------------------below required by module salinity_humidity_sensor----------------------------------------------------#
 
-
+#include <dht.h>
+dht DHT;
+#define DHT22_PIN_1 2
+#define DHT22_PIN_2 3
+//---------------------above required by module salinity_humidity_sensor----------------------------------------------------#
 
 
 void setup() {
@@ -62,10 +67,16 @@ pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion 
 
 void loop() {
 
-heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_no,temp_sampling_interval_ms); 
+//heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_no,temp_sampling_interval_ms); 
+//delay(2000);
+//heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_no,temp_sampling_interval_ms); 
+//delay(2000);
+
+read_salinity_humidity_sensor(DHT22_PIN_1);
 delay(2000);
-heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_no,temp_sampling_interval_ms); 
+read_salinity_humidity_sensor(DHT22_PIN_2);
 delay(2000);
+Serial.println();
 }
 
 void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampling_no, int sampling_interval_ms){
@@ -98,6 +109,18 @@ void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampli
 }  // heat_suction_sensor
 
 
+void read_salinity_humidity_sensor(int digi_pin){
+
+  Serial.print("SaltRH");
+  Serial.print(delimiter);
+  Serial.print(digi_pin);
+  Serial.print(delimiter);
+  int chk1=DHT.read22(digi_pin);
+  Serial.print(DHT.temperature);
+  Serial.print(delimiter);
+  Serial.print(DHT.humidity);
+  Serial.print(delimiter);
+}
 
 
 void read_DS18B20_by_addr(byte addr[8]) {
