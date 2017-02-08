@@ -94,8 +94,8 @@ for i in xrange(no_reading):
         log_attempts=1
         while log_attempts<10:
             try:
-                pht.log(parsed_data['te']
-                    ,parsed_data['tas606']
+                pht.log(parsed_data['tas606']  # warning: the sequence of the upload values has to follow strict from sequence in variable pased_data and field name
+                    ,parsed_data['te']
                     ,parsed_data['measure_local_time'])
                 break
             except: # catch all errors
