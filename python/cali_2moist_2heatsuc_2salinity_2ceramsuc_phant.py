@@ -71,7 +71,7 @@ __author__ = 'chenming'
 ard = serial.Serial(port,9600,timeout=None)
 
 # throw away the first reading as it is always formated poorly
-msg = ard.readline()
+#msg = ard.readline()
 #msg = ard.readline()
 # the '0' at the end of the script helps save instantly.
 # http://stackoverflow.com/questions/18984092/python-2-7-wr
