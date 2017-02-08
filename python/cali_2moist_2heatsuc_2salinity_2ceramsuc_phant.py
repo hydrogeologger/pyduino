@@ -88,7 +88,7 @@ for i in xrange(no_reading):
         for i in sucheat_ind:
             parsed_data['suht_'+current_read[i+1].lower()+'_begin']=float(current_read[i+3])
             parsed_data['suht_'+current_read[i+1].lower()+'_peak']=float(current_read[i+temp_sampling_number+3])
-            parsed_data['suht_'+current_read[i+1].lower()+'_end']=float(current_read[i+temp_sampling_number+3])
+            parsed_data['suht_'+current_read[i+1].lower()+'_end']=float(current_read[i+2*temp_sampling_number+5])
 
         # parse salinity sensor using relative humidty data
         saltrh_ind=[i for i,x in enumerate(current_read) if x == 'SaltRH']
