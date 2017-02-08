@@ -427,8 +427,8 @@ var svg_scale = d3.select("body")
         if (error) return console.warn(error);
         json.forEach(function(d) {
             d.measure_local_time = format_scale(d.measure_local_time);
-            d.tas606=d.tas606/0.0149;
-            d.te=d.te/16.73;
+            d.tas606=d.tas606/16.73;
+            d.te=d.te/0.0149;
         });
 	 
     	data_scale=json;
