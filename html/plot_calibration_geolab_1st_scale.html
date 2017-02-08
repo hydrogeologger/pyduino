@@ -113,8 +113,10 @@ var svg = d3.select("body")
             //d.measure_local_time = parseDate(format.parse(d.measure_local_time));
             //d.measure_local_time = format.parse(d.measure_local_time);
             d.measure_local_time = format(d.measure_local_time);
-            //dataset.date = parseDate(d.date);
-            //dataset.close = +d.close;
+            d.tas606=parseFloat(d.tas606)/0.0149;
+            d.te1=parseFloat(d.te)/16.73;
+//            d.tas606=d.tas606/0.0149;
+//            d.te=d.te/16.73;
         });
 	 
     	data1=json;
@@ -122,14 +124,12 @@ var svg = d3.select("body")
  //       console.log(active1)
 
         x_scale.domain(d3.extent(data1, function(d) { return d.measure_local_time; }));
-       //y_scale.domain([200, d3.max(data1, function(d) { return d.scale_10; })]);
-        y_scale.domain([300, 550]);
+        y_scale.domain([d3.min(data1, function(d) { return d.tas606; }),d3.max(data1, function(d) { return d.tas606; })]]);
 
 
 //-------------------below are new datas ------------------- 
 
-        //var color = d3.scaleOrdinal(d3.schemeCategory10);
-        var color = d3.scaleOrdinal(d3.schemeCategory20);
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
 
         key_scale.forEach(function(d,i) {
             svg.append("path")
