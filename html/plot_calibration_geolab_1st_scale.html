@@ -117,8 +117,10 @@ var svg = d3.select("body")
             d.measure_local_time = format(d.measure_local_time);
             //d.tas606=parseFloat(d.tas606)/0.0149;
             //d.te=parseFloat(d.te)/16.73;
-            d.tas606=float_to_string(d.tas606/0.0149);
-            d.te=float_to_string(d.te/16.73);
+            d.tas606=d.tas606/0.0149;
+            d.te=d.te/16.73;
+            //d.tas606=float_to_string(d.tas606/0.0149);
+            //d.te=float_to_string(d.te/16.73);
         });
 	 
     	data1=json;
