@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+
+https://bl.ocks.org/d3noob/4db972df5d7efc7d611255d1cc6f3c4f
+
+-->
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+
+path { 
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+
+.legend {
+    font-size: 16px;
+    font-weight: bold;
+    text-anchor: middle;
+        }
+
+
+</style>
+<body>
+
+<!-- load the d3.js library -->    
+<!-- EXTERNAL LIBS-->
+<script src="http://d3js.org/d3.v4.min.js"></script>
+
+
+<!-- a container with the headlines and descreptions
+http://bl.ocks.org/Matthew-Weber/5645518
+ -->    
+<div id="container">
+      <p id="headline" class="hed">Headline</p>
+      <p class="dek">dek</p>
+    <p class="dek">dek </p>	
+</div>  
+
+
+<script>
+
+// below is needed to initializating the picture
+
+// Set the dimensions of the canvas / graph
+// right determins the space for writting things
+var margin = {top: 30, right: 100, bottom: 100, left: 50},
+    width = 1300 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// Parse the date / time
+//var parseDate = d3.timeParse("%d-%b-%y");
+
+
+var key_scale=["tas606","te"];
+
+var active1=[];
+
+
+var legendSpace_scale = width/ key_scale.length
+
+var format = d3.timeParse('%Y-%b-%d %H:%M:%S')
+
+// Set the ranges
+var x_scale = d3.scaleTime().range([0, width]);
+var y_scale = d3.scaleLinear().range([height, 0]);
+
+
+
+
+//// Define the line for scaleisture
+var valueline_scale=[];
+key_scale.forEach(function(d,i) {
+    valueline_scale[i]=d3.line()
+        .x(function(d) { return x_scale(d.measure_local_time); })
+        .y(function(d) { return y_scale(d[key_scale[i]]); });
+})
+
+
+
+
+// Adds the svg canvas
+var svg = d3.select("body")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// below is to obtain the data
+
+    var data1;
+    //var url =   "https://data.sparkfun.com/output/JxO9ydlRjnuXARaZX5od.json"
+    //var url =   "https://data.sparkfun.com/output/RMxqjA6nRXfbm01raooM.json"    // commercial data
+//    var url =   "https://data.sparkfun.com/output/9J2rX3QZ94s5RJ9LjrbN.json"
+    var url =   "https://data.sparkfun.com/output/KJo3Nx8grJcMDpEWQOXg.json"
+    d3.json(url,  function (error,json) {
+        if (error) return console.warn(error);
+        json.forEach(function(d) {
+            //d.measure_local_time = parseDate(format.parse(d.measure_local_time));
+            //d.measure_local_time = format.parse(d.measure_local_time);
+            d.measure_local_time = format(d.measure_local_time);
+            //dataset.date = parseDate(d.date);
+            //dataset.close = +d.close;
+        });
+	 
+    	data1=json;
+    	console.log(data1)
+ //       console.log(active1)
+
+        x_scale.domain(d3.extent(data1, function(d) { return d.measure_local_time; }));
+       //y_scale.domain([200, d3.max(data1, function(d) { return d.scale_10; })]);
+        y_scale.domain([300, 550]);
+
+
+//-------------------below are new datas ------------------- 
+
+        //var color = d3.scaleOrdinal(d3.schemeCategory10);
+        var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+        key_scale.forEach(function(d,i) {
+            svg.append("path")
+                .attr("class", "line")
+                .style("stroke", color(key_scale[i]))
+                .attr("d", valueline_scale[i](data1))
+                .attr("id", 'tag'+key_scale[i].replace(/\s+/g, '')); // assign id **
+
+            svg.append("text")
+                .attr("x", (legendSpace_scale/2)+i*legendSpace_scale)  // space legend
+                .attr("y", height + (margin.bottom/2)+ 5)
+                .attr("class", "legend")    // style the legend
+                .style("fill", color(key_scale[i]))
+                .on("click", function(){                     // ************
+                          // Determine if current line is visible 
+                          var active   = active1[i] ? false : true,  // ************ 
+                          newOpacity = active ? 0 : 1;             // ************
+                          // Hide or show the elements based on the ID
+                          d3.select("#tag"+key_scale[i].replace(/\s+/g, '')) // *********
+                              .transition().duration(100)          // ************
+                              .style("opacity", newOpacity);       // ************
+                          // Update whether or not the elements are active
+                          active1[i] = active;                       // ************
+                          })                                       // ************
+                .text(key_scale[i]); 
+         });
+
+         // Add the X Axis
+         svg.append("g")
+             .attr("class", "x axis")
+             .attr("transform", "translate(0," + height + ")")
+             .call(d3.axisBottom(x_scale));
+
+         // Add the Y Axis
+         svg.append("g")
+             .attr("class", "y axis")
+             .call(d3.axisLeft(y_scale));
+})
+</script>
+
+<div id="container">
+      <p id="headline" class="hed">Headline2</p>
+      <p class="dek">dek2</p>
+    <p class="dek">dek </p>	
+</div>  
+
+</body>
+
