@@ -39,12 +39,40 @@ path {
 <!-- EXTERNAL LIBS-->
 <script src="http://d3js.org/d3.v4.min.js"></script>
 
+<script>
+// -----------------------below is to draw current setup of the experiment -------------------
+var width_uq = 1350,
+    height_uq = 100;
 
+var svg_uq = d3.select("body").append("svg")
+    .attr("width", width_uq)
+    .attr("height", height_uq)
+    .style("border", "0px solid black");
+
+var g_uq = svg_uq.append("g");
+var text_2 = svg_uq.selectAll("text")
+     .data([0])
+     .enter()
+     .append("text")
+     .text("Calibration of soil sensors undertaking at the 1st floor geotechnical laboratory")
+     .style("font-size", "30px")
+     .attr("x", "0")
+     .attr("y", "65");
+
+var img = g_uq.append("svg:image")
+    .attr("xlink:href", "https://outbox.eait.uq.edu.au/uqczhan2/photo_geo_1st/UQ.jpg")
+    .attr("width", 200)
+    .attr("height", 200)
+    .attr("x", 1100)
+    .attr("y",-50);
+// -----------------------above is to draw current setup of the experiment -------------------
+</script>
 <!-- a container with the headlines and descreptions
 http://bl.ocks.org/Matthew-Weber/5645518
  -->    
 <div id="container">
-      <p id="headline" class="hed" style="font-size:30px">Calibration of soil sensors undertaking at the 1st floor geotechnical laboratory</p>
+  <!--    <p id="headline" class="hed" style="font-size:30px">Calibration of soil sensors undertaking at the 1st floor geotechnical laboratory</p>  -->
+      <p class="dek" style="font-size:25px">Description</p> 
       <p class="dek" style="font-size:17px">    The experiment involves calibrating four soil sensors: (1) soil moisture sensors based on dielectrical resistivity principle
       (2) soil suction sensor based on dielectrical resistivity, (3) soil suction sensor based on heat dissipation, and (4) soil salinity sensor based on relative humidity. </p>
       <p class="dek" style="font-size:17px">The calibration of moisture sensor is conducted by the volumetric moisture content derived from scale weight reading, with the moisture cotent obtain by sensor reading.
@@ -103,7 +131,62 @@ key_temp.forEach(function(d,i) {
         .y(function(d) { return y_temp(d[key_temp[i]]); });
 })
 
+// ----------------------draw picture for the entire setup ---------------------
+            var svg_pic = d3.select("body")
+                .append("svg")
+                .attr("width", 1280)
+                .attr("height", 1124)
+                .style("border", "0px solid black");
 
+           var text = svg_pic.selectAll("text")
+                .data([0])
+                .enter()
+                .append("text")
+                .text("Experimental Setup")
+                .style("font-size", "25px")
+                .attr("x", "0")
+                .attr("y", "20");
+
+            var imgs = svg_pic.selectAll("image").data([0]);
+                imgs.enter()
+                .append("svg:image")
+                .attr("xlink:href", "https://outbox.eait.uq.edu.au/uqczhan2/photo_geo_1st/setup.PNG")
+                .attr("x", "00")
+                .attr("y", "30")
+                .attr("width", "1280")
+                .attr("height", "1024");
+           
+
+// ----------------------draw picture for the entire setup ---------------------
+           var svg_pic_realtime = d3.select("body")
+                .append("svg")
+                .attr("width", 1280)
+                .attr("height", 1124)
+                .style("border", "0px solid black");
+
+           var text = svg_pic_realtime.selectAll("text")
+                .data([0])
+                .enter()
+                .append("text")
+                .text("Real-time snapshot of tailings surface")
+                .style("font-size", "25px")
+                .attr("x", "0")
+                .attr("y", "20");
+
+            var imgs = svg_pic_realtime.selectAll("image").data([0]);
+                imgs.enter()
+                .append("svg:image")
+                .attr("xlink:href", "https://outbox.eait.uq.edu.au/uqczhan2/photo_geo_1st/2017_02_09_12_58_geo_1st.jpg")
+                .attr("x", "00")
+                .attr("y", "50")
+                .attr("width", "1280")
+                .attr("height", "924");
+           
+	   svg_pic_realtime.append("text")
+                .text("Real-time results")
+                .style("font-size", "25px")
+                .attr("x", "0")
+                .attr("y", "1100");
 
 // Adds the svg canvas
 var svg = d3.select("body")
@@ -498,13 +581,29 @@ var svg_scale = d3.select("body")
 // ---------------------------------  above is plotting of scale results --------------------
 })   //get result
 
+
+// -----------------------below is to draw gec logo -------------------
+var width_gec = 1250,
+    height_gec = 100;
+
+var svg_gec = d3.select("body").append("svg")
+    .attr("width", width_gec)
+    .attr("height", height_gec);
+
+var g_gec = svg_gec.append("g");
+
+var img = g_gec.append("svg:image")
+    .attr("xlink:href", "https://outbox.eait.uq.edu.au/uqczhan2/photo_geo_1st/gec.PNG")
+    .attr("width", 1250)
+    .attr("height", 100)
+    .attr("x", 0)
+    .attr("y",0);
+// -----------------------above is to draw gec logo------------------
+
+
+
 </script>
 
-<div id="container">
-      <p id="headline" class="hed">Headline2</p>
-      <p class="dek">dek2</p>
-    <p class="dek">dek </p>	
-</div>  
 
 </body>
 
