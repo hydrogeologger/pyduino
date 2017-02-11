@@ -10,17 +10,20 @@ https://bl.ocks.org/d3noob/4db972df5d7efc7d611255d1cc6f3c4f
 body { font: 12px Arial;}
 
 
+/* global properties for the plot line properties */
 path { 
     stroke: steelblue;
-    stroke-width: 2;
+    stroke-width: 3;
     fill: none;
 }
 
 .axis path,
+/*<-- global properties for the axes properties--> */
+/* be careful about the new comment styles */
 .axis line {
     fill: none;
-    stroke: grey;
-    stroke-width: 1;
+    stroke: black;
+    stroke-width: 3;
     shape-rendering: crispEdges;
 }
 
@@ -31,6 +34,16 @@ path {
     text-anchor: middle;
         }
 
+
+/*below is function to make grid */
+.grid .tick {
+    stroke: lightgrey;
+    opacity: 0.7;
+}
+.grid path {
+      stroke-width: 0;
+}
+/*above is function to make grid */
 
 </style>
 
@@ -86,6 +99,21 @@ http://bl.ocks.org/Matthew-Weber/5645518
 
 
 <script>
+
+// -------------------------- below is the function to creat grid lines ---------------
+// gridlines in x axis function
+function make_x_gridlines(x_ax) {		
+    return d3.axisBottom(x_ax)
+        .ticks(5)
+}
+
+// gridlines in y axis function
+function make_y_gridlines(y_ax) {		
+    return d3.axisLeft(y_ax)
+        .ticks(5)
+}
+// -------------------------- above is the function to creat grid lines ---------------
+
 
 // below is needed to initializating the picture
 
@@ -316,7 +344,7 @@ var svg_scale = d3.select("body")
 
 
 
-//-------------------below are for moisture sensor ------------------- 
+//-------------------below are for moisture sensor plot------------------- 
         x_mo.domain(d3.extent(data1, function(d) { return d.timestamp; }));
        //y_mo.domain([200, d3.max(data1, function(d) { return d.mo_10; })]);
         y_mo.domain([300, 550]);
@@ -327,6 +355,7 @@ var svg_scale = d3.select("body")
         key_mo.forEach(function(d,i) {
             svg.append("path")
                 .attr("class", "line")
+//                .attr("stroke-width", 20)  
                 .style("stroke", color(key_mo[i]))
                 .attr("d", valueline_mo[i](data1))
                 .attr("id", 'tag'+key_mo[i].replace(/\s+/g, '')); // assign id **
@@ -368,6 +397,7 @@ var svg_scale = d3.select("body")
          svg.append("g")
              .attr("class", "y axis")
              .call(d3.axisLeft(y_mo));
+
          // text label for the y axis
           svg.append("text")
               .attr("transform", "rotate(-90)")
@@ -377,6 +407,21 @@ var svg_scale = d3.select("body")
               .style("text-anchor", "middle")
               .style("font-size", "18px")
               .text("MOISTURE SENSOR READING");    
+         // draw grid lines
+         svg.append("g")         
+             .attr("class", "grid")
+             .attr("transform", "translate(0," + height + ")")
+             .call(make_x_gridlines(x_mo)
+                 .tickSize(-height, 0, 0)
+                 .tickFormat("")
+             )
+     
+         svg.append("g")         
+             .attr("class", "grid")
+             .call(make_y_gridlines(y_mo)
+                 .tickSize(-width, 0, 0)
+                 .tickFormat("")
+             )
 //---------------------------- below are to plot temperature sensors ----------------------
         //x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
         x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
@@ -442,6 +487,20 @@ var svg_scale = d3.select("body")
              .style("font-size", "20px")
              .text("TIME");
 
+         // draw grid lines
+         svg2.append("g")         
+             .attr("class", "grid")
+             .attr("transform", "translate(0," + height + ")")
+             .call(make_x_gridlines(x_temp)
+                 .tickSize(-height, 0, 0)
+                 .tickFormat("")
+             )
+         svg2.append("g")         
+             .attr("class", "grid")
+             .call(make_y_gridlines(y_temp)
+                 .tickSize(-width, 0, 0)
+                 .tickFormat("")
+             )
 //---------------------------- below are for humidity sensor ----------------------
         x_rh.domain(d3.extent(data1, function(d) { return d.timestamp; }));
         y_rh.domain([0, 100]);
@@ -503,6 +562,20 @@ var svg_scale = d3.select("body")
               .style("text-anchor", "middle")
               .style("font-size", "18px")
               .text("RELATIVE HUMIDITY (PERCENT)");    
+         // draw grid lines
+         svg_rh.append("g")         
+             .attr("class", "grid")
+             .attr("transform", "translate(0," + height + ")")
+             .call(make_x_gridlines(x_rh)
+                 .tickSize(-height, 0, 0)
+                 .tickFormat("")
+             )
+         svg_rh.append("g")         
+             .attr("class", "grid")
+             .call(make_y_gridlines(y_rh)
+                 .tickSize(-width, 0, 0)
+                 .tickFormat("")
+             )
 
 // --------------------------above is for relative humidity sensor -----------------------
 })
@@ -583,6 +656,21 @@ var svg_scale = d3.select("body")
               .style("font-size", "18px")
               .text("LOAD CELL READING (G)");    
 
+         // draw grid lines
+         svg_scale.append("g")         
+             .attr("class", "grid")
+             .attr("transform", "translate(0," + height + ")")
+             .call(make_x_gridlines(x_scale)
+                 .tickSize(-height, 0, 0)
+                 .tickFormat("")
+             )
+
+         svg_scale.append("g")         
+             .attr("class", "grid")
+             .call(make_y_gridlines(y_scale)
+                 .tickSize(-width, 0, 0)
+                 .tickFormat("")
+             )
 // ---------------------------------  above is plotting of scale results --------------------
 })   //get result
 

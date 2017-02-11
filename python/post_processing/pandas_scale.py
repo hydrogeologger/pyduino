@@ -68,7 +68,13 @@ class pandas_scale:
                 # http://stackoverflow.com/questions/38561268/parsing-data-using-pandas-with-fixed-sequence-of-strings/38561323#38561323
                 #pdb.set_trace()
                 #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'],parse_dates=arg['parse_dates'],header=arg['header'])
-                self.df_sub[i]=pd.read_csv(fn,**kwargs ) #,names=arg['names'],parse_dates=arg['parse_dates'],header=arg['header'])
+                #self.df_sub[i]=pd.read_csv(fn,**kwargs ) #,names=arg['names'],parse_dates=arg['parse_dates'],header=arg['header'])
+
+                #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'],parse_dates=arg['parse_dates'],
+                #    header=arg['header'],date_parser=arg['date_parser'])
+                self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'], header=arg['header'],date_parser=arg['date_parser'],parse_dates=arg['parse_dates'])
+                #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=['sensor1','sensor2','sensor3','sensor4','sensor5','sensor6'], header=arg['header'],date_parser=arg['date_parser'])
+
                 # http://stackoverflow.com/questions/10972410/pandas-combine-two-columns-in-a-dataframe
                 #self.df[i]['a']= self.df[i]['a'].map(str)+' '+self.df[i]['b']
                 ##http://stackoverflow.com/questions/13411544/delete-column-from-pandas-dataframe 
@@ -163,7 +169,8 @@ class pandas_scale:
     
 class concat_data_roof:
     import pandas as pd
-    def __init__(self,start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
+    #def __init__(self,start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
+    def __init__(self,start_time=pd.Timestamp('2016-11-21 12:30:30'),end_time=pd.Timestamp('2016-12-05 12:00:56'),dt_s=600):
     #def __init__(self): #start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
 	import pdb
         import csv
