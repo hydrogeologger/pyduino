@@ -239,6 +239,33 @@ http://bl.ocks.org/Matthew-Weber/5645518
           .attr("transform", 
                 "translate(" + margin.left + "," + margin.top + ")");
   
+  // ---------------------below is data defination for the delta temp --------------------------
+  
+  var key_del_temp=["del_temp_28e5_heating","del_temp_28e5_cooling","del_temp_2847_heating","del_temp_2847_cooling"]; 
+  var act_del_temp=[];
+  var legendSpace_del_temp = width/ key_del_temp.length;
+  
+  var x_del_temp = d3.scaleTime().range([0, width]);
+  var y_del_temp = d3.scaleLinear().range([height, 0]);
+  
+  //// Define the line for moisture
+  var valueline_del_temp=[];
+  key_del_temp.forEach(function(d,i) {
+      valueline_del_temp[i]=d3.line()
+          .x(function(d) { return x_del_temp(d.timestamp); })
+          .y(function(d) { return y_del_temp(d[key_del_temp[i]]); });
+  })
+  
+  
+  var svg_del_temp = d3.select("body")
+      .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+          .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")");
+  
+  // ---------------------above is data defination for the delta temperature  --------------------------
   
   // ---------------------below is data defination for the relative humidity sensor --------------------------
   
@@ -322,6 +349,10 @@ http://bl.ocks.org/Matthew-Weber/5645518
           json.forEach(function(d) {
               //d.timestamp = format(d.timestamp);
               d.timestamp = d3.timeHour.offset(format(d.timestamp),+10);  // http://stackoverflow.com/questions/18796291/d3-get-current-time-and-subtract-by-2-hours
+	      d.del_temp_28e5_heating=d.suht_28e5_peak-d.suht_28e5_begin;
+	      d.del_temp_28e5_cooling=d.suht_28e5_peak-d.suht_28e5_end;
+	      d.del_temp_2847_heating=d.suht_2847_peak-d.suht_2847_begin;
+	      d.del_temp_2847_cooling=d.suht_2847_peak-d.suht_2847_end;
               //dataset.date = parseDate(d.date);
               //dataset.close = +d.close;
   	    //if (d.saltrh_3_tp == "NaN") {d.saltrh_3_tp=NaN}
@@ -428,7 +459,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
           x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
          // y_temp.domain([0, d3.max(data1, function(d) { return d.tp1; })]);
           //y_temp.domain([20, d3.max(data1, function(d) { return d.suht_2847_begin; })]);
-          y_temp.domain([20, 33]);
+          y_temp.domain([22, 38]);
           
           var color_temp = d3.scaleOrdinal(d3.schemeCategory10);
           key_temp.forEach(function(d,i) {
@@ -503,9 +534,89 @@ http://bl.ocks.org/Matthew-Weber/5645518
                    .tickSize(-width, 0, 0)
                    .tickFormat("")
                )
+  //---------------------------- below are for delta temperature ----------------------
+          x_del_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
+          y_del_temp.domain([0, 4]);
+          
+          var color_del_temp = d3.scaleOrdinal(d3.schemeCategory10);
+          key_del_temp.forEach(function(d,i) {
+              svg_del_temp.append("path")
+                  .attr("class", "line")
+                  .style("stroke", color_del_temp(key_del_temp[i]))
+                  .attr("d", valueline_del_temp[i](data1))
+                  .attr("id", 'tag'+key_del_temp[i].replace(/\s+/g, '')); // assign id **
+  
+              svg_del_temp.append("text")
+                  .attr("x", (legendSpace_del_temp/2)+i*legendSpace_del_temp)  // space legend
+                  .attr("y", -20 )
+//                  .attr("y", height + (margin.bottom/2)+ 45)
+                  .attr("class", "legend")    // style the legend
+                  .style("fill", color_del_temp(key_del_temp[i]))
+                  .on("click", function(){                     // ************
+                            // Determine if current line is visible 
+                            var active   = act_del_temp[i] ? false : true,  // ************ 
+                            newOpacity = active ? 0 : 1;             // ************
+                            // Hide or show the elements based on the ID
+                            d3.select("#tag"+key_del_temp[i].replace(/\s+/g, '')) // *********
+                                .transition().duration(100)          // ************
+                                .style("opacity", newOpacity);       // ************
+                            // Update whether or not the elements are active
+                            act_del_temp[i] = active;                       // ************
+                            })                                       // ************
+                  .text(key_del_temp[i]); 
+           });
+  
+           // Add the X Axis
+           svg_del_temp.append("g")
+               .attr("class", "x axis")
+               .attr("transform", "translate(0," + height + ")")
+               .call(d3.axisBottom(x_del_temp));
+  
+  
+           // text label for the x axis
+           svg_del_temp.append("text")             
+               .attr("transform",
+                     "translate(" + (width/2) + " ," + 
+                                    (height + margin.top + 40) + ")") // location of x axis
+               .style("text-anchor", "middle")
+               .style("font-size", "20px")
+               .text("TIME");
+  
+           // Add the Y Axis
+           svg_del_temp.append("g")
+               .attr("class", "y axis")
+               .call(d3.axisLeft(y_del_temp));
+  
+           // text label for the y axis
+            svg_del_temp.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left)
+                .attr("x",0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .style("font-size", "18px")
+                .text("TEMPERATURE DIFFERENCE (CELSIUS)");    
+
+           // draw grid lines
+           svg_del_temp.append("g")         
+               .attr("class", "grid")
+               .attr("transform", "translate(0," + height + ")")
+               .call(make_x_gridlines(x_del_temp)
+                   .tickSize(-height, 0, 0)
+                   .tickFormat("")
+               )
+           svg_del_temp.append("g")         
+               .attr("class", "grid")
+               .call(make_y_gridlines(y_del_temp)
+                   .tickSize(-width, 0, 0)
+                   .tickFormat("")
+               )
+  
+  // --------------------------above is for delta temperature -----------------------
+
   //---------------------------- below are for humidity sensor ----------------------
           x_rh.domain(d3.extent(data1, function(d) { return d.timestamp; }));
-          y_rh.domain([0, 105]);
+          y_rh.domain([45, 105]);
           
           var color_rh = d3.scaleOrdinal(d3.schemeCategory10);
           key_rh.forEach(function(d,i) {
@@ -593,7 +704,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
           json.forEach(function(d) {
               d.measure_local_time = format_scale(d.measure_local_time);
               d.tas606=d.tas606/16.73;
-              d.te=d.te/0.0149;
+              d.te=(d.te-104)/0.00597;
           });
   	 
       	data_scale=json;
