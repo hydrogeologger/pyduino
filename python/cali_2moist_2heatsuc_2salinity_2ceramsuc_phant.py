@@ -33,7 +33,8 @@ parsed_data={'suht_28e5_begin':0.0,
 # the port arduino has been connected to. in windows, it is usually 'COM4, COM5' where
 #   the number is subject to change. Just try 'devmgmt.msc' after pressing ctrl+r.
 # In linux it is usually /dev/ttyUSB
-port = '/dev/ttyUSB0'  # USB1 is for all the EC 5 moisture sensors
+#port = '/dev/ttyUSB0'  # USB1 is for all the EC 5 moisture sensors
+port = '/dev/serial/by-id/usb-FTDI_FT231X_USB_UART_DN01JJDJ-if00-port0'
 
 # whether the result will be displayed on the screen
 screen_display=True
