@@ -459,7 +459,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
           x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
          // y_temp.domain([0, d3.max(data1, function(d) { return d.tp1; })]);
           //y_temp.domain([20, d3.max(data1, function(d) { return d.suht_2847_begin; })]);
-          y_temp.domain([22, 38]);
+          y_temp.domain([22, 65]);
           
           var color_temp = d3.scaleOrdinal(d3.schemeCategory10);
           key_temp.forEach(function(d,i) {
@@ -536,7 +536,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
                )
   //---------------------------- below are for delta temperature ----------------------
           x_del_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
-          y_del_temp.domain([0, 4]);
+          y_del_temp.domain([0, 15]);
           
           var color_del_temp = d3.scaleOrdinal(d3.schemeCategory10);
           key_del_temp.forEach(function(d,i) {
