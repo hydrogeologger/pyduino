@@ -52,7 +52,7 @@ void loop() {
   delay(5000);
   tas606_read();
   Serial.println();
-  delay_min(5);
+  delay_min(10);
 }   //loop
 
 void te_scale_read() {
