@@ -343,6 +343,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
   
       var data1;
       var url =   "https://data.sparkfun.com/output/9J2rX3QZ94s5RJ9LjrbN.json"
+      // note, plotting is inside the data accessing!!
       d3.json(url,  function (error,json) {
           //if (error) return console.warn(error);
           if (error) throw error;
@@ -459,7 +460,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
           x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
          // y_temp.domain([0, d3.max(data1, function(d) { return d.tp1; })]);
           //y_temp.domain([20, d3.max(data1, function(d) { return d.suht_2847_begin; })]);
-          y_temp.domain([22, 65]);
+          y_temp.domain([22, 38]);
           
           var color_temp = d3.scaleOrdinal(d3.schemeCategory10);
           key_temp.forEach(function(d,i) {
@@ -487,7 +488,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
                             act_temp[i] = active;                       // ************
                             })                                       // ************
                   .text(key_temp[i]); 
-           });
+           });  //key_temp.forEach
   
            // Add the X Axis
            svg_temp.append("g")
@@ -536,7 +537,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
                )
   //---------------------------- below are for delta temperature ----------------------
           x_del_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
-          y_del_temp.domain([0, 30]);
+          y_del_temp.domain([0, 4]);
           
           var color_del_temp = d3.scaleOrdinal(d3.schemeCategory10);
           key_del_temp.forEach(function(d,i) {
@@ -693,7 +694,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
                )
   
   // --------------------------above is for relative humidity sensor -----------------------
-  })
+  }) //d3.json for 
   
   // ------------------------ below is to obtain the load cell data ------------------------
   
@@ -714,7 +715,7 @@ http://bl.ocks.org/Matthew-Weber/5645518
   
   // ------------------------ above is to obtain the load cell data ------------------------
   
-  // --------------------------below is for load cell sensor -----------------------
+  // --------------------------below is for plotting load cell sensor -----------------------
   
           var color_scale = d3.scaleOrdinal(d3.schemeCategory10);
   

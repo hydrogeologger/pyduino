@@ -72,7 +72,7 @@ class pandas_scale:
 
                 #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'],parse_dates=arg['parse_dates'],
                 #    header=arg['header'],date_parser=arg['date_parser'])
-                self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'], header=arg['header'],date_parser=arg['date_parser'],parse_dates=arg['parse_dates'])
+                self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'], header=arg['header'],date_parser=arg['date_parser'],parse_dates=arg['parse_dates'],index_col=arg['index_col'])
                 #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=['sensor1','sensor2','sensor3','sensor4','sensor5','sensor6'], header=arg['header'],date_parser=arg['date_parser'])
 
                 # http://stackoverflow.com/questions/10972410/pandas-combine-two-columns-in-a-dataframe
@@ -167,16 +167,17 @@ class pandas_scale:
 
 
     
-class concat_data_roof:
+class concat_data_roof():
     import pandas as pd
     #def __init__(self,start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
-    def __init__(self,start_time=pd.Timestamp('2016-11-21 12:30:30'),end_time=pd.Timestamp('2016-12-05 12:00:56'),dt_s=600):
+    #def __init__(self,start_time=inp_start_time,end_time=inp_end_time,dt_s=inp_dt_s):
+    def __init__(self,start_time,end_time,dt_s):
     #def __init__(self): #start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
 	import pdb
         import csv
 	import numpy as np
         import pandas as pd
-        self.dt_s=600
+        self.dt_s=dt_s
         #pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),period=pd.Timedelta(600,unit='s' ) )
         # frequency is actually the duration between the neighbouring point not period
         #date_time=pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),freq=pd.Timedelta(600,unit='s' ) )
@@ -209,6 +210,7 @@ class concat_data_roof:
         #for i in arg['new_keys']:
         #    if i==None : arg['new_keys'][i]=
         
+        #pdb.set_trace()
         #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
         source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
         #pdb.set_trace()

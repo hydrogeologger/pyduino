@@ -6,15 +6,15 @@
  This example code is in the public domain.
  */
 
-static const uint8_t analog_pins[]  = {A0,A1,A2,A3};
+static const uint8_t analog_pins[]  = {A1,A2,A3,A4};
 int digital_pins[] = {2, 3, 4, 5};
 float AnalogVals1[4];
-float AnalogVals2[3];
+
 int i;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=3;
+int number_sensors=4;
 // the setup routine runs once when you press reset:
 
 
