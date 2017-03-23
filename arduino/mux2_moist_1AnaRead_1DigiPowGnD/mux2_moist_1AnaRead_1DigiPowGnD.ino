@@ -25,11 +25,11 @@ MuxShield muxShield;
 // the delimiter between each reading. it is good to use ',' alwyas
 char seperator=',';
 //Arrays to store analog values after recieving them  
-int number_sensors=2;
+int number_sensors=6;
 // define toggles for I/O3, which are used for output;
 //int toggle[16]=LOW;
 //int IO1AnalogVals[16];
-int IO2AnalogVals[2];
+int IO2AnalogVals[6];
 //int IO3AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
@@ -39,7 +39,7 @@ int IO2AnalogVals[2];
 // the powered sensor reading, there are two properties, on and off
 int delay_sensor_reading=100;
 
-int number_dummy_readings=100;
+int number_dummy_readings=10;
 
 
 int delay_after_reading_each_ports=3000;
@@ -101,19 +101,20 @@ void read_muxschield(){
 // -------------------- needed by mux schield -----------------------
   for (int i=0; i<number_sensors; i++)
   {
+    //i=4;
     //Analog read on all 16 inputs on IO1, IO2, and IO3
     //IO1AnalogVals[i] =0;
     //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
-    muxShield.digitalWriteMS(2,i,HIGH);
-    delay(100);
+    //muxShield.digitalWriteMS(2,i,HIGH);
+    //delay(100);
     muxShield.digitalWriteMS(3,i,HIGH);
-    delay(100);
+    delay(5000);
     Serial.print("IO2 analog");
     Serial.print(seperator);
     Serial.print(i);
     Serial.print(seperator);
 
-    for (int j=0;j<number_dummy_reading;j++){
+    for (int j=0;j<number_dummy_readings;j++){
     delay(50);
     muxShield.analogReadMS(1,i);
     }
@@ -132,13 +133,13 @@ void read_muxschield(){
     Serial.print(i);
     Serial.print(seperator);
     Serial.println();
-    delay(500);
+    //delay(500);
 
-    muxShield.digitalWriteMS(2,i,LOW);
+    //muxShield.digitalWriteMS(2,i,LOW);
     muxShield.digitalWriteMS(3,i,LOW);
 
     //IO3AnalogVals[i] = muxShield.analogReadMS(3,i);
-    delay(delay_after_reading_each_ports);
+    //delay(delay_after_reading_each_ports);
   }
   
 //  //Print IO1 values for inspection

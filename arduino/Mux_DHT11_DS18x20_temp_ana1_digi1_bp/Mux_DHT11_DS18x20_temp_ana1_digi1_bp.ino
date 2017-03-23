@@ -33,9 +33,9 @@ OneWire  ds(3);  // on pin 10 (a 4.7K resistor is necessary)
 //int number_sensors=12;
 //// the setup routine runs once when you press reset:
 //
-//int number_readings=11;
+int number_readings=7;
 //int dummy_readings=5;
-//const char delimiter=',';
+const char delimiter=',';
 //
 ////-------------------above required by analog digital for moisture ---------------------
 
@@ -50,20 +50,20 @@ MuxShield muxShield;
 //Arrays to store analog values after recieving them  
 int const number_sensors=12;
 // define toggles for I/O3, which are used for output;
-float io1analogVals[number_sensors];
+float io1analogvals[number_sensors];
 // Defining the waiting time between each readings;
 
 
 // the powered sensor reading, there are two properties, on and off
 int delay_sensor_reading=100;
 
-int number_dummy_readings=100;
+int number_dummy_readings=3;
 
-int delay_after_reading_each_ports=3000;
+int delay_after_reading_each_ports=100;
 
-int delay_after_writting=1000;
+int delay_after_writting=100;
 
-int delay_after_moisture_done=1000;
+int delay_after_moisture_done=100;
 
 // -------------------- ablve needed by mux schield -----------------------
 
@@ -78,7 +78,7 @@ int delay_after_moisture_done=1000;
 #define DHTPIN1 5     // what digital pin we're connected to
 #define DHTPIN2 9     // what digital pin we're connected to
 // Uncomment whatever type you're using!
-#define DHTTYPE DHT11   // DHT 11
+#define DHTTYPE DHT22   // DHT 11
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
@@ -102,13 +102,13 @@ void setup(void) {
 
 void loop(void) {
     Serial.print("Soil");
-    Serial.print(dilimiter);
-    read_muxshield();
+    Serial.print(delimiter);
+    read_muxschield();
     read_temp_sensors();
     //ana_digi_loop();
     //sdi12_loop();
-    dht11_loop(dht1,26);
-    dht11_loop(dht2,27);
+    dht11_loop(dht1,5);
+    dht11_loop(dht2,9);
     Serial.println();
     //delay_min(30);
 }
@@ -148,11 +148,11 @@ void read_muxschield(){
     for (int i=0; i<number_sensors;i++)
     {
         Serial.print("Mo");
-        Serial.print(dilimiter);
+        Serial.print(delimiter);
         Serial.print(i);
-        Serial.print(dilimiter);
-        Serial.print(io1analogVals[i]);
-        Serial.print(dilimiter);
+        Serial.print(delimiter);
+        Serial.print(io1analogvals[i]);
+        Serial.print(delimiter);
     }
 
 
@@ -300,7 +300,7 @@ void dht11_loop(DHT dht,int i) {
 
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println("Failed to read from DHT sensor!");
+    Serial.print("Failed to read from DHT sensor!");
     return;
   }
 
