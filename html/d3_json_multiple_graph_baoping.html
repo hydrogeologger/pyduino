@@ -67,6 +67,7 @@ var margin = {top: 30, right: 100, bottom: 100, left: 50},
 //var key_mo=["mo0","mo1","mo2","mo3","mo4","mo5","mo6","mo7","mo8","mo9","mo10","mo11"];
 var key_mo=["mo1","mo2","mo3","mo4","mo5","mo6","mo7","mo8","mo9","mo10","mo11"];
 var key_temp=["tp12","tp2","tp21","tp32","tp35","tp4b","tp8a","tp9f","tpa3","tpc7","tpe5"];
+//var key_temp=["tp4b"];
 var active1=[];
 var act_temp=[];
 
@@ -133,15 +134,16 @@ var svg2 = d3.select("body")
             d.timestamp = format(d.timestamp);
             //dataset.date = parseDate(d.date);
             //dataset.close = +d.close;
+	    d.tp4b=d.tp4b/1.0;
         });
 	 
     	data1=json;
     	console.log(data1)
  //       console.log(active1)
 
-        //x_mo.domain(d3.extent(data1, function(d) { return d.timestamp; }));
+        x_mo.domain(d3.extent(data1, function(d) { return d.timestamp; }));
         //http://stackoverflow.com/questions/7538519/how-to-get-subarray-from-array 
-        x_mo.domain(d3.extent(data1.slice(1,1500), function(d) { return d.timestamp; }));
+        //x_mo.domain(d3.extent(data1.slice(1,1500), function(d) { return d.timestamp; }));
         y_mo.domain([200, d3.max(data1, function(d) { return d.mo10; })]);
         y_mo.domain([200, 550]);
         //y.domain([0, 30]);
@@ -191,8 +193,7 @@ var svg2 = d3.select("body")
 //---------------------------- below are to plot graph 2 ----------------------
         //x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
         x_temp.domain(d3.extent(data1, function(d) { return d.timestamp; }));
-       // y_temp.domain([0, d3.max(data1, function(d) { return d.tp1; })]);
-        y_temp.domain([20, d3.max(data1, function(d) { return d.tp1; })]);
+        y_temp.domain([20, d3.max(data1, function(d) { return d.tp4b; })]);
         
         var color_temp = d3.scaleOrdinal(d3.schemeCategory20);
         key_temp.forEach(function(d,i) {
