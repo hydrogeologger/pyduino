@@ -6,40 +6,9 @@ import sys
 from phant import Phant
 
 
-#field_name=['tpf0','tp11','tp8d','tpa3','mo0','mo1','mo2','mo3','mo4','mo5','mo6','mo7',
-#    'mo8','mo9','mo10','mo11','su1','tp1','su2','tp2','su3','tp3','su4','tp4']
-#parsed_data={'tpf0':0.0,
-#    'tp11':0.0,
-#    'tp8d':0.0,
-#    'tpa3':0.0,
-#    'mo0':0.0,
-#    'mo1':0.0,
-#    'mo2':0.0,
-#    'mo3':0.0,
-#    'mo4':0.0,
-#    'mo5':0.0,
-#    'mo6':0.0,
-#    'mo7':0.0,
-#    'mo8':0.0,
-#    'mo9':0.0,
-#    'mo10':0.0,
-#    'mo11':0.0,
-#    'su1':0.0,
-#    'tp1':0.0,
-#    'su2':0.0,
-#    'tp2':0.0,
-#    'su3':0.0,
-#    'tp3':0.0,
-#    'su4':0.0,
-#    'tp4':0.0}
-# column on the roof 
-#pht = Phant(publicKey='RMxqjA6nRXfbm01raooM', 
-#    fields=field_name ,privateKey='lzEpXb5dxRhYAbG6177V')
-#    fields=['TpF0','Tp11','Tp8D','TpA3','Mo0','Mo1','Mo2','Mo3','Mo4','Mo5','Mo6','Mo7',
-#    'Mo8','Mo9','Mo10','Mo11','Su1','Tp1','Su2','Tp2','Su3','Tp3','Su4','Tp4']
 # column for baoping
 field_name=['tp2','tp12','tp32','tp8a','tp21','tpe5','tp35','tpa3','tp4b','tpc7','tp9f','mo0',
-    'mo1','mo2','mo3','mo4','mo5','mo6','mo7','mo8','mo9','mo10','mo11','ht1126rh','ht1126t','ht1127rh','ht1127t','scale']
+    'mo1','mo2','mo3','mo4','mo5','mo6','mo7','mo8','mo9','mo10','mo11','ht115rh','ht115t','ht119rh','ht119t','scale']
 pht = Phant(publicKey='8dojwRmX3jh0GDV99MlZ', 
     fields=field_name ,privateKey='pzNd8BXKPdHnAyYdda24')
 
@@ -69,10 +38,10 @@ parsed_data={'tp2':0.0,
     'mo9':0.0,
     'mo10':0.0,
     'mo11':0.0,
-    'ht1126rh':0.0,
-    'ht1126t':0.0,
-    'ht1127rh':0.0,
-    'ht1127t':0.0,
+    'ht115rh':0.0,
+    'ht115t':0.0,
+    'ht119rh':0.0,
+    'ht119t':0.0,
     'scale':0.0}
 #fileSoil,Tp,2,32.19,Tp,12,30.12,Tp,32,30.25,Tp,8A,30.56,Tp,21,29.31,Tp,E5,49.25,Tp,35,34.06,Tp,A3,35.13,Tp,4B,39.38,Tp,C7,37.81,Tp,9F,30.56,Mo,0,565.90,Mo,1,565.95,Mo,2,566.90,Mo,3,563.45,Mo,4,563.10,Mo,5,566.90,Mo,6,553.80,Mo,7,567.00,Mo,8,566.30,Mo,9,566.20,Mo,10,564.55,Mo,11,565.95,ht11,26,19.00,45.00,ht11,27,8.00,43.0
 #TpF0,Tp11,Tp8D,TpA3,Mo0,Mo1,Mo2,Mo3,Mo4,Mo5,Mo6,Mo7,Mo8,Mo9,Mo10,Mo11,Su1,Tp1,Su2,Tp2,Su3,Tp3,Su4,Tp4,
@@ -191,8 +160,10 @@ for i in xrange(no_reading):
             parsed_data['ht11'+current_read[i+1]+'t']=float(current_read[i+3])
 
         # below is to read from scale
-        scale_raw=ser.write('IP\n\r')
-        parsed_data['scale']=current_scale_read=scale_raw.split()[0]
+        ser.write('IP\n\r')  # output constant result, if it is a unsable one, the result ends up with a question mark.
+        scale_raw=ser.readline()
+                
+        parsed_data['scale']=float(scale_raw.split()[0])
 
         log_attempts=1
         while log_attempts<10:
@@ -220,10 +191,10 @@ for i in xrange(no_reading):
                      ,parsed_data['mo9']
                      ,parsed_data['mo10']
                      ,parsed_data['mo11']
-                     ,parsed_data['ht1126rh']
-                     ,parsed_data['ht1126t' ]
-                     ,parsed_data['ht1127rh']
-                     ,parsed_data['ht1127t' ]
+                     ,parsed_data['ht115rh']
+                     ,parsed_data['ht115t' ]
+                     ,parsed_data['ht119rh']
+                     ,parsed_data['ht119t' ]
                      ,parsed_data['scale'])
                 break
             except: # catch all errors

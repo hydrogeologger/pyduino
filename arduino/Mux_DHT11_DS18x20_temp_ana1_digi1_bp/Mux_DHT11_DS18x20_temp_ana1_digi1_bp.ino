@@ -110,7 +110,7 @@ void loop(void) {
     dht11_loop(dht1,5);
     dht11_loop(dht2,9);
     Serial.println();
-    //delay_min(30);
+    delay_min(30);
 }
 
 
