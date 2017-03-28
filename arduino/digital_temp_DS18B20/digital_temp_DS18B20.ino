@@ -7,7 +7,7 @@
 // The DallasTemperature library can do all this work for you!
 // http://milesburton.com/Dallas_Temperature_Control_Library
 
-OneWire  ds(3);  // on pin 2 (a 4.7K resistor is necessary)
+OneWire  ds(2);  // on pin 2 (a 4.7K resistor is necessary)
 
 void setup(void) {
   Serial.begin(9600);
@@ -35,10 +35,10 @@ void loop(void) {
     Serial.print(addr[i], HEX);
   }
 
-  if (OneWire::crc8(addr, 7) != addr[7]) {
-      Serial.println("CRC is not valid!");
-      return;
-  }
+//  if (OneWire::crc8(addr, 7) != addr[7]) {
+//      Serial.println("CRC is not valid!");
+//      return;
+//  }
   //Serial.println();
 
   // the first ROM byte indicates which chip

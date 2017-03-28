@@ -212,7 +212,7 @@ void loop()
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
 
-  delay_min(10);
+  //delay_min(10);
   //delay(10000);
 }
 
