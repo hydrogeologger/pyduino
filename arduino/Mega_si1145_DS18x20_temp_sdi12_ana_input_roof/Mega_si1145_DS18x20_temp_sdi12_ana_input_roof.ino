@@ -76,7 +76,10 @@ void setup(void) {
   }
 // -----------------------------below is required by si1145 sensor ------------
 
-
+  if (! uv.begin()) {
+    Serial.println("Didn't find Si1145");
+    while (1);
+  }
 // -----------------------------above is required by si1145 sensor ------------
 
 }
@@ -90,7 +93,7 @@ sdi12_loop();
 si1145_loop();
 Serial.println();
 delay(10000);
-//delay_min(30);
+delay_min(30);
 }
 
 // loop routine to obtain si1145 result
@@ -98,9 +101,11 @@ void si1145_loop() {
   Serial.print("Vis");
   Serial.print(seperator);
   Serial.print(uv.readVisible());
+  Serial.print(seperator);
   Serial.print("IR");
   Serial.print(seperator);
   Serial.print(uv.readIR());
+  Serial.print(seperator);
   
   // Uncomment if you have an IR LED attached to LED pin!
   //Serial.print("Prox: "); Serial.println(uv.readProx());
@@ -112,6 +117,7 @@ void si1145_loop() {
   Serial.print("UV");  
   Serial.print(seperator);
   Serial.print(UVindex);
+  Serial.print(seperator);
   delay(1000);
 }
 

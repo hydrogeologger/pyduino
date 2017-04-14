@@ -52,8 +52,8 @@ char seperator=',';
 int number_sensors=12;
 // the setup routine runs once when you press reset:
 
-int number_readings=20;
-int dummy_readings=30;
+int number_readings=3;
+int dummy_readings=3;
 const char delimiter=',';
 // -----------------ubove required by analog digital for moisture --------------------
 
