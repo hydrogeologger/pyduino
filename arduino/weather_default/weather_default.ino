@@ -160,7 +160,24 @@ void setup()
 
 }
 
-void loop()
+
+
+
+void loop() { 
+    String content = "";
+    char character;
+    while(Serial.available()) {
+        character = Serial.read();
+        content.concat(character); 
+        delay (10); 
+    }
+    if (content == "Weather") { 
+       get_weather();
+    }
+
+}
+
+void get_weather()
 {
     //Keep track of which minute it is
   if(millis() - lastSecond >= 1000)
@@ -398,7 +415,7 @@ void printWeather()
     calcWeather(); //Go calc all the various sensors
 
     //Serial.println();
-    Serial.print("$,WdDir,");
+    Serial.print("Weather,WdDir,");
     Serial.print(winddir);
     Serial.print(",WdSpdkph,");
     Serial.print(windspeedmph*1.609, 1);
@@ -429,7 +446,7 @@ void printWeather()
     Serial.print(",lt,");
     Serial.print(light_lvl, 2);
     Serial.print(",");
-    Serial.println("#");
+    Serial.println("WeatherDone");
 
 }
 
