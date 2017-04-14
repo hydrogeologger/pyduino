@@ -127,6 +127,10 @@ void loop(void) {
         si1145_loop();
         Serial.println("SolarDone");
     }
+    else {
+      Serial.println(content);
+    }
+    }
 
 }
 
