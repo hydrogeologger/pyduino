@@ -36,6 +36,7 @@ def open_port(portname):
             if port.isOpen():
                 try:
                     fcntl.flock(port.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+	            time.sleep(3) #critical
                     return [True,port]
                 except IOError:
                     print 'Port {0} is busy'.format(tty)
@@ -56,9 +57,16 @@ def close_port(portname):
 def initialize(device_handle):
 ### this script is to make sure that arduino is ready to return the result as expected
     initialized=False
-    writing_string="ABC"
+    writing_string='ABC'
     while initialized==False: 
         device_handle.write(writing_string)
+        time.sleep(2)
         if writing_string == device_handle.readline().rstrip():
             initialized=True
+
+def list_devices():
+    return serial.tools.list_ports.comports()
+
+
+
 
