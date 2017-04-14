@@ -49,3 +49,16 @@ def open_port(portname):
         print 'Port '+portname+' is not found'
         return [False,[]]
 
+def close_port(portname):
+    portname.close()
+    return False
+
+def initialize(device_handle):
+### this script is to make sure that arduino is ready to return the result as expected
+    initialized=False
+    writing_string="ABC"
+    while initialized==False: 
+        device_handle.write(writing_string)
+        if writing_string == device_handle.readline().rstrip():
+            initialized=True
+
