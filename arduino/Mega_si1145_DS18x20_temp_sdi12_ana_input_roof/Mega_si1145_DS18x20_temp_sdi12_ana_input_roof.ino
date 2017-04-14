@@ -84,17 +84,54 @@ void setup(void) {
 
 }
 
-void loop(void) {
-Serial.print("Soil");
-Serial.print(seperator);
-read_temp_sensors();
-ana_digi_loop();
-sdi12_loop();
-si1145_loop();
-Serial.println();
-delay(10000);
-delay_min(30);
+//void loop(void) {
+//Serial.print("Soil");
+//Serial.print(seperator);
+//read_temp_sensors();
+//ana_digi_loop();
+//sdi12_loop();
+//si1145_loop();
+//Serial.println();
+//delay(10000);
+//delay_min(30);
+//}
+
+void loop(void) { 
+    String content = "";
+    char character;
+    while(Serial.available()) {
+        character = Serial.read();
+        content.concat(character); 
+        delay (10); 
+    }
+    if (content == "All") { 
+        Serial.print("All");
+        Serial.print(seperator);
+        read_temp_sensors();
+        ana_digi_loop();
+        sdi12_loop();
+        si1145_loop();
+        Serial.println("AllDone");
+    }
+    else if (content == "Soil") {
+        Serial.print("Soil");
+        Serial.print(seperator);
+        read_temp_sensors();
+        ana_digi_loop();
+        sdi12_loop();
+        Serial.println("SoilDone");
+    }
+    else if (content == "Solar") {
+        Serial.print("Solar");
+        Serial.print(seperator);
+        si1145_loop();
+        Serial.println("SolarDone");
+    }
+
 }
+
+
+
 
 // loop routine to obtain si1145 result
 void si1145_loop() {
