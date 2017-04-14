@@ -171,10 +171,14 @@ void loop() {
         content.concat(character); 
         delay (10); 
     }
-    if (content == "Weather") { 
-       get_weather();
+    if (content != ""){
+        if (content == "Weather") { 
+            get_weather();
+        }
+        else {
+            Serial.println(content);
+        }
     }
-
 }
 
 void get_weather()

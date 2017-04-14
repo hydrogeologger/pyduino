@@ -104,35 +104,35 @@ void loop(void) {
         content.concat(character); 
         delay (10); 
     }
-    if (content == "All") { 
-        Serial.print("All");
-        Serial.print(seperator);
-        read_temp_sensors();
-        ana_digi_loop();
-        sdi12_loop();
-        si1145_loop();
-        Serial.println("AllDone");
-    }
-    else if (content == "Soil") {
-        Serial.print("Soil");
-        Serial.print(seperator);
-        read_temp_sensors();
-        ana_digi_loop();
-        sdi12_loop();
-        Serial.println("SoilDone");
-    }
-    else if (content == "Solar") {
-        Serial.print("Solar");
-        Serial.print(seperator);
-        si1145_loop();
-        Serial.println("SolarDone");
-    }
-    else {
-      Serial.println(content);
-    }
-    }
-
-}
+    if (content != ""){
+        if (content == "All") { 
+            Serial.print("All");
+            Serial.print(seperator);
+            read_temp_sensors();
+            ana_digi_loop();
+            sdi12_loop();
+            si1145_loop();
+            Serial.println("AllDone");
+        }
+        else if (content == "Soil") {
+            Serial.print("Soil");
+            Serial.print(seperator);
+            read_temp_sensors();
+            ana_digi_loop();
+            sdi12_loop();
+            Serial.println("SoilDone");
+        }
+        else if (content == "Solar") {
+            Serial.print("Solar");
+            Serial.print(seperator);
+            si1145_loop();
+            Serial.println("SolarDone");
+        }
+        else {
+          Serial.println(content);
+        } 
+    } //content != ""
+}  //loop
 
 
 
