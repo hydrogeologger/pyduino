@@ -5,8 +5,7 @@ import time
 import numpy as np
 import sys
 from serial import tools
-from serial.tools import list_ports
-#from phant import Phant
+from serial.tools import list_ports #from phant import Phant
 #In [36]: serial.tools.list_ports.comports()[0][0]
 #Out[36]: '/dev/ttyUSB0'
 #
@@ -67,6 +66,22 @@ def initialize(device_handle):
 def list_devices():
     return serial.tools.list_ports.comports()
 
+def get_result_by_input(**kwargs):
 
+    arg_defaults = {
+                'port':'port',
+                'command':None
+                   }
+    arg=arg_defaults
+    for d in kwargs:
+        arg[d]= kwargs.get(d)
 
-
+    [port_sensor_isopen, sensor_fid]=open_port(arg['port'])
+    while port_sensor_isopen == False:
+        [port_sensor_isopen, sensor_fid]=open_port(arg['port'])
+        time.sleep(10)
+    initialize(sensor_fid)
+    sensor_fid.write(arg['command']) 
+    msg = sensor_fid.readline()
+    port_sensor_isopen=close_port(sensor_fid)
+    return msg
