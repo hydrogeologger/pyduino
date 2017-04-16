@@ -30,7 +30,7 @@ void loop() {
   for (int i=0; i<number_sensors;i++){
     AnalogVals1[i]=0.;
     digitalWrite(digital_pins[i],HIGH);
-    delay(100);
+    delay(1000);
 
     for (int j=0;j<dummy_readings;j++){
       analogRead(analog_pins[i]);
@@ -43,7 +43,7 @@ void loop() {
     }
 
     AnalogVals1[i]=AnalogVals1[i]/float(number_readings);
-    digitalWrite(digital_pins[i],HIGH);
+    digitalWrite(digital_pins[i],LOW);
  }
 
     for (int i=0; i<number_sensors;i++)
