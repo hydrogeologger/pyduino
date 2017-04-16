@@ -46,6 +46,16 @@ pht_weather = Phant(publicKey='JxO9ydlRjnuXARaZX5od', fields=field_name_weather 
 port_weather = 'USB VID:PID=0403:6015'
 #------------------------- below are definations for the weather station ---------------------------------
 
+##------------------------- below is to initialize sensor result connect to new arduino
+#[port_weather_isopen, weather_fid]=serial_openlock.open_port(port_weather)
+#while port_weather_isopen == False:
+#    [port_weather_isopen, weather_fid]=serial_openlock.open_port(port_weather)
+#    time.sleep(60)
+#serial_openlock.initialize(weather_fid)
+#weather_fid.write("Weather") 
+#msg_weather = weather_fid.readline()
+#port_weather_isopen=serial_openlock.close_port(weather_fid)
+
 
 
 # whether the result will be displayed on the screen
@@ -83,17 +93,35 @@ def upload_phant(pht,parsed_data,screen_display):
             time.sleep(30)
             continue
 
-while True: 
-    ### --------------------------- bwlow is to processing data from column sensor--------------------------
+def read_arduino(port_sensor,command):
     [port_sensor_isopen, sensor_fid]=serial_openlock.open_port(port_sensor)
     while port_sensor_isopen == False:
         [port_sensor_isopen, sensor_fid]=serial_openlock.open_port(port_sensor)
         time.sleep(10)
     serial_openlock.initialize(sensor_fid)
-    sensor_fid.write("All") # either "Solar", "Soil" or "All"
+    sensor_fid.write(command) # either "Solar", "Soil" or "All"
     msg = sensor_fid.readline()
     port_sensor_isopen=serial_openlock.close_port(sensor_fid)
+    return msg
+
+# initialize the weather station data
+# it is found that all the first readings from weather station would give 0 atmosphere reading. call this 
+# function is to discard the first reading
+msg_weather=read_arduino(port_weather,"Weather")
+
+while True: 
+    ### --------------------------- bwlow is to processing data from column sensor--------------------------
+    #[port_sensor_isopen, sensor_fid]=serial_openlock.open_port(port_sensor)
+    #while port_sensor_isopen == False:
+    #    [port_sensor_isopen, sensor_fid]=serial_openlock.open_port(port_sensor)
+    #    time.sleep(10)
+    #serial_openlock.initialize(sensor_fid)
+    #sensor_fid.write("All") # either "Solar", "Soil" or "All"
+    #msg = sensor_fid.readline()
+    #port_sensor_isopen=serial_openlock.close_port(sensor_fid)
     
+    msg=read_arduino(port_sensor,"All")
+
     current_read=msg.split(',')[0:-1]
     # parse tp result
     tp_ind=[i for i,x in enumerate(current_read) if x == 'Tp']
@@ -121,15 +149,17 @@ while True:
     uv_ind=[i for i,x in enumerate(current_read) if x == 'UV'] 
     parsed_data_weather["uv_up"]=float(current_read[uv_ind[0]+1])
     
-    # connect to new arduino
-    [port_weather_isopen, weather_fid]=serial_openlock.open_port(port_weather)
-    while port_weather_isopen == False:
-        [port_weather_isopen, weather_fid]=serial_openlock.open_port(port_weather)
-        time.sleep(60)
-    serial_openlock.initialize(weather_fid)
-    weather_fid.write("Weather") 
-    msg_weather = weather_fid.readline()
-    port_weather_isopen=serial_openlock.close_port(weather_fid)
+    ## connect to new arduino
+    #[port_weather_isopen, weather_fid]=serial_openlock.open_port(port_weather)
+    #while port_weather_isopen == False:
+    #    [port_weather_isopen, weather_fid]=serial_openlock.open_port(port_weather)
+    #    time.sleep(60)
+    #serial_openlock.initialize(weather_fid)
+    #weather_fid.write("Weather") 
+    #msg_weather = weather_fid.readline()
+    #port_weather_isopen=serial_openlock.close_port(weather_fid)
+    
+    msg_weather=read_arduino(port_weather,"Weather")
 
     
     current_read=msg_weather.split(',')[1:-1]
