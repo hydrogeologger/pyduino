@@ -15,6 +15,8 @@ import SI1145.SI1145 as SI1145
 sensor = SI1145.SI1145() #"/dev/i2c-1")
 time.sleep(3)   # a good sleep before reading is found extremetly important
 vis = sensor.readVisible()
+si1145_number_readings=7;
+si1145_sleep_interval_seconds=10;
 while vis == 0:
     print 'si1145 init failed'
     time.sleep(2)
@@ -104,6 +106,21 @@ def read_arduino(port_sensor,command):
     port_sensor_isopen=serial_openlock.close_port(sensor_fid)
     return msg
 
+def read_si1145(number_readings,sleep_time_s):
+    vis=0
+    ir=0
+    uv=0
+    for i in range(number_readings):
+        vis=sensor.readVisible()
+        time.sleep(1)
+        ir=sensor.readIR()
+        time.sleep(1)
+        uv=sensor.readUV()
+        time.sleep(sleep_time_s)
+    vis/=float(number_readings-1)
+    ir/=float(number_readings-1)
+    uv/=float(number_readings-1)
+    return vis,ir,uv
 # initialize the weather station data
 # it is found that all the first readings from weather station would give 0 atmosphere reading. call this 
 # function is to discard the first reading
@@ -169,11 +186,11 @@ while True:
     vis=sensor.readVisible()
     ir=sensor.readIR()
     uv=sensor.readUV()
+    [vis,ir,uv]=read_si1145(si1145_number_readings,si1145_sleep_interval_seconds)
     parsed_data_weather["vis_down"]=vis
     parsed_data_weather["ir_down"]=ir
     parsed_data_weather["uv_down"]=uv
     msg_solar='vis_down'+delimiter+str(vis)+delimiter+'ir_down'+delimiter+str(ir)+delimiter+'uv_down'+delimiter+str(uv)+delimiter
-
 
     upload_phant(pht_weather,parsed_data_weather,screen_display)
 

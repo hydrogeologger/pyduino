@@ -5,6 +5,9 @@
 #include <Wire.h>
 #include "Adafruit_SI1145.h"
 Adafruit_SI1145 uv = Adafruit_SI1145();
+int number_readings_si1145=7;
+int reading_interval_ms_si1145=10000;
+
 //--------------------above is required by Adafruit si1145 sensor ----------------
 
 //---------------------below required by temperature sensor-----------------------------------------------------------#
@@ -111,7 +114,7 @@ void loop(void) {
             read_temp_sensors();
             ana_digi_loop();
             sdi12_loop();
-            si1145_loop();
+            si1145_loop(number_readings_si1145,reading_interval_ms_si1145);
             Serial.println("AllDone");
         }
         else if (content == "Soil") {
@@ -125,7 +128,7 @@ void loop(void) {
         else if (content == "Solar") {
             Serial.print("Solar");
             Serial.print(seperator);
-            si1145_loop();
+            si1145_loop(number_readings_si1145,reading_interval_ms_si1145);
             Serial.println("SolarDone");
         }
         else {
@@ -138,26 +141,43 @@ void loop(void) {
 
 
 // loop routine to obtain si1145 result
-void si1145_loop() {
+void si1145_loop(int number_readings,int sleep_interval_ms) {
+  float vis =0.0;
+  float ir  =0.0;
+  float uvindex  =0.0;
+  
+
+    for (int j=0;j<number_readings;j++){
+      vis+=uv.readVisible();
+      delay(100);
+      ir+=uv.readIR(); 
+      delay(100);
+      uv+=uv.readUV(); 
+      delay(sleep_interval_ms);
+    }
+  vis/= float(number_readings);
+  ir /= float(number_readings);
+  uv /= float(number_readings);
+
   Serial.print("Vis");
   Serial.print(seperator);
-  Serial.print(uv.readVisible());
+  Serial.print(vis);
   Serial.print(seperator);
   Serial.print("IR");
   Serial.print(seperator);
-  Serial.print(uv.readIR());
+  Serial.print(ir);
   Serial.print(seperator);
   
   // Uncomment if you have an IR LED attached to LED pin!
   //Serial.print("Prox: "); Serial.println(uv.readProx());
 
-  float UVindex = uv.readUV();
+  //float UVindex = uv.readUV();
   // the index is multiplied by 100 so to get the
   // integer index, divide by 100!
-  UVindex /= 100.0;  
+  //UVindex /= 100.0;  
   Serial.print("UV");  
   Serial.print(seperator);
-  Serial.print(UVindex);
+  Serial.print(uv);
   Serial.print(seperator);
   delay(1000);
 }
