@@ -53,14 +53,6 @@ void loop(void) {
     if (content != ""){
         if (content == "All") { 
             Serial.print("All");
-            Serial.print(seperator);
-            read_temp_sensors();
-            ana_digi_loop();
-            sdi12_loop();
-            si1145_loop(number_readings_si1145,reading_interval_ms_si1145);
-            Serial.println("AllDone");
-
-            Serial.print("All");
             Serial.print(delimiter);
             te_scale_read();
             delay(1000);
@@ -68,14 +60,14 @@ void loop(void) {
             Serial.println("AllDone");
         }
         else if (content == "Te") {
-            Serial.print("Soil");
-            Serial.print(seperator);
+            Serial.print("Te");
+            Serial.print(delimiter);
             te_scale_read();
             Serial.println("TeDone");
         }
         else if (content == "Tas606") {
             Serial.print("Tas606");
-            Serial.print(seperator);
+            Serial.print(delimiter);
             tas606_read();
             Serial.println("Tas606Done");
         }

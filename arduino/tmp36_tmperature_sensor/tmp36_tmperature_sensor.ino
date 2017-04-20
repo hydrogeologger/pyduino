@@ -1,5 +1,5 @@
 //TMP36 Pin Variables
-int sensorPin = 2; //the analog pin the TMP36's Vout (sense) pin is connected to
+int sensorPin = 5; //the analog pin the TMP36's Vout (sense) pin is connected to
                         //the resolution is 10 mV / degree centigrade with a
                         //500 mV offset to allow for negative temperatures
  
