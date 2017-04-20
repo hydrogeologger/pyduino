@@ -152,12 +152,12 @@ void si1145_loop(int number_readings,int sleep_interval_ms) {
       delay(100);
       ir+=uv.readIR(); 
       delay(100);
-      uv+=uv.readUV(); 
+      uvindex+=uv.readUV(); 
       delay(sleep_interval_ms);
     }
   vis/= float(number_readings);
   ir /= float(number_readings);
-  uv /= float(number_readings);
+  uvindex /= float(number_readings);
 
   Serial.print("Vis");
   Serial.print(seperator);
@@ -177,7 +177,7 @@ void si1145_loop(int number_readings,int sleep_interval_ms) {
   //UVindex /= 100.0;  
   Serial.print("UV");  
   Serial.print(seperator);
-  Serial.print(uv);
+  Serial.print(uvindex);
   Serial.print(seperator);
   delay(1000);
 }
