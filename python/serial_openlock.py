@@ -70,7 +70,8 @@ def get_result_by_input(**kwargs):
 
     arg_defaults = {
                 'port':'port',
-                'command':None
+                'command':None,
+                'initialize':True
                    }
     arg=arg_defaults
     for d in kwargs:
@@ -80,7 +81,7 @@ def get_result_by_input(**kwargs):
     while port_sensor_isopen == False:
         [port_sensor_isopen, sensor_fid]=open_port(arg['port'])
         time.sleep(10)
-    initialize(sensor_fid)
+    if arg['initialize']: initialize(sensor_fid) 
     sensor_fid.write(arg['command']) 
     msg = sensor_fid.readline()
     port_sensor_isopen=close_port(sensor_fid)
