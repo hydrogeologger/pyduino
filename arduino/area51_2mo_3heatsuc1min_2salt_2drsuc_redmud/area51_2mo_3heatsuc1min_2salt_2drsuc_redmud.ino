@@ -1,11 +1,9 @@
-// this script is used for the redmud project for calibrating the sensors
-// the project started on 20170409
 char delimiter =',';
 
 
 //---------------------below required by module heat_suction_sensor----------------------------------------------------#
 #include <OneWire.h>
-OneWire  ds(4);  // on pin 10 (a 4.7K resistor is necessary)
+OneWire  ds(3);  // on pin 10 (a 4.7K resistor is necessary)
 // OneWire DS18S20, DS18B20, DS1822 Temperature Example
 //
 // http://www.pjrc.com/teensy/td_libs_OneWire.html
@@ -18,9 +16,9 @@ byte heat_suction_sensor_2_addr[8];
 
 
 int  heat_suction_sensor_heat_sw_1= 6;
-int  heat_suction_sensor_heat_sw_2= 5;
+//int  heat_suction_sensor_heat_sw_2= 5;
 int  temp_sampling_number =20;
-int  temp_sampling_interval_ms=6000;
+int  temp_sampling_interval_ms=1000;
 //int  temp_sampling_number =20;
 //int  temp_sampling_interval_ms=100;
 
@@ -32,7 +30,7 @@ int  temp_sampling_interval_ms=6000;
 #include <dht.h>
 dht DHT;
 #define DHT22_PIN_1 2
-#define DHT22_PIN_2 3
+#define DHT22_PIN_2 11
 //---------------------above required by module salinity_humidity_sensor----------------------------------------------------#
 
 
@@ -65,32 +63,38 @@ void setup() {
 
 //---------------------below required by module heat_suction_sensor----------------------------------------------------#
 // define the address
-// the 
-//the below two sensors are the first generation of suction sensor based on heat principle
-//it is been used for calibrating coal tailings during 16Nov--17Apr in area51
+////const char  addr='28E5A34A8007F';
+//heat_suction_sensor_1_addr[0]=0x28;
+//heat_suction_sensor_1_addr[1]=0xE5;
+//heat_suction_sensor_1_addr[2]=0xA3;
+//heat_suction_sensor_1_addr[3]=0x4A;
+//heat_suction_sensor_1_addr[4]=0x08;
+//heat_suction_sensor_1_addr[5]=0x00;
+//heat_suction_sensor_1_addr[6]=0x00;
+//heat_suction_sensor_1_addr[7]=0x7F;
+////addr[0]=0x2847A686800B4;
+//heat_suction_sensor_2_addr[0]=0x28;
+//heat_suction_sensor_2_addr[1]=0x47;
+//heat_suction_sensor_2_addr[2]=0xA6;
+//heat_suction_sensor_2_addr[3]=0x86;
+//heat_suction_sensor_2_addr[4]=0x08;
+//heat_suction_sensor_2_addr[5]=0x00;
+//heat_suction_sensor_2_addr[6]=0x00;
+//heat_suction_sensor_2_addr[7]=0xB4;
 
+// define the address
 //const char  addr='28E5A34A8007F';
 heat_suction_sensor_1_addr[0]=0x28;
-heat_suction_sensor_1_addr[1]=0xE5;
-heat_suction_sensor_1_addr[2]=0xA3;
-heat_suction_sensor_1_addr[3]=0x4A;
+heat_suction_sensor_1_addr[1]=0x96;
+heat_suction_sensor_1_addr[2]=0xA2;
+heat_suction_sensor_1_addr[3]=0x29;
 heat_suction_sensor_1_addr[4]=0x08;
 heat_suction_sensor_1_addr[5]=0x00;
 heat_suction_sensor_1_addr[6]=0x00;
-heat_suction_sensor_1_addr[7]=0x7F;
-
-//addr[0]=0x2847A686800B4;
-heat_suction_sensor_2_addr[0]=0x28;
-heat_suction_sensor_2_addr[1]=0x47;
-heat_suction_sensor_2_addr[2]=0xA6;
-heat_suction_sensor_2_addr[3]=0x86;
-heat_suction_sensor_2_addr[4]=0x08;
-heat_suction_sensor_2_addr[5]=0x00;
-heat_suction_sensor_2_addr[6]=0x00;
-heat_suction_sensor_2_addr[7]=0xB4;
+heat_suction_sensor_1_addr[7]=0x6B;
 
 pinMode(heat_suction_sensor_heat_sw_1, OUTPUT);  // switch for heating sucktion sensor 1
-pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion sensor 2
+//pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion sensor 2
 //---------------------above required by module heat_suction_sensor----------------------------------------------------#
 
 }
@@ -109,10 +113,8 @@ pinMode(heat_suction_sensor_heat_sw_2, OUTPUT);  // switch for heating sucktion 
 //read_analog_moisture_sensor();
 //delay(2000);
 //Serial.println();
-//delay_min(30);
 //}
-
-void loop() {
+void loop(void) {
     String content = "";
     char character;
     while(Serial.available()) {
@@ -123,54 +125,43 @@ void loop() {
     if (content != ""){
         if (content == "All") {
             Serial.print("All");
-            Serial.print(seperator);
-            read_analog_moisture_sensor();
-            delay(1000);
-            read_salinity_humidity_sensor(DHT22_PIN_2);
-            delay(1000);
-            read_salinity_humidity_sensor(DHT22_PIN_1);
+            Serial.print(delimiter);
             heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_number,temp_sampling_interval_ms); 
-            delay(1000);
-            heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_number,temp_sampling_interval_ms); 
-            delay(1000);
-            heat_suction_sensor(heat_suction_sensor_3_addr,heat_suction_sensor_heat_sw_2,temp_sampling_number,temp_sampling_interval_ms); 
+            read_salinity_humidity_sensor(DHT22_PIN_2);
+            read_salinity_humidity_sensor(DHT22_PIN_1);
+            read_analog_moisture_sensor();
             Serial.println("AllDone");
         }
         else if (content == "SoilMoisture") {
             Serial.print("SoilMoisture");
-            Serial.print(seperator);
+            Serial.print(delimiter);
             read_analog_moisture_sensor();
             Serial.println("SoilMoistureDone");
         }
-        else if (content == "SoilSuction") {
-            Serial.print("SoilSuction");
-            Serial.print(seperator);
-            heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_number,temp_sampling_interval_ms); 
-            heat_suction_sensor(heat_suction_sensor_2_addr,heat_suction_sensor_heat_sw_2,temp_sampling_number,temp_sampling_interval_ms); 
-            heat_suction_sensor(heat_suction_sensor_3_addr,heat_suction_sensor_heat_sw_3,temp_sampling_number,temp_sampling_interval_ms); 
-            Serial.println("SoilSuctionDone");
-        }
-        else if (content == "Salinity") {
-            Serial.print("Salinity");
-            Serial.print(seperator);
+        else if (content == "SoilSalinity") {
+            Serial.print("SoilSalinity");
+            Serial.print(delimiter);
             read_salinity_humidity_sensor(DHT22_PIN_2);
             read_salinity_humidity_sensor(DHT22_PIN_1);
-            Serial.println("SalinityDone");
+            Serial.println("SoilSalinityDone");
+        }
+        else if (content == "SoilSuction") {
+            Serial.print("SoilSuction");
+            Serial.print(delimiter);
+            heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_number,temp_sampling_interval_ms); 
+            Serial.println("SoilSuctionDone");
         }
         else {
           Serial.println(content);
         }
     } //content != ""
-
-} //void loop
-
-
-
+}  //loop
 
 void heat_suction_sensor(byte heat_suction_sensor_addr[8],int heat_sw,int sampling_number, int sampling_interval_ms){
 
   Serial.print("SucHeat");
   Serial.print(delimiter);
+  Serial.print(heat_suction_sensor_addr[0],HEX);
   Serial.print(heat_suction_sensor_addr[1],HEX);
   Serial.print(delimiter);
   Serial.print("Heating");
@@ -308,21 +299,10 @@ void read_analog_moisture_sensor() {
     Serial.print(delimiter);
 
     }
-    
-    //delay_min(30);
-    }
-
-
-
-
-
-void delay_min(int min){
-  for (int i=0;i<min;i++)
-  {
-    for (int j=0;j<12;j++)
-    {
-      delay(5000);
 
     }
-  }
-}
+
+
+
+
+
