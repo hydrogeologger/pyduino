@@ -9,6 +9,7 @@ import serial_openlock
 
 
 field_name_area51=['t_2896_begin','t_2896_peak','t_2896_end','t_14_begin','t_14_peak','t_14_end',
+    't_19_begin','t_19_peak','t_19_end',
     'saltrh_2_t','saltrh_2_rh','saltrh_11_t','saltrh_11_rh','mo_7','mo_8','mo_9','mo_10',
     'te','tas606','commercial','evap']
 
