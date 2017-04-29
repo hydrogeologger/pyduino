@@ -69,7 +69,7 @@ save_to_file=True
 # the Filename of the csv file for storing file
 file_name= 'column_daisy.csv'
 
-sleep_time_seconds=25*60
+sleep_time_seconds=55*60
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 delimiter=','
@@ -107,6 +107,19 @@ def read_arduino(port_sensor,command):
     return msg
 
 def read_si1145(number_readings,sleep_time_s):
+    # make sure it gives useful data by repeating the reset
+    sensor = SI1145.SI1145() #"/dev/i2c-1")
+    time.sleep(3)   # a good sleep before reading is found extremetly important
+    vis = sensor.readVisible()
+    while vis == 0:
+        print 'si1145 init failed'
+        time.sleep(2)
+        print str(vis)
+        SI1145.SI1145_RESET
+        time.sleep(2)
+        sensor = SI1145.SI1145() #"/dev/i2c-1")
+        time.sleep(2)
+        vis = sensor.readVisible()
     vis=0
     ir=0
     uv=0
@@ -120,6 +133,7 @@ def read_si1145(number_readings,sleep_time_s):
     vis/=float(number_readings)
     ir/=float(number_readings)
     uv/=float(number_readings)
+    SI1145.SI1145_RESET
     return vis,ir,uv
 # initialize the weather station data
 # it is found that all the first readings from weather station would give 0 atmosphere reading. call this 
