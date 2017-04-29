@@ -12,18 +12,18 @@ import serial_openlock
 import SI1145.SI1145 as SI1145
 
 ##------------------------ below is to initialize the si1145 at the rpi--------------------
-#sensor = SI1145.SI1145() #"/dev/i2c-1")
-#time.sleep(3)   # a good sleep before reading is found extremetly important
-#vis = sensor.readVisible()
-#while vis == 0:
-#    print 'si1145 init failed'
-#    time.sleep(2)
-#    print str(vis)
-#    SI1145.SI1145_RESET
-#    time.sleep(2)
-#    sensor = SI1145.SI1145() #"/dev/i2c-1")
-#    time.sleep(2)
-#    vis = sensor.readVisible()
+sensor = SI1145.SI1145() #"/dev/i2c-1")
+time.sleep(3)   # a good sleep before reading is found extremetly important
+vis = sensor.readVisible()
+while vis == 0:
+    print 'si1145 init failed'
+    time.sleep(2)
+    print str(vis)
+    sensor=SI1145.SI1145_RESET
+    time.sleep(2)
+    sensor = SI1145.SI1145() #"/dev/i2c-1")
+    time.sleep(2)
+    vis = sensor.readVisible()
 ##------------------------ above is to initialize the si1145 at the rpi--------------------
 
 
@@ -56,7 +56,7 @@ save_to_file=True
 file_name= 'column_camellias.csv'
 
 #sleep_time_seconds=20*60  # this ends up with 49 min interval
-sleep_time_seconds=1  # this ends up with 49 min interval
+sleep_time_seconds=30*60  # this ends up with 49 min interval
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 delimiter=','
@@ -72,7 +72,7 @@ if save_to_file: fid= open(file_name,'a',0)
 
 def upload_phant(pht,parsed_data,screen_display):
     log_attempts=1
-    while log_attempts<10:
+    while log_attempts<3:
         try:          
             ##pht.log(iter([ parsed_data[key] for key in pht.fields]))
             # http://stackoverflow.com/questions/43414407/iterate-at-a-function-input-in-python/43414660#43414660
@@ -85,10 +85,41 @@ def upload_phant(pht,parsed_data,screen_display):
             time.sleep(30)
             continue
 
+def read_si1145(number_readings,sleep_time_s):
+    # make sure it gives useful data by repeating the reset
+    sensor = SI1145.SI1145() #"/dev/i2c-1")
+    time.sleep(3)   # a good sleep before reading is found extremetly important
+    vis = sensor.readVisible()
+    while vis == 0:
+        print 'si1145 init failed'
+        time.sleep(2)
+        print str(vis)
+        sensor=SI1145.SI1145_RESET
+        time.sleep(2)
+        sensor = SI1145.SI1145() #"/dev/i2c-1")
+        time.sleep(2)
+        vis = sensor.readVisible()
+    vis=0
+    ir=0
+    uv=0
+    for i in range(number_readings):
+        vis+=sensor.readVisible()
+        time.sleep(1)
+        ir+=sensor.readIR()
+        time.sleep(1)
+        uv+=sensor.readUV()
+        time.sleep(sleep_time_s)
+    vis/=float(number_readings)
+    ir/=float(number_readings)
+    uv/=float(number_readings)
+    sensor=SI1145.SI1145_RESET
+    return vis,ir,uv
 
 # initialize the weather station data
 # it is found that all the first readings from weather station would give 0 atmosphere reading. call this 
 # function is to discard the first reading
+msg_weather=serial_openlock.get_result_by_input(port=port_weather,command="Weather")
+time.sleep(3)
 msg_weather=serial_openlock.get_result_by_input(port=port_weather,command="Weather")
 
 while True: 
@@ -110,14 +141,14 @@ while True:
     upload_phant(pht_sensor,parsed_data_sensor,screen_display)
     ### --------------------------- above is to processing data from column sensor--------------------------
     
-    ### --------------------------- bwlow is to processing data for weather station-------------------------
-    ## get from previous parsing
-    #vis_ind=[i for i,x in enumerate(current_read) if x == 'Vis'] 
-    #parsed_data_weather["vis_up"]=float(current_read[vis_ind[0]+1])
-    #ir_ind=[i for i,x in enumerate(current_read) if x == 'IR'] 
-    #parsed_data_weather["ir_up"]=float(current_read[ir_ind[0]+1])
-    #uv_ind=[i for i,x in enumerate(current_read) if x == 'UV'] 
-    #parsed_data_weather["uv_up"]=float(current_read[uv_ind[0]+1])
+    ## --------------------------- bwlow is to processing data for weather station-------------------------
+    # get from previous parsing
+    vis_ind=[i for i,x in enumerate(current_read) if x == 'Vis'] 
+    parsed_data_weather["vis_up"]=float(current_read[vis_ind[0]+1])
+    ir_ind=[i for i,x in enumerate(current_read) if x == 'IR'] 
+    parsed_data_weather["ir_up"]=float(current_read[ir_ind[0]+1])
+    uv_ind=[i for i,x in enumerate(current_read) if x == 'UV'] 
+    parsed_data_weather["uv_up"]=float(current_read[uv_ind[0]+1])
     
     
     msg_weather=serial_openlock.get_result_by_input(port=port_weather,command="Weather")
@@ -126,14 +157,13 @@ while True:
     for i,key in enumerate(current_read[::2]):
         parsed_data_weather[key.lower()]=float(current_read[2*i+1])
     ## get solar from rpi
-    #vis=sensor.readVisible()
-    #ir=sensor.readIR()
-    #uv=sensor.readUV()
-    #parsed_data_weather["vis_down"]=vis
-    #parsed_data_weather["ir_down"]=ir
-    #parsed_data_weather["uv_down"]=uv
-    #msg_solar='vis_down'+delimiter+str(vis)+delimiter+'ir_down'+delimiter+str(ir)+delimiter+'uv_down'+delimiter+str(uv)+delimiter
     msg_solar=''
+    [vis,ir,uv]=read_si1145(si1145_number_readings,si1145_sleep_interval_seconds)
+    parsed_data_weather["vis_down"]=vis
+    parsed_data_weather["ir_down"]=ir
+    parsed_data_weather["uv_down"]=uv
+    msg_solar='vis_down'+delimiter+str(vis)+delimiter+'ir_down'+delimiter+str(ir)+delimiter+'uv_down'+delimiter+str(uv)+delimiter
+
 
 
     upload_phant(pht_weather,parsed_data_weather,screen_display)

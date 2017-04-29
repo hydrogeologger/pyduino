@@ -1,11 +1,11 @@
 char delimiter =',';
 
-////--------------------below is required by Adafruit si1145 sensor ----------------
-//
-//#include <Wire.h>
-//#include "Adafruit_SI1145.h"
-//Adafruit_SI1145 uv = Adafruit_SI1145();
-////--------------------above is required by Adafruit si1145 sensor ----------------
+//--------------------below is required by Adafruit si1145 sensor ----------------
+
+#include <Wire.h>
+#include "Adafruit_SI1145.h"
+Adafruit_SI1145 uv = Adafruit_SI1145();
+//--------------------above is required by Adafruit si1145 sensor ----------------
 
 
 
@@ -16,8 +16,8 @@ int moist_digital_pins[] = {23, 25, 27, 29, 31, 33, 35, 37, 39, 41};
 
 //Arrays to store analog values after recieving them
 int const moist_number_sensors=sizeof(moist_analog_pins);
-int moist_number_readings=7;
-int moist_dummy_readings=3;
+int moist_number_readings=3;
+int moist_dummy_readings=2;
 
 float moist_data[moist_number_sensors];
 // ------------------- above is required by soil moisture sensor -----------------
@@ -48,8 +48,8 @@ int  heat_suction_sensor_heat_sw_5= 32;
 int  heat_suction_sensor_heat_sw_6= 34;
 
 //int  heat_suction_sensor_heat_sw_2= 3;
-int  temp_sampling_number =20;
-int  temp_sampling_interval_ms=6000; //this will be used on the roof
+int  temp_sampling_number =10;
+int  temp_sampling_interval_ms=12000; //this will be used on the roof
 //int  temp_sampling_interval_ms=1; //this will be used on the roof
 //int  temp_sampling_number =20;
 //int  temp_sampling_interval_ms=100;
@@ -62,12 +62,12 @@ int  temp_sampling_interval_ms=6000; //this will be used on the roof
 void setup() {
   Serial.begin(9600); // open serial port, set the baud rate as 9600 bps
 
-//// -----------------------------below is required by si1145 sensor ------------
-//  if (! uv.begin()) {
-//    Serial.println("Didn't find Si1145");
-//    while (1);
-//  }
-//// -----------------------------above is required by si1145 sensor ------------
+// -----------------------------below is required by si1145 sensor ------------
+  if (! uv.begin()) {
+    Serial.println("Didn't find Si1145");
+    while (1);
+  }
+// -----------------------------above is required by si1145 sensor ------------
 
 
 //---------------------below required by module analog moisture sensor----------------------------------------------------#
@@ -273,6 +273,7 @@ void loop() {
             heat_suction_sensor(heat_suction_sensor_4_addr,heat_suction_sensor_heat_sw_4,temp_sampling_number,temp_sampling_interval_ms); 
             heat_suction_sensor(heat_suction_sensor_5_addr,heat_suction_sensor_heat_sw_5,temp_sampling_number,temp_sampling_interval_ms); 
             heat_suction_sensor(heat_suction_sensor_6_addr,heat_suction_sensor_heat_sw_6,temp_sampling_number,temp_sampling_interval_ms); 
+            si1145_loop();
             Serial.println("SoilSuctionDone");
             Serial.println("AllDone");
         }
@@ -293,12 +294,12 @@ void loop() {
             heat_suction_sensor(heat_suction_sensor_6_addr,heat_suction_sensor_heat_sw_6,temp_sampling_number,temp_sampling_interval_ms); 
             Serial.println("SoilSuctionDone");
         }
-//        else if (content == "Solar") {
-//            Serial.print("Solar");
-//            Serial.print(delimiter);
-//            si1145_loop();
-//            Serial.println("SolarDone");
-//        }
+        else if (content == "Solar") {
+            Serial.print("Solar");
+            Serial.print(delimiter);
+            si1145_loop();
+            Serial.println("SolarDone");
+        }
         else {
           Serial.println(content);
         } 
@@ -307,30 +308,30 @@ void loop() {
 } //void loop
 
 
-//// loop routine to obtain si1145 result 
-//void si1145_loop() { 
-//    Serial.print("Vis"); 
-//    Serial.print(delimiter); 
-//    Serial.print(uv.readVisible()); 
-//    Serial.print(delimiter); 
-//    Serial.print("IR"); 
-//    Serial.print(delimiter); 
-//    Serial.print(uv.readIR()); 
-//    Serial.print(delimiter); 
-//     
-//    // Uncomment if you have an IR LED attached to LED pin! 
-//    //Serial.print("Prox: "); Serial.println(uv.readProx()); 
-//   
-//    float UVindex = uv.readUV(); 
-//    // the index is multiplied by 100 so to get the 
-//    // integer index, divide by 100! 
-//    UVindex /= 100.0;   
-//    Serial.print("UV");   
-//    Serial.print(delimiter); 
-//    Serial.print(UVindex); 
-//    Serial.print(delimiter); 
-//    delay(1000); 
-//} 
+// loop routine to obtain si1145 result 
+void si1145_loop() { 
+    Serial.print("Vis"); 
+    Serial.print(delimiter); 
+    Serial.print(uv.readVisible()); 
+    Serial.print(delimiter); 
+    Serial.print("IR"); 
+    Serial.print(delimiter); 
+    Serial.print(uv.readIR()); 
+    Serial.print(delimiter); 
+     
+    // Uncomment if you have an IR LED attached to LED pin! 
+    //Serial.print("Prox: "); Serial.println(uv.readProx()); 
+   
+    float UVindex = uv.readUV(); 
+    // the index is multiplied by 100 so to get the 
+    // integer index, divide by 100! 
+    //UVindex /= 100.0;   
+    Serial.print("UV");   
+    Serial.print(delimiter); 
+    Serial.print(UVindex); 
+    Serial.print(delimiter); 
+    delay(1000); 
+} 
 
 
 //void loop() {

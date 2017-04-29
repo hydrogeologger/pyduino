@@ -82,7 +82,7 @@ if save_to_file: fid= open(file_name,'a',0)
 
 def upload_phant(pht,parsed_data,screen_display):
     log_attempts=1
-    while log_attempts<10:
+    while log_attempts<3:
         try:          
             ##pht.log(iter([ parsed_data[key] for key in pht.fields]))
             # http://stackoverflow.com/questions/43414407/iterate-at-a-function-input-in-python/43414660#43414660
@@ -115,7 +115,7 @@ def read_si1145(number_readings,sleep_time_s):
         print 'si1145 init failed'
         time.sleep(2)
         print str(vis)
-        SI1145.SI1145_RESET
+        sensor=SI1145.SI1145_RESET
         time.sleep(2)
         sensor = SI1145.SI1145() #"/dev/i2c-1")
         time.sleep(2)
@@ -133,7 +133,7 @@ def read_si1145(number_readings,sleep_time_s):
     vis/=float(number_readings)
     ir/=float(number_readings)
     uv/=float(number_readings)
-    SI1145.SI1145_RESET
+    sensor=SI1145.SI1145_RESET
     return vis,ir,uv
 # initialize the weather station data
 # it is found that all the first readings from weather station would give 0 atmosphere reading. call this 
