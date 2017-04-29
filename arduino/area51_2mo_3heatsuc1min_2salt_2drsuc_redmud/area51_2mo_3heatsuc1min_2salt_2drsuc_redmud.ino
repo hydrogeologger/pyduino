@@ -3,7 +3,7 @@ char delimiter =',';
 
 //---------------------below required by module heat_suction_sensor----------------------------------------------------#
 #include <OneWire.h>
-OneWire  ds(4);  // on pin 10 (a 4.7K resistor is necessary)
+OneWire  ds(3);  // on pin 10 (a 4.7K resistor is necessary)
 // OneWire DS18S20, DS18B20, DS1822 Temperature Example
 //
 // http://www.pjrc.com/teensy/td_libs_OneWire.html
@@ -30,7 +30,7 @@ int  temp_sampling_interval_ms=1000;
 #include <dht.h>
 dht DHT;
 #define DHT22_PIN_1 2
-#define DHT22_PIN_2 3
+#define DHT22_PIN_2 11
 //---------------------above required by module salinity_humidity_sensor----------------------------------------------------#
 
 
@@ -149,7 +149,7 @@ void loop(void) {
             Serial.print("SoilSuction");
             Serial.print(delimiter);
             heat_suction_sensor(heat_suction_sensor_1_addr,heat_suction_sensor_heat_sw_1,temp_sampling_number,temp_sampling_interval_ms); 
-            Serial.println("SoilSalinityDone");
+            Serial.println("SoilSuctionDone");
         }
         else {
           Serial.println(content);
@@ -299,8 +299,7 @@ void read_analog_moisture_sensor() {
     Serial.print(delimiter);
 
     }
-    
-    //delay_min(30);
+
     }
 
 

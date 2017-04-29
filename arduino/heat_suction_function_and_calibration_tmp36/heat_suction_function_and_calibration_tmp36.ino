@@ -4,13 +4,13 @@ char delimiter =',';
 //---------------------below required by module heat_suction_sensor----------------------------------------------------#
 
 
-const int sensorPin = 1; //the analog pin the TMP36's Vout (sense) pin is connected to
+const int sensorPin = 0; //the analog pin the TMP36's Vout (sense) pin is connected to
                         //the resolution is 10 mV / degree centigrade with a
                         //500 mV offset to allow for negative temperatures
 
-int  heat_suction_sensor_heat_sw_1= 2;
+int  heat_suction_sensor_heat_sw_1= 4;
 int  temp_sampling_number =20;
-int  temp_sampling_interval_ms=1000;
+int  temp_sampling_interval_ms=2000;
 //int  temp_sampling_number =20;
 //int  temp_sampling_interval_ms=100;
 
