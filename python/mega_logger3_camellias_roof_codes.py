@@ -12,13 +12,15 @@ import serial_openlock
 import SI1145.SI1145 as SI1145
 
 ##------------------------ below is to initialize the si1145 at the rpi--------------------
-sensor = SI1145.SI1145() #"/dev/i2c-1")
+sensor = SI1145.SI1145()
+si1145_number_readings=5
+si1145_sleep_interval_seconds=20
 time.sleep(3)   # a good sleep before reading is found extremetly important
 vis = sensor.readVisible()
 while vis == 0:
     print 'si1145 init failed'
     time.sleep(2)
-    print str(vis)
+    #print str(vis)
     sensor=SI1145.SI1145_RESET
     time.sleep(2)
     sensor = SI1145.SI1145() #"/dev/i2c-1")
@@ -53,7 +55,7 @@ screen_display=True
 save_to_file=True
 
 # the Filename of the csv file for storing file
-file_name= 'column_camellias.csv'
+file_name= 'column_camellias_up.csv'
 
 #sleep_time_seconds=20*60  # this ends up with 49 min interval
 sleep_time_seconds=30*60  # this ends up with 49 min interval
@@ -63,7 +65,8 @@ delimiter=','
 
 
 # temp sampling number 
-temp_sampling_number=20
+temp_sampling_number=10
+
 __author__ = 'chenming'
 
 
@@ -72,7 +75,7 @@ if save_to_file: fid= open(file_name,'a',0)
 
 def upload_phant(pht,parsed_data,screen_display):
     log_attempts=1
-    while log_attempts<3:
+    while log_attempts<5:
         try:          
             ##pht.log(iter([ parsed_data[key] for key in pht.fields]))
             # http://stackoverflow.com/questions/43414407/iterate-at-a-function-input-in-python/43414660#43414660
@@ -85,9 +88,24 @@ def upload_phant(pht,parsed_data,screen_display):
             time.sleep(30)
             continue
 
+def open_si1145(open_attempt_limit,screen_display):
+    open_attempt=1
+    while open_attempt<open_attempt_limit:
+        try:
+            sensor = SI1145.SI1145()
+            break
+        except:
+            if screen_display: print 'opening si1145 failed',open_attempt
+            open_attempt += 1
+            time.sleep(30)
+            continue
+    return sensor 
+
+
 def read_si1145(number_readings,sleep_time_s):
     # make sure it gives useful data by repeating the reset
-    sensor = SI1145.SI1145() #"/dev/i2c-1")
+    #sensor = SI1145.SI1145() #"/dev/i2c-1")
+    sensor =open_si1145(500,screen_display)
     time.sleep(3)   # a good sleep before reading is found extremetly important
     vis = sensor.readVisible()
     while vis == 0:
@@ -96,7 +114,8 @@ def read_si1145(number_readings,sleep_time_s):
         print str(vis)
         sensor=SI1145.SI1145_RESET
         time.sleep(2)
-        sensor = SI1145.SI1145() #"/dev/i2c-1")
+        sensor =open_si1145(500,screen_display)
+        #sensor = SI1145.SI1145() #"/dev/i2c-1")
         time.sleep(2)
         vis = sensor.readVisible()
     vis=0
@@ -143,12 +162,12 @@ while True:
     
     ## --------------------------- bwlow is to processing data for weather station-------------------------
     # get from previous parsing
-    vis_ind=[i for i,x in enumerate(current_read) if x == 'Vis'] 
-    parsed_data_weather["vis_up"]=float(current_read[vis_ind[0]+1])
-    ir_ind=[i for i,x in enumerate(current_read) if x == 'IR'] 
-    parsed_data_weather["ir_up"]=float(current_read[ir_ind[0]+1])
-    uv_ind=[i for i,x in enumerate(current_read) if x == 'UV'] 
-    parsed_data_weather["uv_up"]=float(current_read[uv_ind[0]+1])
+    vis_ind=[i for i,x in enumerate(current_read_sensor) if x == 'Vis'] 
+    parsed_data_weather["vis_up"]=float(current_read_sensor[vis_ind[0]+1])
+    ir_ind=[i for i,x in enumerate(current_read_sensor) if x == 'IR'] 
+    parsed_data_weather["ir_up"]=float(current_read_sensor[ir_ind[0]+1])
+    uv_ind=[i for i,x in enumerate(current_read_sensor) if x == 'UV'] 
+    parsed_data_weather["uv_up"]=float(current_read_sensor[uv_ind[0]+1])
     
     
     msg_weather=serial_openlock.get_result_by_input(port=port_weather,command="Weather")

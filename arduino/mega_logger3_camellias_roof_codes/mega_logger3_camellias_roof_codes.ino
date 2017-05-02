@@ -49,7 +49,7 @@ int  heat_suction_sensor_heat_sw_6= 34;
 
 //int  heat_suction_sensor_heat_sw_2= 3;
 int  temp_sampling_number =10;
-int  temp_sampling_interval_ms=12000; //this will be used on the roof
+int  temp_sampling_interval_ms=9000; //this will be used on the roof
 //int  temp_sampling_interval_ms=1; //this will be used on the roof
 //int  temp_sampling_number =20;
 //int  temp_sampling_interval_ms=100;
@@ -274,7 +274,6 @@ void loop() {
             heat_suction_sensor(heat_suction_sensor_5_addr,heat_suction_sensor_heat_sw_5,temp_sampling_number,temp_sampling_interval_ms); 
             heat_suction_sensor(heat_suction_sensor_6_addr,heat_suction_sensor_heat_sw_6,temp_sampling_number,temp_sampling_interval_ms); 
             si1145_loop();
-            Serial.println("SoilSuctionDone");
             Serial.println("AllDone");
         }
         else if (content == "SoilMoisture") {
