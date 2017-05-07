@@ -11,9 +11,9 @@ int number_sensors=10;
 // the setup routine runs once when you press reset:
 
 
-int number_readings=11;
+int number_readings=3;
 
-int dummy_readings=10;
+int dummy_readings=3;
 void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
@@ -30,7 +30,7 @@ void loop() {
   for (int i=0; i<number_sensors;i++){
     AnalogVals1[i]=0.;
     digitalWrite(digital_pins[i],HIGH);
-    delay(100);
+    delay(1000);
 
     for (int j=0;j<dummy_readings;j++){
       analogRead(analog_pins[i]);
@@ -43,7 +43,9 @@ void loop() {
     }
 
     AnalogVals1[i]=AnalogVals1[i]/float(number_readings);
-    digitalWrite(digital_pins[i],HIGH);
+    digitalWrite(digital_pins[i],LOW);
+     delay(1000);
+   
  }
 
     for (int i=0; i<number_sensors;i++)

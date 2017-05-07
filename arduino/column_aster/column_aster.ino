@@ -5,7 +5,7 @@ float AnalogVals1[10];
 //float AnalogVals2[10];
 int i;
 // the delimiter between each reading. it is good to use ',' alwyas
-char seperator=',';
+char delimiter=',';
 //Arrays to store analog values after recieving them
 int number_sensors=10;
 // the setup routine runs once when you press reset:
@@ -13,7 +13,7 @@ int number_sensors=10;
 
 int number_readings=11;
 
-int dummy_readings=10;
+int dummy_readings=4;
 void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
@@ -80,7 +80,7 @@ void read_moisture_loop() {
     for (int i=0; i<number_sensors;i++)
     {
     Serial.print(AnalogVals1[i]);
-    Serial.print(seperator);
+    Serial.print(delimiter);
 
     }
 
