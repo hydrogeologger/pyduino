@@ -105,7 +105,7 @@ while True:
 
 
 
-    upload_phant(pht_weather,parsed_data_weather,screen_display)
+    #upload_phant(pht_weather,parsed_data_weather,screen_display)
 
     # save to file
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
