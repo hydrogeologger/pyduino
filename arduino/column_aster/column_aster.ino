@@ -55,36 +55,71 @@ void loop(){
 
 
 
-// the loop routine runs over and over again forever:
+//// the loop routine runs over and over again forever:
+//void read_moisture_loop() {
+//  // read the input on analog pin 0
+//  for (int i=0; i<number_sensors;i++){
+//    AnalogVals1[i]=0.;
+//    digitalWrite(digital_pins[i],HIGH);
+//    delay(100);
+//
+//    for (int j=0;j<dummy_readings;j++){
+//      analogRead(analog_pins[i]);
+//      //delay(100);
+//    }
+//
+//    for (int j=0;j<number_readings;j++){
+//      AnalogVals1[i]+=analogRead(analog_pins[i]);
+//      delay(10);
+//    }
+//
+//    AnalogVals1[i]=AnalogVals1[i]/float(number_readings);
+//    digitalWrite(digital_pins[i],HIGH);
+// }
+//
+//    for (int i=0; i<number_sensors;i++)
+//    {
+//    Serial.print(AnalogVals1[i]);
+//    Serial.print(delimiter);
+//
+//    }
+//
+//
+//    }
+//
 void read_moisture_loop() {
   // read the input on analog pin 0
-  for (int i=0; i<number_sensors;i++){
-    AnalogVals1[i]=0.;
-    digitalWrite(digital_pins[i],HIGH);
-    delay(100);
+  for (int i=0; i<moist_number_sensors;i++){
+    moist_data[i]=0;
+    digitalWrite(moist_digital_pins[i],HIGH);
+    delay(1000);
 
-    for (int j=0;j<dummy_readings;j++){
-      analogRead(analog_pins[i]);
-      //delay(100);
+    for (int j=0;j<moist_dummy_readings;j++){
+      analogRead(moist_analog_pins[i]);
+      delay(100);
     }
 
-    for (int j=0;j<number_readings;j++){
-      AnalogVals1[i]+=analogRead(analog_pins[i]);
+    for (int j=0;j<moist_number_readings;j++){
+      moist_data[i]+=analogRead(moist_analog_pins[i]);
       delay(10);
     }
 
-    AnalogVals1[i]=AnalogVals1[i]/float(number_readings);
-    digitalWrite(digital_pins[i],HIGH);
- }
+    moist_data[i]=moist_data[i]/moist_number_readings;
+    digitalWrite(moist_digital_pins[i],LOW);
+  }
 
-    for (int i=0; i<number_sensors;i++)
+    for (int i=0; i<moist_number_sensors;i++)
     {
-    Serial.print(AnalogVals1[i]);
+    Serial.print("Mo");
+    Serial.print(delimiter);
+    //Serial.print((char)moist_analog_pins[i]);   // how to convert this to strings?
+    Serial.print(moist_digital_pins[i]);
+    Serial.print(delimiter);
+    Serial.print(moist_data[i]);
     Serial.print(delimiter);
 
     }
 
-
+    //delay_min(30);
     }
-
                                        
