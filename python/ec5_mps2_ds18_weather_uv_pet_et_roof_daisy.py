@@ -7,6 +7,7 @@ import numpy as np
 import sys
 from phant import Phant
 import serial_openlock
+import get_ip
 
 
 import SI1145.SI1145 as SI1145
@@ -169,6 +170,7 @@ while True:
         parsed_data['su'+current_read[i+1][0]]=float(current_read[i+2])
         parsed_data['tp'+current_read[i+1][0]]=float(current_read[i+3])
     # log the results to sparkfun
+    parsed_data['evap2']=get_ip.get_ip_address_digit_mask('wlan0')
     upload_phant(pht_sensor,parsed_data,screen_display)
     ### --------------------------- above is to processing data from column sensor--------------------------
     
