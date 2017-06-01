@@ -11,7 +11,17 @@ import get_ip
 
 
 import SI1145.SI1145 as SI1145
+with open('/home/pi/script/pass/public_daisy_sensors', 'r') as myfile:
+    public_daisy_sensors=myfile.read().replace('\n', '')
 
+with open('/home/pi/script/pass/private_daisy_sensors', 'r') as myfile:
+    private_daisy_sensors=myfile.read().replace('\n', '')
+
+with open('/home/pi/script/pass/public_daisy_weather', 'r') as myfile:
+    public_daisy_weather=myfile.read().replace('\n', '')
+
+with open('/home/pi/script/pass/private_daisy_weather', 'r') as myfile:
+    private_daisy_weather=myfile.read().replace('\n', '')
 #------------------------ below is to initialize the si1145 at the rpi--------------------
 sensor = SI1145.SI1145() #"/dev/i2c-1")
 time.sleep(3)   # a good sleep before reading is found extremetly important
@@ -35,8 +45,7 @@ field_name=['tpf0','tp11','tp8d','tpa3','mo0','mo1','mo2','mo3','mo4','mo5','mo6
     'mo8','mo9','mo10','mo11','su1','tp1','su2','tp2','su3','tp3','su4','tp4','evap1','evap2']
 #http://stackoverflow.com/questions/3869487/how-do-i-create-a-dictionary-with-keys-from-a-list-and-values-defaulting-to-say
 parsed_data=dict((el,0.0) for el in field_name)
-#https://data.sparkfun.com/streams/RMxqjA6nRXfbm01raooM/update/lzEpXb5dxRhYAbG6177V
-pht_sensor = Phant(publicKey='RMxqjA6nRXfbm01raooM', fields=field_name ,privateKey='lzEpXb5dxRhYAbG6177V')
+pht_sensor = Phant(publicKey=public_daisy_sensors, fields=field_name ,privateKey=private_daisy_sensors)
 
 # 'All,Tp,F0,20.44,Tp,11,20.06,Tp,8D,20.25,Tp,A3,20.62,Mo,0,247.00,Mo,1,70.15,Mo,2,69.20,Mo,3,65.90,Mo,4,69.95,Mo,5,75.00,Mo,6,66.00,Mo,7,60.80,Mo,8,69.60,Mo,9,40.35,Mo,10,190.90,Mo,11,86.60,SuTp,113DECAGON MPS-2 124,-3661.3,20.0,SuTp,213DECAGON MPS-2 124,-2251.4,20.0,SuTp,313DECAGON MPS-2 350,-6885.3,19.9,SuTp,413DECAGON MPS-2 136,-3487.4,20.3,Vis,260,IR,253,UV,0.02,AllDone\r\n'
 
@@ -45,7 +54,7 @@ port_sensor  = 'USB VID:PID=2341:0042 '
 #------------------------- above are definations for the sensors in the column ---------------------------------
 field_name_weather=['aet','batt','dlyrainmm','ir_down','ir_up','lt','mo_soil','p','pet','rainmm','rh','tc','temp_soil','uv_down','uv_up','vis_down','vis_up','wddir','wddiravg2m','wdgstdir','wdgstdir10m','wdgstkph','wdgstkph10m','wdspdkph','wdspdkphavg2m']
 parsed_data_weather=dict((el,0.0) for el in field_name_weather)
-pht_weather = Phant(publicKey='JxO9ydlRjnuXARaZX5od', fields=field_name_weather ,privateKey='gzregldRnxClRy8El76G')
+pht_weather = Phant(publicKey=public_daisy_weather, fields=field_name_weather ,privateKey=private_daisy_weather)
 port_weather = 'USB VID:PID=0403:6015'
 #------------------------- below are definations for the weather station ---------------------------------
 
