@@ -89,13 +89,13 @@ void loop()
         if (content == "All") { 
             Serial.print("All");
             Serial.print(delimiter);
-            read_muxshield();
+            read_muxschield();
             Serial.println("AllDone");
         }
         else if (content == "SoilMoisture") {
             Serial.print("SoilMoisture");
             Serial.print(delimiter);
-            read_muxshield();
+            read_muxschield();
             Serial.println("SoilMoistureDone");
         }
         else {
@@ -105,7 +105,6 @@ void loop()
 } //void loop
 
 
-}
 
 
 
@@ -147,9 +146,8 @@ void read_muxschield(){
      Serial.print(delimiter);
     }
     
-    Serial.println();
  //
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
 //brown green black red brown orange with light blue background 15k Ohms 1% 15 ppm//
 //need to check the resistance from volt meter//
-
+} // mux_schield
