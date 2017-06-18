@@ -4,6 +4,5 @@
 
 sleep 38 
 cd /home/pi/pyduino/python/
-#python rs232_adam.py
-python  campbell_logging.py   >>aster_log
+p/usr/bin/stdbuf -i0 -o0 -e0 ython  campbell_logging.py   >> campbell_log
 

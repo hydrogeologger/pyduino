@@ -6,5 +6,5 @@ sleep 18
 #su pi
 cd /home/pi/pyduino/python/
 #python rs232_adam.py
-python mega_logger1_aster.py  >>aster_log
+p/usr/bin/stdbuf -i0 -o0 -e0 ython mega_logger1_aster.py  >>aster_log
 
