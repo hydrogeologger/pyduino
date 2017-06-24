@@ -16,10 +16,11 @@ int moist_digital_pins[] = {23, 25, 27, 29, 31, 33, 35, 37, 39, 41};
 
 //Arrays to store analog values after recieving them
 int const moist_number_sensors=sizeof(moist_analog_pins);
-int moist_number_readings=3;
-int moist_dummy_readings=2;
+int const moist_number_readings=7;
+int const moist_dummy_readings=4;
 
-float moist_data[moist_number_sensors];
+float moist_data_avg[moist_number_sensors];
+float moist_data_individual[moist_number_sensors][moist_number_readings];
 // ------------------- above is required by soil moisture sensor -----------------
 
 
@@ -454,7 +455,7 @@ void read_DS18B20_by_addr(byte addr[8]) {
 void read_analog_moisture_sensor() {
   // read the input on analog pin 0
   for (int i=0; i<moist_number_sensors;i++){
-    moist_data[i]=0;
+    moist_data_avg[i]=0;
     digitalWrite(moist_digital_pins[i],HIGH);
     delay(1000);
 
@@ -464,23 +465,28 @@ void read_analog_moisture_sensor() {
     }
 
     for (int j=0;j<moist_number_readings;j++){
-      moist_data[i]+=analogRead(moist_analog_pins[i]);
-      delay(10);
+      moist_data_individual[i][j]=analogRead(moist_analog_pins[i]);
+      moist_data_avg[i]+=moist_data_individual[i][j];
+      delay(100);
     }
 
-    moist_data[i]=moist_data[i]/moist_number_readings;
+    moist_data_avg[i]=moist_data_avg[i]/moist_number_readings;
     digitalWrite(moist_digital_pins[i],LOW);
   }
 
     for (int i=0; i<moist_number_sensors;i++)
     {
-    Serial.print("Mo");
-    Serial.print(delimiter);
-    //Serial.print((char)moist_analog_pins[i]);   // how to convert this to strings?
-    Serial.print(moist_digital_pins[i]);
-    Serial.print(delimiter);
-    Serial.print(moist_data[i]);
-    Serial.print(delimiter);
+        Serial.print("Mo");
+        Serial.print(delimiter);
+        //Serial.print((char)moist_analog_pins[i]);   // how to convert this to strings?
+        Serial.print(moist_digital_pins[i]);
+        Serial.print(delimiter);
+        Serial.print(moist_data_avg[i]);
+        Serial.print(delimiter);
+        for (int j=0;j<moist_number_readings;j++){
+            Serial.print(moist_data_individual[i][j]);
+            Serial.print(delimiter);
+        }
 
     }
 
