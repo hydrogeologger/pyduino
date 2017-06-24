@@ -7,6 +7,13 @@ import numpy as np
 import sys
 from phant import Phant
 import serial_openlock
+import csv_tools
+import get_ip
+
+
+
+file_name_campbell='campbell_output.csv'
+fn_camp=open(file_name_campbell,'r')
 
 
 with open('/home/pi/script/pass/public_aster', 'r') as myfile:
@@ -83,34 +90,50 @@ while True:
     mo_ind=[i for i,x in enumerate(current_read_aster) if x == 'Mo']
     for i in mo_ind:
         parsed_data_aster['mo'+current_read_aster[i+1]]=float(current_read_aster[i+2])
-    # log the results to sparkfun
-    upload_phant(pht_aster,parsed_data_aster,screen_display)
     ### --------------------------- above is to processing data from column sensor--------------------------
     
-    ### --------------------------- bwlow is to processing data for weather station-------------------------
-    ## get from previous parsing
-    #vis_ind=[i for i,x in enumerate(current_read_aster) if x == 'Vis'] 
-    #parsed_data_weather["vis_up"]=float(current_read_aster[vis_ind[0]+1])
-    #ir_ind=[i for i,x in enumerate(current_read_aster) if x == 'IR'] 
-    #parsed_data_weather["ir_up"]=float(current_read_aster[ir_ind[0]+1])
-    #uv_ind=[i for i,x in enumerate(current_read_aster) if x == 'UV'] 
-    #parsed_data_weather["uv_up"]=float(current_read_aster[uv_ind[0]+1])
-    #
-    #
-    #msg_weather=serial_openlock.get_result_by_input(port=port_weather,command="Weather")
-    #
-    #current_read=msg_weather.split(',')[1:-1]
-    #for i,key in enumerate(current_read[::2]):
-    #    parsed_data_weather[key.lower()]=float(current_read[2*i+1])
+    ### --------------------------- bwlow is to processing data for campbell scientific-------------------------
+    
+    msg_campbell=csv_tools.tail(fn_camp,1)
+    current_read_campbell=msg_campbell.split(',')[0:-1]
+    parsed_data_campbell={}
+    for i,key in enumerate(current_read_campbell[::2]):
+        if key.lower()=='datetime':
+            parsed_data_campbell[key.lower()]=current_read_campbell[2*i+1]
+        else:
+            parsed_data_campbell[key.lower()]=float(current_read_campbell[2*i+1])
 
+    parsed_data_aster['temp1']     =parsed_data_campbell['starttemp_c_1']
+    parsed_data_aster['temp2']     =parsed_data_campbell['starttemp_c_2']
+    parsed_data_aster['temp3']     =parsed_data_campbell['starttemp_c_3']
+    parsed_data_aster['temp4']     =parsed_data_campbell['starttemp_c_4']
+    parsed_data_aster['temp5']     =parsed_data_campbell['starttemp_c_5']
+    parsed_data_aster['temp6']     =parsed_data_campbell['starttemp_c_6']
+    parsed_data_aster['temp7']     =parsed_data_campbell['starttemp_c_7']
+    parsed_data_aster['temp8']     =parsed_data_campbell['starttemp_c_8']
+    parsed_data_aster['suction1']  =parsed_data_campbell['kpa_1']
+    parsed_data_aster['suction2']  =parsed_data_campbell['kpa_2']
+    parsed_data_aster['suction3']  =parsed_data_campbell['kpa_3']
+    parsed_data_aster['suction4']  =parsed_data_campbell['kpa_4']
+    parsed_data_aster['suction5']  =parsed_data_campbell['kpa_5']
+    parsed_data_aster['suction6']  =parsed_data_campbell['kpa_6']
+    parsed_data_aster['suction7']  =parsed_data_campbell['kpa_7']
+    parsed_data_aster['suction8']  =parsed_data_campbell['kpa_8']
 
+    str_campbell_output=''
+    for key in parsed_data_aster:
+         str_campbell_output+= key+delimiter+ str(parsed_data_aster[key])+delimiter
 
-    #upload_phant(pht_weather,parsed_data_weather,screen_display)
+    # log the results to sparkfun
+    parsed_data_aster['ip']=get_ip.get_ip_address_digit_mask('wlan0')
+
+    # log the results to sparkfun
+    upload_phant(pht_aster,parsed_data_aster,screen_display)
 
     # save to file
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
-    if screen_display: print i,delimiter,time_now,delimiter,msg_aster.rstrip()
-    if save_to_file: fid.write(time_now+delimiter+msg_aster)
+    if screen_display: print i,delimiter,time_now,delimiter,str_campbell_output,msg_aster.rstrip()
+    if save_to_file: fid.write(time_now+delimiter+str_campbell_output+msg_aster)
        
     # sleep to the next loop
     time.sleep(sleep_time_seconds)

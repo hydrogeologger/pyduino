@@ -92,7 +92,7 @@ if save_to_file: fid= open(file_name,'a',0)
 
 def upload_phant(pht,parsed_data,screen_display):
     log_attempts=1
-    while log_attempts<3:
+    while log_attempts<6:
         try:          
             ##pht.log(iter([ parsed_data[key] for key in pht.fields]))
             # http://stackoverflow.com/questions/43414407/iterate-at-a-function-input-in-python/43414660#43414660
