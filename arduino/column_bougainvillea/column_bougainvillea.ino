@@ -20,16 +20,16 @@ will prevent such )
 #include <MuxShield.h>
 //Initialize the Mux Shield
 MuxShield muxShield;
-
+int digital_pins[] = {0, 5, 1, 6, 2, 7, 3, 8, 4, 9};
 
 // the delimiter between each reading. it is good to use ',' alwyas
-char seperator=',';
+char delimiter=',';
 //Arrays to store analog values after recieving them  
 int number_sensors=10;
 // define toggles for I/O3, which are used for output;
 //int toggle[16]=LOW;
 //int IO1AnalogVals[16];
-int IO2AnalogVals[10];
+float IO2AnalogVals[10];
 //int IO3AnalogVals[16];
 //digitalWrite(A1, LOW);
 //digitalWrite(A0, LOW);
@@ -37,16 +37,15 @@ int IO2AnalogVals[10];
 
 
 // the powered sensor reading, there are two properties, on and off
-int delay_sensor_reading=7;
-
+int delay_sensor_reading=100;
 int number_dummy_readings=5;
+int moisture_number_readings=5;
 
-
-int delay_after_reading_each_ports=3000;
+int delay_after_reading_each_ports=50;
 
 // finish writting 
 //int delay_after_writting=1000;
-int delay_after_writting=1000;
+int delay_after_writting=50;
 
 //int delay_after_moisture_done=1000;  // this is working 
 
@@ -55,10 +54,6 @@ int delay_after_writting=1000;
 //int delay_after_moisture_done=60000; //not working
 int delay_after_moisture_done=1000; //not working
 //int delay_after_moisture_done=600000;
-
-// -------------------- needed by digital sensor --------------------
-//#include <OneWire.h>
-//OneWire  ds(3);  // on digita pin 2 (a 4.7K resistor is necessary)
 
 
 void setup()
@@ -83,9 +78,33 @@ void setup()
 void loop()
 {
 
-    read_muxschield();
-  
-}
+    String content = "";
+    char character;
+    while(Serial.available()) {
+        character = Serial.read();
+        content.concat(character); 
+        delay (10); 
+    }
+    if (content != ""){
+        if (content == "All") { 
+            Serial.print("All");
+            Serial.print(delimiter);
+            read_muxschield();
+            Serial.println("AllDone");
+        }
+        else if (content == "SoilMoisture") {
+            Serial.print("SoilMoisture");
+            Serial.print(delimiter);
+            read_muxschield();
+            Serial.println("SoilMoistureDone");
+        }
+        else {
+          Serial.println(content);
+        } 
+    } //content != ""
+} //void loop
+
+
 
 
 
@@ -94,57 +113,41 @@ void read_muxschield(){
 // -------------------- needed by mux schield -----------------------
   for (int i=0; i<number_sensors; i++)
   {
-    //Analog read on all 16 inputs on IO1, IO2, and IO3
-    //IO1AnalogVals[i] =0;
-    //IO1AnalogVals[i] = muxShield.analogReadMS(1,i);
-    muxShield.digitalWriteMS(2,i,HIGH);
+    muxShield.digitalWriteMS(3,digital_pins[i],HIGH);
     delay(1000);
-    Serial.print("IO2 analog");
-    Serial.print(seperator);
-    Serial.print(i);
-    Serial.print(seperator);
+
 
     for (int j=0;j<number_dummy_readings;j++){
-    //delay(50);
-    muxShield.analogReadMS(1,i);
+      delay(50);
+      muxShield.analogReadMS(1,i);
     }
 
-
-    for (int j=0;j<20;j++){
-    delay(delay_sensor_reading);
-    muxShield.analogReadMS(1,i);
-    IO2AnalogVals[i] = muxShield.analogReadMS(1,i);
-    Serial.print(IO2AnalogVals[i]);
-    Serial.print(seperator);
+    IO2AnalogVals[i] =0;
+    for (int j=0;j<moisture_number_readings;j++){
+        delay(delay_sensor_reading);
+        muxShield.analogReadMS(1,i);
+        IO2AnalogVals[i] += muxShield.analogReadMS(1,i);
     }
-
-
+    IO2AnalogVals[i]=IO2AnalogVals[i]/float(moisture_number_readings);
     
-    Serial.print(i);
-    Serial.print(seperator);
-    Serial.println();
-    delay(500);
-
-    muxShield.digitalWriteMS(2,i,LOW);
+    
+    
+    muxShield.digitalWriteMS(3,digital_pins[i],LOW);
+   
 
     delay(delay_after_reading_each_ports);
   }
-  
-//  //Print IO1 values for inspection
-//  Serial.print("IO2 analog");
-//  Serial.print(seperator);
-//  for (int i=0; i<number_sensors; i++)
-//  {
-//    //Serial.print(IO1AnalogVals[i]);
-//    Serial.print(IO2AnalogVals[i]);
-//    Serial.print(seperator);
-//  }
-//  
-//  Serial.println();
-//  delay(delay_after_writting);
-}
+   for (int i=0;i<number_sensors;i++){
+     Serial.print("Mo");
+     Serial.print(delimiter);
+     Serial.print(i);
+     Serial.print(delimiter);
+     Serial.print(IO2AnalogVals[i]);
+     Serial.print(delimiter);
+    }
+    
  //
 //orange brown red black green brown with light blue background 312 Ohms 0.5% 100ppm//
 //brown green black red brown orange with light blue background 15k Ohms 1% 15 ppm//
 //need to check the resistance from volt meter//
-
+} // mux_schield

@@ -13,7 +13,8 @@ second2day=1./3600/24
 kg2g=1000.
 g2kg=0.001
 psych=62.2  # pa/K  # https://en.wikipedia.org/wiki/Psychrometric_constant
-
+molecular_weight_water=0.018
+R=8.314
 #class constitutive_relation:
 
 def dv(tk):
@@ -81,7 +82,26 @@ def rs1984(sw):
     '''(S)urface (R)esistance from Sun et al. [1984]'''
     return 3.5*(sw)**(-2.3)+33.5
    
-
+def swcc_fredlund_xing_1994(**kwargs):
+    '''Soil water retention curve from Fredlund and Xing [1994]'''
+    psi_default=np.arange(10**-4,10**-4,10**-4)
+    for i in np.arange(-3,6):
+       new=np.arange(10**i,10**(i+1),10**i)
+       psi_default=np.concatenate((psi_default,new))
+    arg_defaults = {
+                'n'  :1.,
+                'm'  :2.,
+                'a'  :2.,
+                'por':0.5,
+                'psi':psi_default}
+    arg=arg_defaults
+    for d in kwargs:
+        arg[d]= kwargs.get(d)
+    
+    tmp1=(arg['psi']/arg['a'])**arg['n']
+    tmp2=np.log(np.e+tmp1)
+    tmp3=arg['por']*(1./tmp2)**arg['m']
+    return tmp3
 #    g2kg = 0.001
 #    kg2g = 1000.
 #    ms2mmday=3600.*24*1000
