@@ -89,58 +89,119 @@ def swcc_fredlund_xing_1994(**kwargs):
        new=np.arange(10**i,10**(i+1),10**i)
        psi_default=np.concatenate((psi_default,new))
     arg_defaults = {
-                'n'  :1.,
-                'm'  :2.,
-                'a'  :2.,
-                'por':0.5,
+                'plot':True,
+                'nf'  :0.85,
+                'mf'  :0.31,
+                'af'  :24.9999,
+                'hr'  :223873.8,
+                'por':0.54,
                 'psi':psi_default}
+
     arg=arg_defaults
     for d in kwargs:
         arg[d]= kwargs.get(d)
     
-    tmp1=(arg['psi']/arg['a'])**arg['n']
-    tmp2=np.log(np.e+tmp1)
-    tmp3=arg['por']*(1./tmp2)**arg['m']
-    return tmp3
-#    g2kg = 0.001
-#    kg2g = 1000.
-#    ms2mmday=3600.*24*1000
-#    kelvin=273.15
-#    mm2m=0.001
-#    m2mm=1000.
-#    rhow_pure_water=1000
-#    g=9.8
-#    second2day=1./3600/24
-#    kg2g=1000.
-#    g2kg=0.001
-#    #self.psim_log_range=-[0.0001:0.0001:0.001,0.002:0.001:0.01,0.02:0.01:0.1,0.2:0.1:1,2:1:10,20:10:100,200:100:1000,2000:1000:10000,20000:10000:1e5...
-#    #	,2e5:1e5:1e6,2e6:1e6:9e6,1e7:1e7:9e7,1e8:1e8:9e8]
-#    mol_weight_water=0.018 #kg/mol
-#    R =8.314
-#    def __init__(self):
-#        self.g2kg = 0.001
-#        self.kg2g = 1000.
-#        self.ms2mmday=3600.*24*1000
-#        self.kelvin=273.15
-#        self.mm2m=0.001
-#        self.m2mm=1000.
-#        self.rhow_pure_water=1000
-#        self.g=9.8
-#        self.second2day=1./3600/24
-#        self.kg2g=1000.
-#        self.g2kg=0.001
-#        #self.psim_log_range=-[0.0001:0.0001:0.001,0.002:0.001:0.01,0.02:0.01:0.1,0.2:0.1:1,2:1:10,20:10:100,200:100:1000,2000:1000:10000,20000:10000:1e5...
-#        #	,2e5:1e5:1e6,2e6:1e6:9e6,1e7:1e7:9e7,1e8:1e8:9e8]
-#        self.mol_weight_water=0.018 #kg/mol
-#        self.R =8.314
-#    def area(self):
-#        return self.x * self.y
-#    def perimeter(self):
-#        return 2 * self.x + 2 * self.y
-#    def describe(self,text):
-#        self.description = text
-#    def authorName(self,text):
-#        self.author = text
-#    def scaleSize(self,scale):
-#        self.x = self.x * scale
-#        self.y = self.y * scale
+    #tmp1=(arg['psi']/arg['a'])**arg['n']
+    #tmp2=np.log(np.e+tmp1)
+    #tmp3=arg['por']*(1./tmp2)**arg['m']
+
+
+
+    tmp1=1  -  np.log(1+arg['psi']/arg['hr'])  /  np.log(1+1.0e6/arg['hr'])
+    tmp2=np.exp(1)+(arg['psi']/arg['af'])**arg['nf']
+    tmp3=np.log(tmp2)**arg['mf']
+    tmp4=arg['por']*tmp1*(1/tmp3)
+    if arg['plot']:
+        import matplotlib.pyplot as plt
+        import matplotlib.pylab as pylab
+
+
+        params = {'legend.fontsize': 13,
+                  'figure.figsize': (10, 5),
+                 'axes.labelsize': 12,
+                 'axes.titlesize':'x-large',
+                 'xtick.labelsize':'20',
+                 'ytick.labelsize':'20',
+        #         'ytick.labelweight':'bold',
+                  'axes.labelsize': 16,
+                   'axes.labelweight':'bold'}
+        #         'axes.grid':'linewidth=grid_width,color = '0.5''}
+        #         'linewidth':lw,'markers.size':ms,'markers.edgewidth':mew}
+        plt.rcParams["font.weight"] = "bold"
+        plt.rcParams["axes.labelweight"] = "bold"
+        pylab.rcParams.update(params)
+        
+        
+        
+        fig = plt.figure(figsize=(12,12))
+        
+        fig.subplots_adjust(left=0.18, right=0.98, top=0.99, bottom=0.15)
+        lw=4
+        ms=12
+        mew=4
+        grid_width=2
+        y_fontsize=25
+        
+        
+        ax = fig.add_subplot(111)
+        for axis in ['top','bottom','left','right']:
+          ax.spines[axis].set_linewidth(2) 
+        
+        #sp_sch[sch_name].te_fit=np.polyfit(sp_sch[sch_name].df['commercial'],sp_sch[sch_name].df['te'],1)
+        #legend_string_second_te="%.3e" % sp_sch[sch_name].te_fit[0] + ' * x +' "%.3e" % sp_sch[sch_name].te_fit[1]
+        #legend_string_first_te="%.3e" % sp_sch[sch_name].te_fit[0] + ' * x +' "%.3e" % sp_sch[sch_name].te_fit[1]
+
+        plt.semilogx(arg['psi'],tmp4 ,'ro',linewidth=lw,label='SWCC')
+        plt.grid(linewidth=grid_width,color = '0.5')
+
+        plt.xlabel('SOIL SUCTION (kPa)', fontsize=y_fontsize, labelpad=15)
+        plt.ylabel('GRAVIMETRIC WATER CONTENT (g)', fontsize=y_fontsize, labelpad=15)
+
+    return tmp4, arg['psi']
+
+
+def swcc_reverse_fredlund_xing_1994(**kwargs):
+    '''Soil water retention curve from Fredlund and Xing [1994]
+      reversing calculating from content to suction
+      input should be suction'''
+    arg_defaults = {
+                'nf'  :0.85,
+                'mf'  :0.31,
+                'af'  :24.9999,
+                'hr'  :223873.8,
+                'por':0.54,
+                'vwc':0.1
+                }
+
+    arg=arg_defaults
+    for d in kwargs:
+        arg[d]= kwargs.get(d)
+
+    psi_1=0.02  # after a testing, the starting point would be good to be near the saturation level
+    psi_0=0.
+    
+    if arg['vwc']>=arg['por']:
+        psi_1=0
+    else:
+        while abs(psi_0-psi_1)>0.01:
+            psi_0=psi_1
+
+            psi_on_af  = psi_0/arg['af']
+            log_on_log =  np.log(1+psi_0/arg['hr']) / np.log(1+1.e6/arg['hr']) 
+
+            e_plus    = np.e+psi_on_af**arg['nf']
+            log_e      = np.log(e_plus) 
+            dw_dpsi_0   =  - arg['mf']*arg['nf']*psi_on_af**(-1+arg['nf']) * arg['por'] * (1- log_on_log) * log_e **(-1-arg['mf']) /  arg['af'] / e_plus - arg['por']* log_e**(-arg['mf'])/arg['hr']/(1+psi_0/arg['hr'])/np.log(1+1.e6/arg['hr'])
+
+
+            tmp1=1  -  np.log(1+psi_0/arg['hr'])  /  np.log(1+1.0e6/arg['hr'])
+            tmp2=np.exp(1)+(psi_0/arg['af'])**arg['nf']
+            tmp3=np.log(tmp2)**arg['mf']
+            w_0=arg['por']*tmp1*(1/tmp3)-arg['vwc']
+
+
+            psi_1= psi_0 - w_0/dw_dpsi_0
+
+
+    return psi_1
+
