@@ -88,7 +88,7 @@ def upload_phant(pht,parsed_data,screen_display):
             time.sleep(30)
             continue
 
-def open_si1145(open_attempt_limit,screen_display):
+def open_si1145(open_attempt_limit,screen_display,sensor):
     open_attempt=1
     while open_attempt<open_attempt_limit:
         try:
@@ -102,22 +102,30 @@ def open_si1145(open_attempt_limit,screen_display):
     return sensor 
 
 
-def read_si1145(number_readings,sleep_time_s):
+def read_si1145(number_readings,sleep_time_s,sensor):
     # make sure it gives useful data by repeating the reset
     #sensor = SI1145.SI1145() #"/dev/i2c-1")
-    sensor =open_si1145(500,screen_display)
+    #sensor =open_si1145(500,screen_display)
     time.sleep(3)   # a good sleep before reading is found extremetly important
     vis = sensor.readVisible()
-    while vis == 0:
+    ir = sensor.readIR()
+    uv = sensor.readUV()
+    try_times=100
+    current_try=0
+    while vis+ir+uv == 0:
         print 'si1145 init failed'
         time.sleep(2)
         print str(vis)
         sensor=SI1145.SI1145_RESET
         time.sleep(2)
-        sensor =open_si1145(500,screen_display)
+        sensor =open_si1145(500,screen_display,sensor)
         #sensor = SI1145.SI1145() #"/dev/i2c-1")
         time.sleep(2)
         vis = sensor.readVisible()
+        ir = sensor.readIR()
+        uv = sensor.readUV()
+        current_try+=1
+        if current_try==try_times: break
     vis=0
     ir=0
     uv=0
@@ -131,7 +139,7 @@ def read_si1145(number_readings,sleep_time_s):
     vis/=float(number_readings)
     ir/=float(number_readings)
     uv/=float(number_readings)
-    sensor=SI1145.SI1145_RESET
+    #sensor=SI1145.SI1145_RESET
     return vis,ir,uv
 
 # initialize the weather station data
@@ -177,7 +185,7 @@ while True:
         parsed_data_weather[key.lower()]=float(current_read[2*i+1])
     ## get solar from rpi
     msg_solar=''
-    [vis,ir,uv]=read_si1145(si1145_number_readings,si1145_sleep_interval_seconds)
+    [vis,ir,uv]=read_si1145(si1145_number_readings,si1145_sleep_interval_seconds,sensor)
     parsed_data_weather["vis_down"]=vis
     parsed_data_weather["ir_down"]=ir
     parsed_data_weather["uv_down"]=uv

@@ -25,9 +25,9 @@ port_sensors='USB VID:PID=0403:6015 SNR=DN01JJDJ'
 
 # makesure the salinity sensor are well initialized
 serial_openlock.get_result_by_input(port=port_sensors,command="SoilSalinity")
-time.delay(3)
+time.sleep(3)
 serial_openlock.get_result_by_input(port=port_sensors,command="SoilSalinity")
-time.delay(3)
+time.sleep(3)
 
 
 #-------------------below are preparation for the scale arduino ----------- 
@@ -53,7 +53,7 @@ save_to_file=True
 # the Filename of the csv file for storing file
 file_name= 'area51_redmud.csv'
 
-sleep_time_seconds=1 #25*60
+sleep_time_seconds=25*60
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 delimiter=','
@@ -119,7 +119,7 @@ while True:
     parsed_data_area51['commercial']=float(current_read_balance)
 
 
-    upload_phant(pht_weather,parsed_data_weather,screen_display)
+    upload_phant(pht_area51,parsed_data_area51,screen_display)
     # save to file
     time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     if screen_display: print i,delimiter,time_now,delimiter,msg_sensors.rstrip(),msg_loadcell.rstrip(),delimiter,msg_balance.rstrip()

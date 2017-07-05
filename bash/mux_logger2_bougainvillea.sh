@@ -5,5 +5,5 @@
 sleep 38 
 #su pi
 cd /home/pi/pyduino/python/
-python mux_logger_bougainvillea.py  >>bougainvillea_log
+/usr/bin/stdbuf -i0 -o0 -e0 python mux_logger_bougainvillea.py  >>bougainvillea_log
 
