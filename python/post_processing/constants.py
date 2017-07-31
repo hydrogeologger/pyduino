@@ -163,7 +163,8 @@ def swcc_fredlund_xing_1994(**kwargs):
 def swcc_reverse_fredlund_xing_1994(**kwargs):
     '''Soil water retention curve from Fredlund and Xing [1994]
       reversing calculating from content to suction
-      input should be suction'''
+      input should be volumetric water content
+      output unit is kpa'''
     arg_defaults = {
                 'nf'  :0.85,
                 'mf'  :0.31,
@@ -177,31 +178,39 @@ def swcc_reverse_fredlund_xing_1994(**kwargs):
     for d in kwargs:
         arg[d]= kwargs.get(d)
 
-    psi_1=0.02  # after a testing, the starting point would be good to be near the saturation level
-    psi_0=0.
-    
-    if arg['vwc']>=arg['por']:
-        psi_1=0
-    else:
-        while abs(psi_0-psi_1)>0.01:
-            psi_0=psi_1
+    psi_outcome=np.zeros(len(np.atleast_1d(arg['vwc'])))
 
-            psi_on_af  = psi_0/arg['af']
-            log_on_log =  np.log(1+psi_0/arg['hr']) / np.log(1+1.e6/arg['hr']) 
+    for i,k in enumerate(np.atleast_1d(arg['vwc'])) :
+        #import pdb
+        #psi_1=0.02  # after a testing, the starting point would be good to be near the saturation level
+        psi_1=arg['af']  #2017-07-08 16:27 turns out the air entry pressure is the best start guessing point 
+        psi_0=0.
+        
+        #pdb.set_trace()
+        if k>=arg['por']:
+            psi_1=0
+        else:
+            while abs(psi_0-psi_1)>0.0001:
+                psi_0=psi_1
 
-            e_plus    = np.e+psi_on_af**arg['nf']
-            log_e      = np.log(e_plus) 
-            dw_dpsi_0   =  - arg['mf']*arg['nf']*psi_on_af**(-1+arg['nf']) * arg['por'] * (1- log_on_log) * log_e **(-1-arg['mf']) /  arg['af'] / e_plus - arg['por']* log_e**(-arg['mf'])/arg['hr']/(1+psi_0/arg['hr'])/np.log(1+1.e6/arg['hr'])
+                psi_on_af  = psi_0/arg['af']
+                log_on_log =  np.log(1+psi_0/arg['hr']) / np.log(1+1.e6/arg['hr']) 
 
-
-            tmp1=1  -  np.log(1+psi_0/arg['hr'])  /  np.log(1+1.0e6/arg['hr'])
-            tmp2=np.exp(1)+(psi_0/arg['af'])**arg['nf']
-            tmp3=np.log(tmp2)**arg['mf']
-            w_0=arg['por']*tmp1*(1/tmp3)-arg['vwc']
-
-
-            psi_1= psi_0 - w_0/dw_dpsi_0
+                e_plus    = np.e+psi_on_af**arg['nf']
+                log_e      = np.log(e_plus) 
+                dw_dpsi_0   =  - arg['mf']*arg['nf']*psi_on_af**(-1+arg['nf']) * arg['por'] * (1- log_on_log) * log_e **(-1-arg['mf']) /  arg['af'] / e_plus - arg['por']* log_e**(-arg['mf'])/arg['hr']/(1+psi_0/arg['hr'])/np.log(1+1.e6/arg['hr'])
 
 
-    return psi_1
+                tmp1=1  -  np.log(1+psi_0/arg['hr'])  /  np.log(1+1.0e6/arg['hr'])
+                tmp2=np.exp(1)+(psi_0/arg['af'])**arg['nf']
+                tmp3=np.log(tmp2)**arg['mf']
+                w_0=arg['por']*tmp1*(1/tmp3)-k
+
+
+                psi_1= psi_0 - w_0/dw_dpsi_0
+        #print psi_1
+        psi_outcome[i] = psi_1
+
+
+    return psi_outcome
 
