@@ -715,14 +715,17 @@ char printInfo(char i){
 
   Serial.write("SuTp");
   Serial.print(delimiter);
+  output_string += "";
   while(mySDI12.available()){
     char c = mySDI12.read();
     if((c!='\n') && (c!='\r')) 
     {
-      Serial.write(c); //print sensor info and type
+      output_string+=Serial.write(c); //print sensor info and type
     }
     delay(5); 
   } 
+  Serial.print("output string is")
+  Serial.print(output_string);
   //Serial.print(delimiter);
 }
 
