@@ -186,7 +186,8 @@ String temp="";
     int firstValue_int=firstValue.toInt();
     String secondValue = temp.substring(commaIndex+1); 
     float secondValue_int=secondValue.toFloat();
-    
+    Serial.print(commaIndex);
+          Serial.print(',');
     Serial.print(temp);
       Serial.print(',');
     Serial.print(firstValue_int);
