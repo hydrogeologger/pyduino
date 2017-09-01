@@ -164,11 +164,21 @@ void loop(void) {
         if (content == "All") { 
             Serial.print("All");
             Serial.print(seperator);
-            power_and_read_temp_sensors_ds18b20(ds18b20_pw);
-            ana_digi_loop();
+            //power_and_read_temp_sensors_ds18b20(ds18b20_pw);
+            //ana_digi_loop();
             //sdi12_loop();
             si1145_loop(si1145_pw_1,number_readings_si1145,reading_interval_ms_si1145);
             si1145_loop(si1145_pw_2,number_readings_si1145,reading_interval_ms_si1145);
+            power_and_read_temp_sensors_ds18b20(ds18b20_pw);
+            ana_digi_loop();           
+            read_salinity_humidity_sensor(DHT22_PIN_2,3,3,dht22_pw);
+            read_salinity_humidity_sensor(DHT22_PIN_1,3,3,dht22_pw);
+            digitalWrite(sdi12_pw,HIGH); 
+            delay(2000);           
+            sdi12_init();
+            delay(2000);
+            sdi12_loop();
+            digitalWrite(sdi12_pw,LOW);                         
             Serial.println("AllDone");
         }
         else if (content == "Soil") {
@@ -270,7 +280,10 @@ void si1145_loop(int power_sw,int number_readings_si1145,int sleep_interval_ms) 
   vis/= float(number_readings);
   ir /= float(number_readings);
   uvindex /= float(number_readings);
-
+  Serial.print("Solar");
+  Serial.print(seperator);
+  Serial.print(power_sw);
+  Serial.print(seperator);
   Serial.print("Vis");
   Serial.print(seperator);
   Serial.print(vis);
@@ -495,54 +508,54 @@ void read_temp_sensors_ds18b20() {
 
 
 
-
-      // repeating this section to provide redundancy
-      present = ds.reset();
-      ds.select(addr);    
-      ds.write(0xBE);         // Read Scratchpad
-    
-      //Serial.print("  Data = ");
-      //Serial.print(present, HEX);
-      //Serial.print(" ");
-      for ( i = 0; i < 9; i++) {           // we need 9 bytes
-        data[i] = ds.read();
-        //Serial.print(data[i], HEX);
-        //Serial.print(" ");
-      }
-//      // add one more to produce redundancy
-//      
+//
+//      // repeating this section to provide redundancy
+//      present = ds.reset();
+//      ds.select(addr);    
+//      ds.write(0xBE);         // Read Scratchpad
+//    
+//      //Serial.print("  Data = ");
+//      //Serial.print(present, HEX);
+//      //Serial.print(" ");
 //      for ( i = 0; i < 9; i++) {           // we need 9 bytes
 //        data[i] = ds.read();
 //        //Serial.print(data[i], HEX);
 //        //Serial.print(" ");
-//      }      
-      //Serial.print(" CRC=");
-      //Serial.print(OneWire::crc8(data, 8), HEX);
-      //Serial.println();
-    
-      // Convert the data to actual temperature
-      // because the result is a 16 bit signed integer, it should
-      // be stored to an "int16_t" type, which is always 16 bits
-      // even when compiled on a 32 bit processor.
-       raw = (data[1] << 8) | data[0];
-      if (type_s) {
-        raw = raw << 3; // 9 bit resolution default
-        if (data[7] == 0x10) {
-          // "count remain" gives full 12 bit resolution
-          raw = (raw & 0xFFF0) + 12 - data[6];
-        }
-      } else {
-        byte cfg = (data[4] & 0x60);
-        // at lower res, the low bits are undefined, so let's zero them
-        if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
-        else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
-        else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
-        //// default is 12 bit resolution, 750 ms conversion time
-      }
-      celsius = (float)raw / 16.0;
-      Serial.print(delimiter);
-      Serial.print(celsius);
-      Serial.write(delimiter);
+//      }
+////      // add one more to produce redundancy
+////      
+////      for ( i = 0; i < 9; i++) {           // we need 9 bytes
+////        data[i] = ds.read();
+////        //Serial.print(data[i], HEX);
+////        //Serial.print(" ");
+////      }      
+//      //Serial.print(" CRC=");
+//      //Serial.print(OneWire::crc8(data, 8), HEX);
+//      //Serial.println();
+//    
+//      // Convert the data to actual temperature
+//      // because the result is a 16 bit signed integer, it should
+//      // be stored to an "int16_t" type, which is always 16 bits
+//      // even when compiled on a 32 bit processor.
+//       raw = (data[1] << 8) | data[0];
+//      if (type_s) {
+//        raw = raw << 3; // 9 bit resolution default
+//        if (data[7] == 0x10) {
+//          // "count remain" gives full 12 bit resolution
+//          raw = (raw & 0xFFF0) + 12 - data[6];
+//        }
+//      } else {
+//        byte cfg = (data[4] & 0x60);
+//        // at lower res, the low bits are undefined, so let's zero them
+//        if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
+//        else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
+//        else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
+//        //// default is 12 bit resolution, 750 ms conversion time
+//      }
+//      celsius = (float)raw / 16.0;
+//      Serial.print(delimiter);
+//      Serial.print(celsius);
+//      Serial.write(delimiter);
 
       
   }
@@ -715,16 +728,16 @@ char printInfo(char i){
 
   Serial.write("SuTp");
   Serial.print(delimiter);
-  output_string += "";
+  String output_string = "";
   while(mySDI12.available()){
     char c = mySDI12.read();
     if((c!='\n') && (c!='\r')) 
     {
-      output_string+=Serial.write(c); //print sensor info and type
+      output_string+=c; //Serial.write(c); //print sensor info and type
     }
     delay(5); 
   } 
-  Serial.print("output string is")
+  //Serial.print("output string is");
   Serial.print(output_string);
   //Serial.print(delimiter);
 }

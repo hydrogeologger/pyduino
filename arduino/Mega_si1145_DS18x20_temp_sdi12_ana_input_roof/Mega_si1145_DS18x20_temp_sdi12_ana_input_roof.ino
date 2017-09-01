@@ -63,8 +63,8 @@ char seperator=',';
 int number_sensors=12;
 // the setup routine runs once when you press reset:
 
-int number_readings=20;
-int dummy_readings=30;
+int number_readings=7;
+int dummy_readings=3;
 const char delimiter=',';
 // -----------------ubove required by analog digital for moisture --------------------
 
@@ -79,10 +79,10 @@ void setup(void) {
   }
 // -----------------------------below is required by si1145 sensor ------------
 
-  if (! uv.begin()) {
-    Serial.println("Didn't find Si1145");
-    while (1);
-  }
+//  if (! uv.begin()) {
+//    Serial.println("Didn't find Si1145");
+//    while (1);
+//  }
 // -----------------------------above is required by si1145 sensor ------------
 
 }
@@ -193,12 +193,12 @@ void ana_digi_loop() {
 
     for (int j=0;j<dummy_readings;j++){
       analogRead(analog_pins[i]);
-      //delay(100);
+      delay(10);
     }
 
     for (int j=0;j<number_readings;j++){
       analogvals1[i]+=analogRead(analog_pins[i]);
-      delay(10);
+      delay(200);
     }
 
     analogvals1[i]=analogvals1[i]/number_readings;
