@@ -152,7 +152,7 @@ void setup(void) {
 } // setup
 
 void loop(void) { 
-    String content = "";
+    String m = "";
     char character;
     while(Serial.available()) {
         character = Serial.read();
