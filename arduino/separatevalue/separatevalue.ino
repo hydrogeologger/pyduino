@@ -38,20 +38,25 @@ void loop() {
         delay (10); 
     }
     if (content != ""){
-        Serial.println(content);
+        //Serial.println(content);
         int str_ay_size=hydrogeolog1.split_strings(content,str_ay);
-        Serial.println(str_ay_size);
-	      Serial.print(delimiter);
-        hydrogeolog1.print_str_ay(str_ay_size,str_ay);
+        //Serial.println(str_ay_size);
+	      //Serial.print(delimiter);
+        //hydrogeolog1.print_str_ay(str_ay_size,str_ay);
         // assign power pins
-        int ana_pow_sw_idx  = hydrogeolog1.strcmpi("power",str_ay_size,str_ay);
-        int analog_idx    = hydrogeolog1.strcmpi("analog",str_ay_size,str_ay);
+        //int ana_pow_sw_idx  = hydrogeolog1.strcmpi("power",str_ay_size,str_ay);
+        //int analog_idx    = hydrogeolog1.strcmpi("analog",str_ay_size,str_ay);
         //int number_of_measurement_idx = hydrogeolog1.strcmpi("points",str_ay_size,str_ay);
         //int number_of_dummies_idx = hydrogeolog1.strcmpi("dummies",str_ay_size,str_ay);
         //int measure_time_interval_ms_idx = hydrogeolog1.strcmpi("interval_mm",str_ay_size,str_ay);
-
+        //power,43,analog,15,point,3,interval_mm,200,
+        //
+        int debug_sw    =hydrogeolog1.parse_argument("debug",0,str_ay_size,str_ay);
+        int analog_in_pin=hydrogeolog1.parse_argument("analog",-1,str_ay_size,str_ay);
+        int power_sw_pin    =hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
+    
         //analog reading
-        if ( (ana_pow_sw_idx!=-1) && (analog_idx!=-1))   //&&(number_of_measurement!=-1) && (number_of_dummies!=-1) 
+        if ( (analog_in_pin!=-1) && (power_sw_pin!=-1))   //&&(number_of_measurement!=-1) && (number_of_dummies!=-1) 
             {
             //int power_sw_pin  = str_ay[ana_pow_sw_idx+1].toInt();
             //int analog_in_pin = str_ay[analog_idx+1].toInt();
@@ -65,23 +70,29 @@ void loop() {
             int number_of_measurement=hydrogeolog1.parse_argument("points",5,str_ay_size,str_ay);
             int number_of_dummies=hydrogeolog1.parse_argument("dummies",3,str_ay_size,str_ay);
             int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",10,str_ay_size,str_ay);
-            
-            Serial.print("power");
-            Serial.print(delimiter);
-            Serial.print(power_sw_pin);
-            Serial.print(delimiter);
             Serial.print("analog");
             Serial.print(delimiter);
             Serial.print(analog_in_pin);
             Serial.print(delimiter);
-            Serial.print("points");
-            Serial.print(delimiter);
-            Serial.print(number_of_measurement);
-            Serial.print(delimiter);
-            Serial.print("interval_mm");
-            Serial.print(delimiter);
-            Serial.print(measure_time_interval_ms);
-            Serial.print(delimiter);
+            if (debug_sw==1)
+            {            
+                Serial.print("power");
+                Serial.print(delimiter);
+                Serial.print(power_sw_pin);
+                Serial.print(delimiter);
+                Serial.print("points");
+                Serial.print(delimiter);
+                Serial.print(number_of_measurement);
+                Serial.print(delimiter);
+                Serial.print("dummies");
+                Serial.print(delimiter);
+                Serial.print(number_of_dummies);                
+                Serial.print(delimiter);
+                Serial.print("interval_mm");
+                Serial.print(delimiter);
+                Serial.print(measure_time_interval_ms);
+                Serial.print(delimiter);
+            }
             float outcome=hydrogeolog1.analog_excite_read(power_sw_pin,analog_in_pin,number_of_dummies,number_of_measurement,measure_time_interval_ms);    
             Serial.println(outcome);   
               } // analog read
@@ -92,7 +103,7 @@ void loop() {
             
             if ( (pow_sw_idx!=-1) )  
             {
-                pow_sw_status = 0;
+                int pow_sw_status = 0;
                 //if (number_of_measurement_idx   !=-1){number_of_measurement=str_ay[number_of_measurement_idx+1].toInt();}
 
                 Serial.print("power_switch");
@@ -104,7 +115,7 @@ void loop() {
 
 	
             }  //power switch
+}//if
+
+
 }//loop
-
-
-

@@ -14,6 +14,7 @@ class hydrogeolog
       void print_str_ay(int number_opts,String str_ay2[20]);
       int strcmpi(String str_source, int number_opts,String str_ay2[20]);
       float analog_excite_read(int power_sw_idx,int analog_idx,int number_of_dummies,int number_of_measurement,int measure_time_interval);
+      int parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20]);
     private:
       int _pin;
       String inp2; 

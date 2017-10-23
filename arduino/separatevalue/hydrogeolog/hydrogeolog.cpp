@@ -64,9 +64,10 @@ int hydrogeolog::strcmpi(String str_source, int number_opts,String str_ay2[20])
 int hydrogeolog::parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20])
     /* parse argument */
     {
-    int str_idx=strcmpi(str_source,number_opts,str_ay2[20]);
-    string_value=default_values;
-    if (str_idx!=-1){str_value=str_ay[str_idx+1].toInt();}
+    //strcmpi(str_source,number_opts,str_ay2[20]);
+    int str_idx=strcmpi(str_source,number_opts,str_ay2);
+    int str_value=default_values;
+    if (str_idx!=-1){str_value=str_ay2[str_idx+1].toInt();}
     return str_value;
      } //parse_argument
 
