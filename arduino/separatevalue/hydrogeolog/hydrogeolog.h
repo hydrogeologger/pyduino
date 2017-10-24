@@ -4,6 +4,7 @@
 #include "Arduino.h"
 #include <dht.h>
 //#include <DHT.h>
+#include <OneWire.h>
 //#include "hydrogeolog"
 
 class hydrogeolog
@@ -20,6 +21,7 @@ class hydrogeolog
       void switch_power(int power_sw_idx,int status);
       void dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval); 
       void print_string_delimiter_value(String string_input,String value);
+      void search_ds18b20(int digi_pin,int power_switch);
       private:
       int _pin;
       String inp2; 

@@ -1,10 +1,5 @@
 /*
-  AnalogReadSerial
-  Reads an analog input on pin 0, prints the result to the serial monitor.
-  Graphical representation is available using serial plotter (Tools > Serial Plotter menu)
-  Attach the center pin of a potentiometer to pin A0, and the outside pins to +5V and ground.
 
-  This example code is in the public domain.
 */
 static const uint8_t analog_pins[]  = {A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15};
 int const number_analog_pins=sizeof(analog_pins);
@@ -46,6 +41,9 @@ void loop() {
         //
         int debug_sw        = hydrogeolog1.parse_argument("debug",0,str_ay_size,str_ay);
         int analog_in_pin   = hydrogeolog1.parse_argument("analog",-1,str_ay_size,str_ay);
+
+
+        
         int power_sw_pin    = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
     
         //analog reading
@@ -54,10 +52,8 @@ void loop() {
             int number_of_measurement=hydrogeolog1.parse_argument("points",5,str_ay_size,str_ay);
             int number_of_dummies=hydrogeolog1.parse_argument("dummies",3,str_ay_size,str_ay);
             int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",10,str_ay_size,str_ay);
-            Serial.print("analog");
-            Serial.print(delimiter);
-            Serial.print(analog_in_pin);
-            Serial.print(delimiter);
+            hydrogeolog1.print_string_delimiter_value("analog"  ,String(analog_in_pin)  );
+
             if (debug_sw==1)
             {            
                 hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
@@ -75,15 +71,9 @@ void loop() {
             int pow_sw   = hydrogeolog1.parse_argument("power_switch",-1,str_ay_size,str_ay);
             int pow_sw_status    = hydrogeolog1.parse_argument("power_switch_status",0,str_ay_size,str_ay);            
             if ( (pow_sw!=-1) )  
-            {
-
-                Serial.print("power_switch");
-                Serial.print(delimiter);
-                Serial.print(pow_sw);              
-                Serial.print(delimiter);
-                Serial.print("power_switch_status");
-                Serial.print(delimiter);
-                Serial.println(pow_sw_status);             
+            { 
+                hydrogeolog1.print_string_delimiter_value("power_switch"  ,String(pow_sw)  );
+                hydrogeolog1.print_string_delimiter_value("power_switch_status"  ,String(pow_sw_status) );
                 hydrogeolog1.switch_power(pow_sw,pow_sw_status);
             }  //power switch
 
@@ -113,6 +103,25 @@ void loop() {
             }
             hydrogeolog1.dht22_excite_read(power_sw_pin,dht22_in_pin,number_of_dummies,number_of_measurement,measure_time_interval_ms);    
               } // analog read
+
+       /*ds18b20 search
+        ds18b20_search,13,power,42
+       */
+        int ds18b20_search_pin   = hydrogeolog1.parse_argument("ds18b20_search",-1,str_ay_size,str_ay);
+        power_sw_pin    = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
+        if ( (ds18b20_search_pin!=-1) && (power_sw_pin!=-1))   
+            {
+            digitalWrite(power_sw_pin,HIGH);
+            delay(1000);
+            hydrogeolog1.search_ds18b20(ds18b20_search_pin,power_sw_pin);
+
+            digitalWrite(power_sw_pin,LOW);
+            } //if ds18b20_search
+
+
+
+
+
 
             
 }//if
