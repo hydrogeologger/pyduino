@@ -119,26 +119,37 @@ void hydrogeolog::dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_
     dht DHT;
     #define DHT22_PIN digi_idx
 
-        digitalWrite(power_sw_idx,HIGH);
+    digitalWrite(power_sw_idx,HIGH);
+    delay(1000);
+    float results=0.0;
+    for (int j=0;j<number_of_dummies;j++){
+        int chk1=DHT.read22(digi_idx);
         delay(1000);
-        float results=0.0;
-    //for (int j=0;j<number_of_dummies;j++){
-    //    int chk1=DHT.read22(digi_idx);
-    //    delay(100);
-    //}
+    }
 
     float t_results=0.;
     float rh_results=0.;
-    //for (int j=0;j<number_of_measurements;j++){
+    for (int j=0;j<number_of_measurements;j++){
     //  t_results+=DHT.temperature;
-    //  delay(measure_time_interval);
 
     //}
       //Serial.print(t_results);  
       int chk1=DHT.read22(DHT22_PIN);
-      Serial.print(DHT.temperature);  
+      t_results+=DHT.temperature;
+      rh_results+= DHT.humidity;
+      //t_results+= temp.toFloat();
+      //rh_results+= DHT.humidity.toFloat();
+      delay(measure_time_interval);
+      }
+
+      t_results/= float(number_of_measurements);
+      rh_results/=float(number_of_measurements);
+      Serial.print(t_results);  
       Serial.print(delimiter);
-      Serial.println(DHT.humidity);  
+      Serial.println(rh_results); 
+      //Serial.print(DHT.temperature);  
+      //Serial.print(delimiter);
+      //Serial.println(DHT.humidity);  
       //results+=analogRead(analog_idx);
 //    }
 //
@@ -149,6 +160,13 @@ void hydrogeolog::dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_
 //
     } // analog_excite_read
 
+void hydrogeolog::print_string_delimiter_value(String string_input,String value)
+    {
+    Serial.print(string_input);
+    Serial.print(delimiter);
+    Serial.print(value);
+    Serial.print(delimiter);
+    }
 
 
  

@@ -13,12 +13,6 @@ static int digi_out_pins[] = {43,45,47,49,35,37,39,41,27,29,31,33,24,22,23,25,9,
 int const number_digi_out_pins=sizeof(digi_out_pins);
 #include "hydrogeolog/hydrogeolog.h"
 //#include "/home/chenming/Dropbox/scripts/github/pyduino/arduino/libraries/hydrogeolog/hydrogeolog.h"
-//include <hydrogeolog.h>
-//#include "DHT.h"
-//#include <dht.h>
-////#include <DHT.h>
-//dht DHT1;
-//DHT DHT1;
 const char delimiter=',';
 hydrogeolog hydrogeolog1(delimiter);
 String str_ay[20];
@@ -66,22 +60,10 @@ void loop() {
             Serial.print(delimiter);
             if (debug_sw==1)
             {            
-                Serial.print("power");
-                Serial.print(delimiter);
-                Serial.print(power_sw_pin);
-                Serial.print(delimiter);
-                Serial.print("points");
-                Serial.print(delimiter);
-                Serial.print(number_of_measurement);
-                Serial.print(delimiter);
-                Serial.print("dummies");
-                Serial.print(delimiter);
-                Serial.print(number_of_dummies);                
-                Serial.print(delimiter);
-                Serial.print("interval_mm");
-                Serial.print(delimiter);
-                Serial.print(measure_time_interval_ms);
-                Serial.print(delimiter);
+                hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
+                hydrogeolog1.print_string_delimiter_value("points" ,String(number_of_measurement)  );
+                hydrogeolog1.print_string_delimiter_value("dummies",String(number_of_dummies)  );
+                hydrogeolog1.print_string_delimiter_value("interval_mm",String(measure_time_interval_ms)  );                
             }
             float outcome=hydrogeolog1.analog_excite_read(power_sw_pin,analog_in_pin,number_of_dummies,number_of_measurement,measure_time_interval_ms);    
             Serial.println(outcome);   
@@ -111,39 +93,25 @@ void loop() {
 
        /*dht22 measurement
        
-       dht22,10,power,48,points,2,dummies,1,interval_mm,10,debug,1
+       dht22,10,power,48,points,2,dummies,1,interval_mm,1000,debug,1
        a 10 k resistor is required to put between digi 10 and ground
        */
        if ( (dht22_in_pin!=-1) && (power_sw_pin!=-1))   //&&(number_of_measurement!=-1) && (number_of_dummies!=-1) 
         {
             int number_of_measurement=hydrogeolog1.parse_argument("points",1,str_ay_size,str_ay);
             int number_of_dummies=hydrogeolog1.parse_argument("dummies",0,str_ay_size,str_ay);
-            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",10,str_ay_size,str_ay);
-            Serial.print("dht22");
-            Serial.print(delimiter);
-            Serial.print(dht22_in_pin);
-            Serial.print(delimiter);
+            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",1000,str_ay_size,str_ay);
+            if (measure_time_interval_ms<1000) {measure_time_interval_ms=1000;}
+            // needs to be at leaset 1000 ms
+            hydrogeolog1.print_string_delimiter_value("dht22"  ,String(dht22_in_pin)  );
             if (debug_sw==1)
             {            
-                Serial.print("power");
-                Serial.print(delimiter);
-                Serial.print(power_sw_pin);
-                Serial.print(delimiter);
-                Serial.print("points");
-                Serial.print(delimiter);
-                Serial.print(number_of_measurement);
-                Serial.print(delimiter);
-                Serial.print("dummies");
-                Serial.print(delimiter);
-                Serial.print(number_of_dummies);                
-                Serial.print(delimiter);
-                Serial.print("interval_mm");
-                Serial.print(delimiter);
-                Serial.print(measure_time_interval_ms);
-                Serial.print(delimiter);
+                hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
+                hydrogeolog1.print_string_delimiter_value("points" ,String(number_of_measurement)  );
+                hydrogeolog1.print_string_delimiter_value("dummies",String(number_of_dummies)  );
+                hydrogeolog1.print_string_delimiter_value("interval_mm",String(measure_time_interval_ms)  );
             }
             hydrogeolog1.dht22_excite_read(power_sw_pin,dht22_in_pin,number_of_dummies,number_of_measurement,measure_time_interval_ms);    
-            //Serial.println(outcome);   
               } // analog read
 
             
