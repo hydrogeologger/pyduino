@@ -99,3 +99,56 @@ float hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number
 
 
 
+void hydrogeolog::switch_power(int power_sw_idx,int status)
+    {
+    if (status==1)
+    {
+        digitalWrite(power_sw_idx,HIGH);
+    }
+    else
+    {
+        digitalWrite(power_sw_idx,LOW);
+    }
+
+
+    } // switch_power
+
+
+void hydrogeolog::dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
+    {
+    dht DHT;
+    #define DHT22_PIN digi_idx
+
+        digitalWrite(power_sw_idx,HIGH);
+        delay(1000);
+        float results=0.0;
+    //for (int j=0;j<number_of_dummies;j++){
+    //    int chk1=DHT.read22(digi_idx);
+    //    delay(100);
+    //}
+
+    float t_results=0.;
+    float rh_results=0.;
+    //for (int j=0;j<number_of_measurements;j++){
+    //  t_results+=DHT.temperature;
+    //  delay(measure_time_interval);
+
+    //}
+      //Serial.print(t_results);  
+      int chk1=DHT.read22(DHT22_PIN);
+      Serial.print(DHT.temperature);  
+      Serial.print(delimiter);
+      Serial.println(DHT.humidity);  
+      //results+=analogRead(analog_idx);
+//    }
+//
+//    //results=results/float(number_of_measurements);
+    digitalWrite(power_sw_idx,LOW);
+//
+//    return results;
+//
+    } // analog_excite_read
+
+
+
+ 
