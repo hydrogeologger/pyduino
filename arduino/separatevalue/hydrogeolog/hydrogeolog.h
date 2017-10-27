@@ -22,6 +22,8 @@ class hydrogeolog
       void dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval); 
       void print_string_delimiter_value(String string_input,String value);
       void search_ds18b20(int digi_pin,int power_switch);
+      String parse_argument_string(String str_source, String default_values, int number_opts, String str_ay2[20]);
+      void read_DS18B20_by_addr(byte addr[8],int digi_pin);
       private:
       int _pin;
       String inp2; 
