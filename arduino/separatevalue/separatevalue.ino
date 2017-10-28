@@ -114,32 +114,37 @@ void loop() {
             hydrogeolog1.print_string_delimiter_value("ds18b20_search",String(ds18b20_search_pin));  
             digitalWrite(power_sw_pin,HIGH);
             delay(1000);
-            hydrogeolog1.search_ds18b20(ds18b20_search_pin,power_sw_pin);
+            //for (int i=0; i<10;i++){
 
+            hydrogeolog1.search_ds18b20(ds18b20_search_pin,power_sw_pin);
+          
+            //}
             digitalWrite(power_sw_pin,LOW);
             } //if ds18b20_search
 
          /*
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,numbersd,1
-         thermal_suction_ds18b20,A3CF969B,thermal_suction_digi_pin,13,power,42
+         thermal_suction_ds18b20,A3CF969B,digital_input,13,power,42
+         thermal_suction_ds18b20,464CBABE,digital_input,13,power,42
          RESULT FROM 8
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,50,56,69,53,65,51,52,0,40,229,163,74,8,0,0,127
          RESULT FROM 2
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,50,0,5,74,5,0,0,3,40,229,163,74,8,0,0,127
          thermal_suction_ds18b20,28E5A34A,power,4,numbersd,1
+         28 A3 CF 96 8 0 0 9B
+         
          */
          String thermal_suction_ds18b20=hydrogeolog1.parse_argument_string("thermal_suction_ds18b20","",str_ay_size,str_ay);
          power_sw_pin    = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
          int thermal_suction_digi_pin= hydrogeolog1.parse_argument("digital_input",-1,str_ay_size,str_ay);
-         int numbersd= hydrogeolog1.parse_argument("numbersd",-1,str_ay_size,str_ay);
+         //int numbersd= hydrogeolog1.parse_argument("numbersd",-1,str_ay_size,str_ay);
 
          if ( (thermal_suction_ds18b20!="") && (power_sw_pin!=-1))
          {
           hydrogeolog1.print_string_delimiter_value("thermal_suction_ds18b20",String(thermal_suction_ds18b20));
           hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
-          hydrogeolog1.print_string_delimiter_value("numbersd"  ,String(numbersd)  );
-          byte CardNumberByte[4];
-          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
+          //hydrogeolog1.print_string_delimiter_value("numbersd"  ,String(numbersd)  );
+          byte CardNumberByte[4];          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
           const char * CardNumber = thermal_suction_ds18b20.c_str();
           unsigned long number = strtoul( CardNumber, nullptr, 16);
           for(int i=3; i>=0; i--)    // start with lowest byte of number
@@ -150,11 +155,12 @@ void loop() {
             CardNumberByte[i] = byte( number);
             number >>= 8;            // get next byte into position
           }   
-                 
+//                 
             for(int i=0; i<4; i++)
             {
               Serial.print("0x");
-              Serial.println(CardNumberByte[i], HEX);
+              Serial.print(CardNumberByte[i], HEX);
+              Serial.print(delimiter);
             }
             byte heat_suction_sensor_addr[8];
             heat_suction_sensor_addr[0]=0x28;
@@ -165,47 +171,27 @@ void loop() {
             heat_suction_sensor_addr[5]=0x00;
             heat_suction_sensor_addr[6]=0x00;
             heat_suction_sensor_addr[7]=CardNumberByte[3];  
-                        digitalWrite(power_sw_pin,HIGH);
+            
+//            //heat_suction_sensor_addr[0]=0x28;
+//            heat_suction_sensor_addr[0]=40;
+//            heat_suction_sensor_addr[1]=163;
+//            //heat_suction_sensor_addr[1]=0xA3;
+//            heat_suction_sensor_addr[2]=0xCF;
+//            heat_suction_sensor_addr[3]=0x96;
+//            heat_suction_sensor_addr[4]=0x08;
+//            heat_suction_sensor_addr[5]=0x00;
+//            heat_suction_sensor_addr[6]=0x00;
+//            heat_suction_sensor_addr[7]=0x9B;             
+            
+            digitalWrite(power_sw_pin,HIGH);
             delay(1000);
      
             hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,thermal_suction_digi_pin) ;
             //hydrogeolog1.search_ds18b20(ds18b20_search_pin,power_sw_pin);
-
+            Serial.println();
             digitalWrite(power_sw_pin,LOW);               
 //          thermal_suction_sensor[0]=char(thermal_suction_ds18b20);
 //          thermal_suction_ds18b20.getBytes(thermal_suction_sensor, numbersd) ;
-//          Serial.print(thermal_suction_sensor[0],HEX);    
-//          Serial.print(',');                 
-//          Serial.print(thermal_suction_sensor[1],HEX);
-//          Serial.print(','); 
-//          Serial.print(thermal_suction_sensor[2],HEX);           
-//          Serial.print(','); 
-//          Serial.print(thermal_suction_sensor[3],HEX); 
-//          Serial.print(','); 
-//          Serial.print(thermal_suction_sensor[4],HEX); 
-//          Serial.print(','); 
-//          Serial.print(thermal_suction_sensor[5],HEX); 
-//          Serial.print(','); 
-//          Serial.print(thermal_suction_sensor[6],HEX);                               
-//          Serial.print(','); 
-//          Serial.print(thermal_suction_sensor[7],HEX);  
-//          Serial.print(','); 
-//          Serial.print(heat_suction_sensor_1_addr[0],HEX);    
-//          Serial.print(',');                 
-//          Serial.print(heat_suction_sensor_1_addr[1],HEX);
-//          Serial.print(','); 
-//          Serial.print(heat_suction_sensor_1_addr[2],HEX);
-//          Serial.print(',');           
-//          Serial.print(heat_suction_sensor_1_addr[3],HEX); 
-//          Serial.print(','); 
-//          Serial.print(heat_suction_sensor_1_addr[4],HEX); 
-//          Serial.print(','); 
-//          Serial.print(heat_suction_sensor_1_addr[5],HEX); 
-//          Serial.print(','); 
-//          Serial.print(heat_suction_sensor_1_addr[6],HEX);                               
-//          Serial.print(','); 
-//          Serial.print(heat_suction_sensor_1_addr[7],HEX);                              
-//          Serial.println();
                     
          }
 

@@ -192,13 +192,20 @@ void hydrogeolog::search_ds18b20(int digi_pin,int power_switch) {
     byte data[12];
     byte addr[8];
     float celsius, fahrenheit;
-  
+    int loop_time=3;
+  int j=0; 
+  for (int kk=0; kk<loop_time;kk++){
+  Serial.print(kk);
+  boolean while_indicator=true;
+  while ( while_indicator==true){
     if ( !ds.search(addr)) {
       Serial.println("No more addresses.");
-      Serial.println();
       ds.reset_search();
       delay(3000);
-      return;
+      //j+=1;
+      while_indicator=false;
+
+      break;
     }
   
     Serial.print("ROM =");
@@ -281,6 +288,8 @@ void hydrogeolog::search_ds18b20(int digi_pin,int power_switch) {
       Serial.print(" Celsius, ");
       Serial.print(fahrenheit);
       Serial.println(" Fahrenheit");
+      }//while true
+      } // looptime
 }//search_ds18b20
 
 
