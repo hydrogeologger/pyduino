@@ -73,6 +73,7 @@ class pandas_scale:
                 #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'],parse_dates=arg['parse_dates'],
                 #    header=arg['header'],date_parser=arg['date_parser'])
                 self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=arg['names'], header=arg['header'],date_parser=arg['date_parser'],parse_dates=arg['parse_dates'],index_col=arg['index_col'])
+                #print i,','
                 #self.df_sub[i]=pd.read_csv(fn,sep=arg['sep'],names=['sensor1','sensor2','sensor3','sensor4','sensor5','sensor6'], header=arg['header'],date_parser=arg['date_parser'])
 
                 # http://stackoverflow.com/questions/10972410/pandas-combine-two-columns-in-a-dataframe
@@ -91,6 +92,7 @@ class pandas_scale:
                 # http://stackoverflow.com/questions/16167829/in-pandas-how-can-i-reset-index-without-adding-a-new-column
                 # to make sure that it re list the system
                 self.df=self.df.reset_index(drop=True)
+                print i,','
             else:
                 self.df=self.df_sub[0]
 
@@ -240,7 +242,7 @@ class concat_data_roof():
                 fig.canvas.set_window_title('interpolate '+ i)
                 plt.plot(source_df['date_time'],source_df [i]  ,'b+')
                 plt.plot(self.df['date_time'],self.df[i],'ro')
-                plt.title('interpolated '+i+' result')
+                plt.title('interpolated '+i+' result, coef='+str(arg['coef']))
                 plt.show(block=False)
             # http://stackoverflow.com/questions/28694025/converting-a-datetime-column-back-to-a-string-columns-pandas-python
             #cc=b.df['date_time'].dt.strftime('%Y-%m-%d')
