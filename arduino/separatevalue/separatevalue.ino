@@ -171,17 +171,7 @@ void loop() {
             heat_suction_sensor_addr[5]=0x00;
             heat_suction_sensor_addr[6]=0x00;
             heat_suction_sensor_addr[7]=CardNumberByte[3];  
-            
-//            //heat_suction_sensor_addr[0]=0x28;
-//            heat_suction_sensor_addr[0]=40;
-//            heat_suction_sensor_addr[1]=163;
-//            //heat_suction_sensor_addr[1]=0xA3;
-//            heat_suction_sensor_addr[2]=0xCF;
-//            heat_suction_sensor_addr[3]=0x96;
-//            heat_suction_sensor_addr[4]=0x08;
-//            heat_suction_sensor_addr[5]=0x00;
-//            heat_suction_sensor_addr[6]=0x00;
-//            heat_suction_sensor_addr[7]=0x9B;             
+                       
             
             digitalWrite(power_sw_pin,HIGH);
             delay(1000);
@@ -193,15 +183,10 @@ void loop() {
 //          thermal_suction_sensor[0]=char(thermal_suction_ds18b20);
 //          thermal_suction_ds18b20.getBytes(thermal_suction_sensor, numbersd) ;
                     
-         }
+         }  // ds18b20 temperature by search.
+         
 
-
-
-
-
-
-            
-}//if
+}//if string is not empty
 
 
 }//loop
