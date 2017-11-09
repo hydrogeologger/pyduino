@@ -5,8 +5,12 @@ static const uint8_t analog_pins[]  = {A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12
 int const number_analog_pins=sizeof(analog_pins);
 
 static int digi_out_pins[] = {43,45,47,49,35,37,39,41,27,29,31,33,24,22,23,25,9,8,7,6,32,30,28,26,40,38,36,42,44,46,48};
-int const number_digi_out_pins=sizeof(digi_out_pins);
-#include "hydrogeolog/hydrogeolog.h"
+//first, for some reasons, the system does not support size of putting into const
+//second, turns out, the best way to put in library is to copy the library into library folder
+//int const number_digi_out_pins=sizeof(digi_out_pins);
+int const number_digi_out_pins=31;
+//#include "hydrogeolog/hydrogeolog.h"
+#include <hydrogeolog.h>
 //#include "/home/chenming/Dropbox/scripts/github/pyduino/arduino/libraries/hydrogeolog/hydrogeolog.h"
 const char delimiter=',';
 hydrogeolog hydrogeolog1(delimiter);
