@@ -20,6 +20,9 @@ String str_ay[20];
 void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
+  Serial1.begin(9600);
+  Serial2.begin(9600);
+  Serial3.begin(9600);
   for (int i=0; i<number_digi_out_pins;i++){
       pinMode(digi_out_pins[i],OUTPUT);
   }
@@ -45,9 +48,6 @@ void loop() {
         //
         int debug_sw        = hydrogeolog1.parse_argument("debug",0,str_ay_size,str_ay);
         int analog_in_pin   = hydrogeolog1.parse_argument("analog",-1,str_ay_size,str_ay);
-
-
-        
         int power_sw_pin    = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
     
         //analog reading
@@ -106,7 +106,66 @@ void loop() {
                 hydrogeolog1.print_string_delimiter_value("interval_mm",String(measure_time_interval_ms)  );
             }
             hydrogeolog1.dht22_excite_read(power_sw_pin,dht22_in_pin,number_of_dummies,number_of_measurement,measure_time_interval_ms);    
-              } // analog read
+        } // analog read
+
+
+
+        String lumino2=hydrogeolog1.parse_argument_string("lumino2","",str_ay_size,str_ay);
+        power_sw_pin    = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
+        int serial_pin   = hydrogeolog1.parse_argument("serial",-1,str_ay_size,str_ay);
+        int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",1000,str_ay_size,str_ay);
+
+       /*luminox sensor
+       lumino2,M 2,power,42,serial,2
+       lumino2,M 1,power,42,serial,2
+       lumino2,M 0,power,42,serial,2
+       lumino2,A,power,42,serial,2
+       
+       */
+       if ( (lumino2!="") && (power_sw_pin!=-1) && (serial_pin!=-1))   //&&(number_of_measurement!=-1) && (number_of_dummies!=-1) 
+           {
+                String input_linebreak=hydrogeolog1.parse_argument_string("inp_linebreak","\r\n",str_ay_size,str_ay);
+                char ouput_linebreak=hydrogeolog1.parse_argument_char("otp_linebreak",'\n',str_ay_size,str_ay);
+                hydrogeolog1.print_string_delimiter_value("lumino2_cmd"  ,lumino2  );
+                hydrogeolog1.print_string_delimiter_value("pow" ,String(power_sw_pin)  );
+                hydrogeolog1.print_string_delimiter_value("serial",String(serial_pin)  );
+                hydrogeolog1.print_string_delimiter_value("delay",String(measure_time_interval_ms)  );
+                if (measure_time_interval_ms<1000) {measure_time_interval_ms=1000;}
+
+              
+               if (serial_pin==1){
+                  Serial.print("result,");
+                  Serial1.print(lumino2);
+                  Serial1.print(input_linebreak);
+                  delay(measure_time_interval_ms);
+                  Serial.print("result,");
+                  String aa= Serial1.readStringUntil(ouput_linebreak);
+                  Serial.println(aa);
+               }
+               if (serial_pin==2){
+                  Serial.print("result,");
+                  Serial2.print(lumino2);
+                  Serial2.print("\r\n");
+                  delay(measure_time_interval_ms);
+                  String aa= Serial2.readStringUntil('\n');
+                  Serial.println(aa);
+               }
+               if (serial_pin==3){
+                  Serial.print("result,");
+                  Serial3.print(lumino2);
+                  Serial3.print("\r\n");
+                  delay(measure_time_interval_ms);
+                  String aa= Serial3.readStringUntil('\n');
+                  Serial.println(aa);
+               }
+        } // lumino2
+
+
+
+
+
+
+
 
        /*ds18b20 search
         ds18b20_search,13,power,42
@@ -277,7 +336,10 @@ void loop() {
 //          thermal_suction_sensor[0]=char(thermal_suction_ds18b20);
 //          thermal_suction_ds18b20.getBytes(thermal_suction_sensor, numbersd) ;
                     
-         }  // ds18b20 temperature by search.
+         }  // fred temperature by search.
+
+
+
 
 }//if string is not empty
 

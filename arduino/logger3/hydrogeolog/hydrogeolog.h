@@ -23,6 +23,7 @@ class hydrogeolog
       void print_string_delimiter_value(String string_input,String value);
       void search_ds18b20(int digi_pin,int power_switch);
       String parse_argument_string(String str_source, String default_values, int number_opts, String str_ay2[20]);
+      char parse_argument_char(String str_source, char default_values, int number_opts, String str_ay2[20]);
       void read_DS18B20_by_addr(byte addr[8],int digi_pin);
       private:
       int _pin;

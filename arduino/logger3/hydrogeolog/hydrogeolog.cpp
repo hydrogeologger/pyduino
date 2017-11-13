@@ -80,6 +80,14 @@ String hydrogeolog::parse_argument_string(String str_source, String default_valu
     return str_value;
      } //parse_argument
 
+char hydrogeolog::parse_argument_char(String str_source, char default_values, int number_opts, String str_ay2[20])
+    /* parse argument */
+    {
+    int str_idx=strcmpi(str_source,number_opts,str_ay2);
+    char str_value=default_values;
+    if (str_idx!=-1){str_value=str_ay2[str_idx+1][0];}
+    return str_value;
+     } //parse_argument
 
 
 
