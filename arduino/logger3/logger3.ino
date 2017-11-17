@@ -1,4 +1,45 @@
 /*
+dht22,13,power,37,points,2,dummies,1,interval_mm,1000,debug,1
+power,37,analog,0,point,3,interval_mm,200,debug,1
+
+
+dht22,12,power,39,points,2,dummies,1,interval_mm,1000,debug,1
+power,39,analog,1,point,3,interval_mm,200,debug,1
+
+
+dht22,11,power,41,points,2,dummies,1,interval_mm,1000,debug,1
+power,41,analog,2,point,3,interval_mm,200,debug,1
+
+dht22,10,power,27,points,2,dummies,1,interval_mm,1000,debug,1 // on board humidity
+power,27,analog,3,point,3,interval_mm,200,debug,1
+
+
+dht22,50,power,29,points,2,dummies,1,interval_mm,1000,debug,1 
+power,29,analog,4,point,3,interval_mm,200,debug,1 
+
+
+
+dht22,51,power,31,points,2,dummies,1,interval_mm,1000,debug,1 
+power,31,analog,5,point,3,interval_mm,200,debug,1 
+
+
+
+
+dht22,52,power,33,points,2,dummies,1,interval_mm,1000,debug,1
+power,33,analog,6,point,3,interval_mm,200,debug,1
+
+
+power,32,analog,8,point,3,interval_mm,200,debug,1
+power,30,analog,9,point,3,interval_mm,200,debug,1
+
+
+
+power,32,analog,8,point,3,interval_mm,200,debug,1
+
+
+power,40,analog,12,point,3,interval_mm,200,debug,1
+
+
 
 */
 static const uint8_t analog_pins[]  = {A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15};
