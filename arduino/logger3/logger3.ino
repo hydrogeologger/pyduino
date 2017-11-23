@@ -67,6 +67,8 @@ void setup() {
   for (int i=0; i<number_digi_out_pins;i++){
       pinMode(digi_out_pins[i],OUTPUT);
   }
+  delay(5000);
+  digitalWrite(46,HIGH); //switch on rpi 
 }
 
 // the loop routine runs over and over again forever:
