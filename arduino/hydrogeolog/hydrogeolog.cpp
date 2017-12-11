@@ -16,6 +16,7 @@ hydrogeolog::hydrogeolog(const char delimiter)
 
  
 int hydrogeolog::split_strings(String inp2,String str_ay2[20])
+/* returns the number of strings */
     {
         int comma_idx = inp2.indexOf(',');
         int number_strings=0;
@@ -91,29 +92,50 @@ char hydrogeolog::parse_argument_char(String str_source, char default_values, in
 
 
 
-float hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
+//float hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
+void hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
     {
         digitalWrite(power_sw_idx,HIGH);
         delay(1000);
-        float results=0.0;
-    for (int j=0;j<number_of_dummies;j++){
-      analogRead(analog_idx);
-      delay(100);
-    }
+        analog_read(analog_idx,number_of_dummies,number_of_measurements,measure_time_interval);
+        //for (int j=0;j<number_of_dummies;j++){
+        //  analogRead(analog_idx);
+        //  delay(100);
+        //}
 
-    for (int j=0;j<number_of_measurements;j++){
-      results+=analogRead(analog_idx);
-      delay(measure_time_interval);
-    }
+        //for (int j=0;j<number_of_measurements;j++){
+        //  results+=analogRead(analog_idx);
+        //  delay(measure_time_interval);
+        //}
 
-    results=results/float(number_of_measurements);
-    digitalWrite(power_sw_idx,LOW);
+        //results=results/float(number_of_measurements);
+        digitalWrite(power_sw_idx,LOW);
 
-    return results;
+        //return results;
 
     } // analog_excite_read
 
 
+//float hydrogeolog::analog_read(int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
+void hydrogeolog::analog_read(int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
+    {
+        float results=0.0;
+        for (int j=0;j<number_of_dummies;j++){
+          analogRead(analog_idx);
+          delay(100);
+        }
+
+        for (int j=0;j<number_of_measurements;j++){
+          results+=analogRead(analog_idx);
+          delay(measure_time_interval);
+        }
+
+        results=results/float(number_of_measurements);
+	Serial.print(results);
+	Serial.print(delimiter);
+        //return results;
+
+    } // analog_read
 
 void hydrogeolog::switch_power(int power_sw_idx,int status)
     {
@@ -137,32 +159,35 @@ void hydrogeolog::dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_
 
     digitalWrite(power_sw_idx,HIGH);
     delay(1000);
-    float results=0.0;
-    for (int j=0;j<number_of_dummies;j++){
-        int chk1=DHT.read22(digi_idx);
-        delay(1000);
-    }
+//    float results=0.0;
+//    for (int j=0;j<number_of_dummies;j++){
+//        int chk1=DHT.read22(digi_idx);
+//        delay(1000);
+//    }
+//
+//    float t_results=0.;
+//    float rh_results=0.;
+//    for (int j=0;j<number_of_measurements;j++){
+//    //  t_results+=DHT.temperature;
+//
+//    //}
+//      //Serial.print(t_results);  
+//      int chk1=DHT.read22(DHT22_PIN);
+//      t_results+=DHT.temperature;
+//      rh_results+= DHT.humidity;
+//      //t_results+= temp.toFloat();
+//      //rh_results+= DHT.humidity.toFloat();
+//      delay(measure_time_interval);
+//      }
+//
+//      t_results/= float(number_of_measurements);
+//      rh_results/=float(number_of_measurements);
+//      Serial.print(t_results);  
+//      Serial.print(delimiter);
+//      Serial.println(rh_results); 
 
-    float t_results=0.;
-    float rh_results=0.;
-    for (int j=0;j<number_of_measurements;j++){
-    //  t_results+=DHT.temperature;
+      dht22_read(digi_idx, number_of_dummies, number_of_measurements, measure_time_interval);
 
-    //}
-      //Serial.print(t_results);  
-      int chk1=DHT.read22(DHT22_PIN);
-      t_results+=DHT.temperature;
-      rh_results+= DHT.humidity;
-      //t_results+= temp.toFloat();
-      //rh_results+= DHT.humidity.toFloat();
-      delay(measure_time_interval);
-      }
-
-      t_results/= float(number_of_measurements);
-      rh_results/=float(number_of_measurements);
-      Serial.print(t_results);  
-      Serial.print(delimiter);
-      Serial.println(rh_results); 
       //Serial.print(DHT.temperature);  
       //Serial.print(delimiter);
       //Serial.println(DHT.humidity);  
@@ -174,7 +199,38 @@ void hydrogeolog::dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_
 //
 //    return results;
 //
-    } // analog_excite_read
+    } // dht_excite_read
+
+
+void hydrogeolog::dht22_read(int digi_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
+    {
+    dht DHT;
+    #define DHT22_PIN digi_idx
+    if (measure_time_interval<1000) {measure_time_interval=1000;}
+
+    float results=0.0;
+    for (int j=0;j<number_of_dummies;j++){
+        int chk1=DHT.read22(digi_idx);
+        delay(1000);
+    }
+    float t_results=0.;
+    float rh_results=0.;
+    for (int j=0;j<number_of_measurements;j++){
+      int chk1=DHT.read22(DHT22_PIN);
+      t_results+=DHT.temperature;
+      rh_results+= DHT.humidity;
+      delay(measure_time_interval);
+      }
+
+      t_results/= float(number_of_measurements);
+      rh_results/=float(number_of_measurements);
+      Serial.print(t_results);  
+      Serial.print(delimiter);
+      Serial.print(rh_results); 
+      Serial.print(delimiter);
+    } // dht_read
+
+
 
 void hydrogeolog::print_string_delimiter_value(String string_input,String value)
     {
