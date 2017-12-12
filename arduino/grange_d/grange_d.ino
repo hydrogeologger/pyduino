@@ -409,13 +409,17 @@ void loop() {
 
          if ( (fredlund_suction_ds18b20!="") && (power_sw_pin!=-1))
              {
-              hydrogeolog1.print_string_delimiter_value("input",content);
-              hydrogeolog1.print_string_delimiter_value("fredlund_ds18b20",String(fredlund_suction_ds18b20));
-              hydrogeolog1.print_string_delimiter_value("sensor_power"  ,String(power_sw_pin)  );
-              hydrogeolog1.print_string_delimiter_value("digital_input"  ,String(digital_input)  );
-              hydrogeolog1.print_string_delimiter_value("power_heating_pin"  ,String(power_heating_pin)  );
-              hydrogeolog1.print_string_delimiter_value("interval_ms"  ,String(output_temp_interval_ms)  );
-              hydrogeolog1.print_string_delimiter_value("output_numbe"  ,String(output_number_temp)  );
+              //hydrogeolog1.print_string_delimiter_value("input",content);
+              hydrogeolog1.print_string_delimiter_value("fred_ds18",String(fredlund_suction_ds18b20));
+              if (debug_sw==1)
+              {            
+              
+                  hydrogeolog1.print_string_delimiter_value("sensor_power"  ,String(power_sw_pin)  );
+                  hydrogeolog1.print_string_delimiter_value("digital_input"  ,String(digital_input)  );
+                  hydrogeolog1.print_string_delimiter_value("power_heating_pin"  ,String(power_heating_pin)  );
+                  hydrogeolog1.print_string_delimiter_value("interval_ms"  ,String(output_temp_interval_ms)  );
+                  hydrogeolog1.print_string_delimiter_value("output_number"  ,String(output_number_temp)  );
+              }
               
               //the reason i did not wrap this in hydrogeolog is because function in c normally can not return an array
               byte CardNumberByte[4];          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
@@ -430,12 +434,12 @@ void loop() {
                   number >>= 8;            // get next byte into position
               }   
 //                 
-            for(int i=0; i<4; i++)
-            {
-              Serial.print("0x");
-              Serial.print(CardNumberByte[i], HEX);
-              Serial.print(delimiter);
-            }
+//            for(int i=0; i<4; i++)
+//            {
+//              Serial.print("0x");
+//              Serial.print(CardNumberByte[i], HEX);
+//              Serial.print(delimiter);
+//            }
             byte heat_suction_sensor_addr[8];
             heat_suction_sensor_addr[0]=0x28;
             heat_suction_sensor_addr[1]=CardNumberByte[0];

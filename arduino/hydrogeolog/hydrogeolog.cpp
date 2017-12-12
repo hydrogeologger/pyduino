@@ -417,7 +417,7 @@ void hydrogeolog::read_DS18B20_by_addr(byte addr[8],int digi_pin) {
       celsius = (float)raw / 16.0;
       //Serial.print(delimiter);
       Serial.print(celsius);
-      Serial.write(delimiter);
+      Serial.print(delimiter);
 
   return;
 }

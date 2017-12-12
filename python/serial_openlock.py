@@ -31,7 +31,9 @@ def open_port(portname):
     if tty_found:
         # trying to open up the port
         try:
-            port = serial.Serial(port=tty[0]) #,9600,timeout=None)
+            #port = serial.Serial(port=tty[0]) #,9600,timeout=None)
+            #port = serial.Serial(port=tty[0],9600,timeout=None)
+            port = serial.Serial(port=tty[0],timeout=None)
             if port.isOpen():
                 try:
                     fcntl.flock(port.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
