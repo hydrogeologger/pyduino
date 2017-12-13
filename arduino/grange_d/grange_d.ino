@@ -401,11 +401,11 @@ void loop() {
          
          */
          String fredlund_suction_ds18b20=hydrogeolog1.parse_argument_string("fred","",str_ay_size,str_ay);
-         power_sw_pin                 = hydrogeolog1.parse_argument("senpow",-1,str_ay_size,str_ay);
-         int digital_input            = hydrogeolog1.parse_argument("digi_inp",-1,str_ay_size,str_ay);
-         int power_heating_pin        = hydrogeolog1.parse_argument("heatpow",-1,str_ay_size,str_ay);
-         int output_temp_interval_ms  = hydrogeolog1.parse_argument("itval",-1,str_ay_size,str_ay);
-         int output_number_temp       = hydrogeolog1.parse_argument("opt_no",-1,str_ay_size,str_ay);
+         power_sw_pin                 = hydrogeolog1.parse_argument("snpw",-1,str_ay_size,str_ay);
+         int digital_input            = hydrogeolog1.parse_argument("dgin",-1,str_ay_size,str_ay);
+         int power_heating_pin        = hydrogeolog1.parse_argument("htpw",-1,str_ay_size,str_ay);
+         int output_temp_interval_ms  = hydrogeolog1.parse_argument("itv",-1,str_ay_size,str_ay);
+         int output_number_temp       = hydrogeolog1.parse_argument("otno",-1,str_ay_size,str_ay);
 
          if ( (fredlund_suction_ds18b20!="") && (power_sw_pin!=-1))
              {
