@@ -55,7 +55,9 @@ pht_ele_o2 = Phant(publicKey=public_grange_d_electrochem_o2, fields=field_name ,
 #------------------------- below are definations for the sensors in the column ---------------------------------
 field_name=['dluo5','dluo7','uva','ira','lra',
             'dlut5','dlut7','uvb','irb','ltb',
-            'dlup5','dlup7','dlupe5','dlupe7']
+            'dlup5','dlup7','dlupe5','dlupe7',
+            'wluo5','wluo7','wlup5','wlup7',
+             'wlupe5','wlupe7']
 luo2=dict((el,0.0) for el in field_name)
 pht_luo2 = Phant(publicKey=public_grange_d_luo2, fields=field_name ,privateKey=private_grange_d_luo2,baseUrl=nectar_address)
 
@@ -101,6 +103,7 @@ while True:
     parsed_data['mo2']=float(current_read[4])
     parsed_data['mo3']=float(current_read[5])
     parsed_data['mo4']=float(current_read[6])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,13,power,35,point,3,interval_mm,200,debug,0",initialize=False)
@@ -108,6 +111,7 @@ while True:
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     parsed_data['mo5']=float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,14,power,37,point,3,interval_mm,200,debug,0",initialize=False)
@@ -115,20 +119,23 @@ while True:
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     parsed_data['mo6']=float(current_read[2])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,15,power,39,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     parsed_data['mo7']=float(current_read[2])
+    time.sleep(5)
 
     # enclosure temperature and humidity
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,200,debug,1",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     parsed_data['temp']=float(current_read[2])
     parsed_data['rh']=float(current_read[3])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,4D01BDC5,dgin,50,snpw,44,htpw,30,itv,3000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
@@ -136,6 +143,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp1']=float(current_read[2])
     parsed_data['su1']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,31FCB964,dgin,50,snpw,44,htpw,28,itv,3000,otno,10',initialize=False)
@@ -144,6 +152,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp2']=float(current_read[2])
     parsed_data['su2']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,4063CE3D,dgin,50,snpw,44,htpw,26,itv,3000,otno,10',initialize=False)
@@ -152,6 +161,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp3']=float(current_read[2])
     parsed_data['su3']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,3100BDED,dgin,50,snpw,44,htpw,40,itv,3000,otno,10',initialize=False)
@@ -160,6 +170,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp4']=float(current_read[2])
     parsed_data['su4']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,B900BA20,dgin,50,snpw,44,htpw,38,itv,3000,otno,10',initialize=False)
@@ -168,6 +179,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp5']=float(current_read[2])
     parsed_data['su5']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,D89ABB51,dgin,50,snpw,44,htpw,36,itv,3000,otno,10',initialize=False)
@@ -176,6 +188,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp6']=float(current_read[2])
     parsed_data['su6']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,A249BA99,dgin,50,snpw,44,htpw,34,itv,3000,otno,10',initialize=False)
@@ -184,6 +197,7 @@ while True:
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp7']=float(current_read[2])
     parsed_data['su7']=float(current_read[12])-float(current_read[2])
+    time.sleep(5)
 
     upload_phant(pht_sensor,parsed_data,screen_display)
     #fred,4D01BDC5,digi_inp,50,senpow,44,heatpow,30,itval,1000,opt_no,5
@@ -212,6 +226,7 @@ while True:
     ele_o2['wox3']=float(current_read[13])
     ele_o2['wox4']=float(current_read[16])
     ele_o2['wox6']=float(current_read[19])
+    time.sleep(5)
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dhto2,12,power,41,points,2,anain,0,dummies,1,interval_mm,1000,debug,0",initialize=False)
@@ -221,6 +236,7 @@ while True:
     ele_o2['dtp0']=float(current_read[2])
     ele_o2['drh0']=float(current_read[3])
     ele_o2['dox0']=float(current_read[4])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dhto2,11,power,27,points,2,anain,1,dummies,1,interval_mm,1000,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
@@ -229,6 +245,7 @@ while True:
     ele_o2['dtp1']=float(current_read[2])
     ele_o2['drh1']=float(current_read[3])
     ele_o2['dox1']=float(current_read[4])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dhto2,10,power,29,points,2,anain,2,dummies,1,interval_mm,1000,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
@@ -237,6 +254,7 @@ while True:
     ele_o2['dtp2']=float(current_read[2])
     ele_o2['drh2']=float(current_read[3])
     ele_o2['dox2']=float(current_read[4])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dhto2,51,power,31,points,2,anain,3,dummies,1,interval_mm,1000,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
@@ -245,6 +263,7 @@ while True:
     ele_o2['dtp3']=float(current_read[2])
     ele_o2['drh3']=float(current_read[3])
     ele_o2['dox3']=float(current_read[4])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dhto2,52,power,33,points,2,anain,4,dummies,1,interval_mm,1000,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
@@ -253,6 +272,7 @@ while True:
     ele_o2['dtp4']=float(current_read[2])
     ele_o2['drh4']=float(current_read[3])
     ele_o2['dox4']=float(current_read[4])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dhto2,53,power,22,points,2,anain,6,dummies,1,interval_mm,1000,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
@@ -261,19 +281,20 @@ while True:
     ele_o2['dtp6']=float(current_read[2])
     ele_o2['drh6']=float(current_read[3])
     ele_o2['dox6']=float(current_read[4])
+    time.sleep(5)
 
 
     upload_phant(pht_ele_o2,ele_o2,screen_display)
     
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,3",initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(' ')[0:-1]
-    luo2['wluo5'] = float(current_read[7])
-    luo2['wlupe5']= float(current_read[5])
-    luo2['wlut5'] = float(current_read[3])
-    luo2['wlup5'] = float(current_read[1])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,3",initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(' ')[0:-1]
+    #luo2['wluo5'] = float(current_read[7])
+    #luo2['wlupe5']= float(current_read[5])
+    #luo2['wlut5'] = float(current_read[3])
+    #luo2['wlup5'] = float(current_read[1])
 
     
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,3",initialize=False)
@@ -284,6 +305,7 @@ while True:
     luo2['dlupe5']= float(current_read[5])
     luo2['dlut5'] = float(current_read[3])
     luo2['dlup5'] = float(current_read[1])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,8,serial,2",initialize=False)
     if screen_display: print msg.rstrip()
@@ -293,6 +315,7 @@ while True:
     luo2['wlupe7']= float(current_read[5])
     luo2['wlut7'] = float(current_read[3])
     luo2['wlup7'] = float(current_read[1])
+    time.sleep(5)
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,25,serial,1",initialize=False)
     if screen_display: print msg.rstrip()
@@ -302,6 +325,7 @@ while True:
     luo2['dlupe7']= float(current_read[5])
     luo2['dlut7'] = float(current_read[3])
     luo2['dlup7'] = float(current_read[1])
+    time.sleep(5)
     upload_phant(pht_luo2,luo2,screen_display)
 #anaay,1,power,42,point,3,interval_mm,200,debug,1
 #analog,13,power,35,point,3,interval_mm,200,debug,1
