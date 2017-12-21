@@ -53,11 +53,18 @@ pht_ele_o2 = Phant(publicKey=public_grange_d_electrochem_o2, fields=field_name ,
 
 
 #------------------------- below are definations for the sensors in the column ---------------------------------
-field_name=['dluo5','dluo7','uva','ira','lra',
-            'dlut5','dlut7','uvb','irb','ltb',
-            'dlup5','dlup7','dlupe5','dlupe7',
-            'wluo5','wluo7','wlup5','wlup7',
-             'wlupe5','wlupe7']
+#field_name=['dluo5','dluo7','uva','ira','lra',
+#            'dlut5','dlut7','uvb','irb','ltb',
+#            'dlup5','dlup7','dlupe5','dlupe7',
+#            'wluo5','wluo7','wlup5','wlup7',
+#             'wlupe5','wlupe7']
+
+
+field_name=['dluo5' , 'dluo7', 'wluo5', 'wluo7','uva','ira','lra',
+            'dlut5' , 'dlut7', 'wlut5', 'wlut7','uvb','irb','ltb',
+            'dlup5' , 'dlup7', 'wlup5', 'wlup7',
+            'dlupe5','dlupe7','wlupe5','wlupe7'
+             ]
 luo2=dict((el,0.0) for el in field_name)
 pht_luo2 = Phant(publicKey=public_grange_d_luo2, fields=field_name ,privateKey=private_grange_d_luo2,baseUrl=nectar_address)
 
@@ -170,14 +177,15 @@ while True:
     upload_phant(pht_ele_o2,ele_o2,screen_display)
     
 
-    #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,3",initialize=False)
-    #if screen_display: print msg.rstrip()
-    #if save_to_file: fid.write(delimiter+msg.rstrip())
-    #current_read=msg.split(' ')[0:-1]
-    #luo2['wluo5'] = float(current_read[7])
-    #luo2['wlupe5']= float(current_read[5])
-    #luo2['wlut5'] = float(current_read[3])
-    #luo2['wlup5'] = float(current_read[1])
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,3",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(' ')[0:-1]
+    luo2['wluo5'] = float(current_read[7])
+    luo2['wlupe5']= float(current_read[5])
+    luo2['wlut5'] = float(current_read[3])
+    luo2['wlup5'] = float(current_read[1])
+    time.sleep(5)
 
     
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,3",initialize=False)
@@ -370,7 +378,7 @@ while True:
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,A249BA99,dgin,50,snpw,44,htpw,34,itv,3000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
+    if save_to_file: fid.write(delimiter+msg)
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp7']=float(current_read[2])
     parsed_data['su7']=float(current_read[12])-float(current_read[2])
