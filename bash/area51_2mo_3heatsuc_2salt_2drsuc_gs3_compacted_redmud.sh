@@ -5,4 +5,4 @@
 sleep 33
 #su pi
 cd /home/pi/pyduino/python/
-/usr/bin/stdbuf -i0 -o0 -e0 python   area51_2mo_3heatsuc_2salt_2drsuc_2gs3_compacted_redmud.py >>area51_log
+/usr/bin/stdbuf -i0 -o0 -e0 python   area51_2mo_3heatsuc_2salt_2drsuc_2gs3_compacted_redmud.py >>area51_log 2>&1

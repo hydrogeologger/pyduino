@@ -31,7 +31,9 @@ def open_port(portname):
     if tty_found:
         # trying to open up the port
         try:
-            port = serial.Serial(port=tty[0]) #,9600,timeout=None)
+            #port = serial.Serial(port=tty[0]) #,9600,timeout=None)
+            #port = serial.Serial(port=tty[0],9600,timeout=None)
+            port = serial.Serial(port=tty[0])#,timeout=None)
             if port.isOpen():
                 try:
                     fcntl.flock(port.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -82,6 +84,7 @@ def get_result_by_input(**kwargs):
         [port_sensor_isopen, sensor_fid]=open_port(arg['port'])
         time.sleep(10)
     if arg['initialize']: initialize(sensor_fid) 
+    
     sensor_fid.write(arg['command']) 
     msg = sensor_fid.readline()
     port_sensor_isopen=close_port(sensor_fid)
