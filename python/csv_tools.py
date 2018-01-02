@@ -2,7 +2,7 @@
 def tail( f, lines=20 ):
     total_lines_wanted = lines
 
-    BLOCK_SIZE = 1024
+    BLOCK_SIZE = 5024
     f.seek(0, 2)
     block_end_byte = f.tell()
     lines_to_go = total_lines_wanted
@@ -25,3 +25,5 @@ def tail( f, lines=20 ):
         block_number -= 1
     all_read_text = ''.join(reversed(blocks))
     return '\n'.join(all_read_text.splitlines()[-total_lines_wanted:])
+#def tail_linux(f,lines=1):
+    
