@@ -245,73 +245,73 @@ while True:
 
     
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,6C51BC5E,dgin,50,snpw,44,htpw,32,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp0']=float(current_read[2])
-    parsed_data['su0']=float(current_read[12])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,6C51BC5E,dgin,50,snpw,44,htpw,32,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp0']=float(current_read[2])
+    #parsed_data['su0']=float(current_read[12])-float(current_read[2])
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,523EBCDE,dgin,50,snpw,44,htpw,30,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp1']=float(current_read[2])
-    parsed_data['su1']=float(current_read[12])-float(current_read[2])
-
-
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,F655BA36,dgin,50,snpw,44,htpw,28,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp2']=float(current_read[2])
-    parsed_data['su2']=float(current_read[12])-float(current_read[2])
-    parsed_data['s2']=float(current_read[5])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,523EBCDE,dgin,50,snpw,44,htpw,30,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp1']=float(current_read[2])
+    #parsed_data['su1']=float(current_read[12])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,5EFCB983,dgin,50,snpw,44,htpw,26,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp3']=float(current_read[2])
-    parsed_data['su3']=float(current_read[12])-float(current_read[2])
-    parsed_data['s3']=float(current_read[5])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,F655BA36,dgin,50,snpw,44,htpw,28,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp2']=float(current_read[2])
+    #parsed_data['su2']=float(current_read[12])-float(current_read[2])
+    #parsed_data['s2']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,CA4DBCED,dgin,50,snpw,44,htpw,40,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp4']=float(current_read[2])
-    parsed_data['su4']=float(current_read[12])-float(current_read[2])
-    parsed_data['s4']=float(current_read[5])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,5EFCB983,dgin,50,snpw,44,htpw,26,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp3']=float(current_read[2])
+    #parsed_data['su3']=float(current_read[12])-float(current_read[2])
+    #parsed_data['s3']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,2E42BC77,dgin,50,snpw,44,htpw,38,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp5']=float(current_read[2])
-    parsed_data['su5']=float(current_read[12])-float(current_read[2])
-    parsed_data['s5']=float(current_read[5])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,CA4DBCED,dgin,50,snpw,44,htpw,40,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp4']=float(current_read[2])
+    #parsed_data['su4']=float(current_read[12])-float(current_read[2])
+    #parsed_data['s4']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,DD33BCFC,dgin,50,snpw,44,htpw,36,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp6']=float(current_read[2])
-    parsed_data['su6']=float(current_read[12])-float(current_read[2])
-    parsed_data['s6']=float(current_read[5])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,2E42BC77,dgin,50,snpw,44,htpw,38,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp5']=float(current_read[2])
+    #parsed_data['su5']=float(current_read[12])-float(current_read[2])
+    #parsed_data['s5']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,E0CFB95D,dgin,50,snpw,44,htpw,34,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp7']=float(current_read[2])
-    parsed_data['su7']=float(current_read[12])-float(current_read[2])
-    parsed_data['s7']=float(current_read[5])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,DD33BCFC,dgin,50,snpw,44,htpw,36,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp6']=float(current_read[2])
+    #parsed_data['su6']=float(current_read[12])-float(current_read[2])
+    #parsed_data['s6']=float(current_read[5])-float(current_read[2])
+
+
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,E0CFB95D,dgin,50,snpw,44,htpw,34,itv,3000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp7']=float(current_read[2])
+    #parsed_data['su7']=float(current_read[12])-float(current_read[2])
+    #parsed_data['s7']=float(current_read[5])-float(current_read[2])
 
     upload_phant(pht_sensor,parsed_data,screen_display)
     # logger2
