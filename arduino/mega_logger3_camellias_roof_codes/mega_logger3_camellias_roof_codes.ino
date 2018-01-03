@@ -64,10 +64,10 @@ void setup() {
   Serial.begin(9600); // open serial port, set the baud rate as 9600 bps
 
 // -----------------------------below is required by si1145 sensor ------------
-  if (! uv.begin()) {
-    Serial.println("Didn't find Si1145");
-    while (1);
-  }
+ // if (! uv.begin()) {
+    //Serial.println("Didn't find Si1145");
+    //while (1);
+ // }
 // -----------------------------above is required by si1145 sensor ------------
 
 

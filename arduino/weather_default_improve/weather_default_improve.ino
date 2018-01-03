@@ -10,23 +10,29 @@
  This is a more advanced example of how to utilize every aspect of the weather shield. See the basic
  example if you're just getting started.
 
- This code reads all the various sensors (wind speed, direction, rain gauge, humidty, pressure, light, batt_lvl)
- and reports it over the serial comm port. This can be easily routed to an datalogger (such as OpenLog) or
+ This code reads all the various sensors (wind speed, direction, rain gauge, humidity, pressure, light, batt_lvl)
+ and reports it over the serial comm port. This can be easily routed to a datalogger (such as OpenLog) or
  a wireless transmitter (such as Electric Imp).
 
  Measurements are reported once a second but windspeed and rain gauge are tied to interrupts that are
- calcualted at each report.
+ calculated at each report.
 
  This example code assumes the GPS module is not used.
+
+
+  Updated by Joel Bartlett
+  03/02/2017
+  Removed HTU21D code and replaced with Si7021
 
  */
 
 #include <Wire.h> //I2C needed for sensors
 #include "SparkFunMPL3115A2.h" //Pressure sensor - Search "SparkFun MPL3115" and install from Library Manager
-#include "SparkFunHTU21D.h" //Humidity sensor - Search "SparkFun HTU21D" and install from Library Manager
+#include "SparkFun_Si7021_Breakout_Library.h" //Humidity sensor - Search "SparkFun Si7021" and install from Library Manager
 
 MPL3115A2 myPressure; //Create an instance of the pressure sensor
-HTU21D myHumidity; //Create an instance of the humidity sensor
+Weather myHumidity;//Create an instance of the humidity sensor
+
 
 //Hardware pin definitions
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -128,6 +134,7 @@ void wspeedIRQ()
 void setup()
 {
     Serial.begin(9600);
+    Serial.println("Weather Shield Example");
 
     pinMode(STAT1, OUTPUT); //Status LED Blue
     pinMode(STAT2, OUTPUT); //Status LED Green
@@ -157,29 +164,9 @@ void setup()
     // turn on interrupts
     interrupts();
 
+    Serial.println("Weather Shield online!");
 
 }
-
-
-
-
-//void loop() { 
-//    String content = "";
-//    char character;
-//    while(Serial.available()) {
-//        character = Serial.read();
-//        content.concat(character); 
-//        delay (10); 
-//    }
-//    if (content != ""){
-//        if (content == "Weather") { 
-//            get_weather();
-//        }
-//        else {
-//            Serial.println(content);
-//        }
-//    }
-//}
 
 void loop()
 {
@@ -195,7 +182,6 @@ void loop()
 
         //Calc the wind speed and direction every second for 120 second to get 2 minute average
         float currentSpeed = get_wind_speed();
-        windspeedmph = currentSpeed; //update global variable for windspeed when using the printWeather() function
         //float currentSpeed = random(5); //For testing
         int currentDirection = get_wind_direction();
         windspdavg[seconds_2m] = (int)currentSpeed;
@@ -233,8 +219,7 @@ void loop()
         digitalWrite(STAT1, LOW); //Turn off stat LED
     }
 
-  delay_min(5);
-  //delay(10000);
+  delay(100);
 }
 
 //Calculates each of the variables that wunderground is expecting
@@ -244,7 +229,7 @@ void calcWeather()
     winddir = get_wind_direction();
 
     //Calc windspeed
-    //windspeedmph = get_wind_speed(); //This is calculated in the main loop on line 179
+    //windspeedmph = get_wind_speed(); //This is calculated in the main loop
 
     //Calc windgustmph
     //Calc windgustdir
@@ -298,7 +283,7 @@ void calcWeather()
     }
 
     //Calc humidity
-    humidity = myHumidity.readHumidity();
+    humidity = myHumidity.getRH();
     //float temp_h = myHumidity.readTemperature();
     //Serial.print(" TempH:");
     //Serial.print(temp_h, 2);
@@ -418,21 +403,54 @@ void printWeather()
 {
     calcWeather(); //Go calc all the various sensors
 
-    //Serial.println();
+//    Serial.println();
+//    Serial.print("$,winddir=");
+//    Serial.print(winddir);
+//    Serial.print(",windspeedmph=");
+//    Serial.print(windspeedmph, 1);
+//    Serial.print(",windgustmph=");
+//    Serial.print(windgustmph, 1);
+//    Serial.print(",windgustdir=");
+//    Serial.print(windgustdir);
+//    Serial.print(",windspdmph_avg2m=");
+//    Serial.print(windspdmph_avg2m, 1);
+//    Serial.print(",winddir_avg2m=");
+//    Serial.print(winddir_avg2m);
+//    Serial.print(",windgustmph_10m=");
+//    Serial.print(windgustmph_10m, 1);
+//    Serial.print(",windgustdir_10m=");
+//    Serial.print(windgustdir_10m);
+//    Serial.print(",humidity=");
+//    Serial.print(humidity, 1);
+//    Serial.print(",tempf=");
+//    Serial.print(tempf, 1);
+//    Serial.print(",rainin=");
+//    Serial.print(rainin, 2);
+//    Serial.print(",dailyrainin=");
+//    Serial.print(dailyrainin, 2);
+//    Serial.print(",pressure=");
+//    Serial.print(pressure, 2);
+//    Serial.print(",batt_lvl=");
+//    Serial.print(batt_lvl, 2);
+//    Serial.print(",light_lvl=");
+//    Serial.print(light_lvl, 2);
+//    Serial.print(",");
+//    Serial.println("#");
+
     Serial.print("Weather,WdDir,");
     Serial.print(winddir);
     Serial.print(",WdSpdkph,");
-    Serial.print(windspeedmph*1.609, 1);
+    Serial.print(windspeedmph, 1);
     Serial.print(",WdGstkph,");
-    Serial.print(windgustmph*1.609, 1);
+    Serial.print(windgustmph, 1);
     Serial.print(",WdGstDir,");
     Serial.print(windgustdir);
     Serial.print(",WdSpdKphAvg2m,");
-    Serial.print(windspdmph_avg2m*1.609, 1);
+    Serial.print(windspdmph_avg2m, 1);
     Serial.print(",WdDirAvg2m,");
     Serial.print(winddir_avg2m);
     Serial.print(",WdGstKph10m,");
-    Serial.print(windgustmph_10m*1.609, 1);
+    Serial.print(windgustmph_10m, 1);
     Serial.print(",WdGstDir10m,");
     Serial.print(windgustdir_10m);
     Serial.print(",rh,");
@@ -451,17 +469,6 @@ void printWeather()
     Serial.print(light_lvl, 2);
     Serial.print(",");
     Serial.println("WeatherDone");
+    delay(60000);
 
 }
-
-void delay_min(int min){
-  for (int i=0;i<min;i++)
-  {
-    for (int j=0;j<12;j++)
-    {
-      delay(5000);
-
-    }
-  }
-}
-
