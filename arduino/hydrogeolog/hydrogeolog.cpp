@@ -25,8 +25,7 @@ int hydrogeolog::split_strings(String inp2,String str_ay2[20])
               str_ay2[number_strings]= inp2.substring(0, comma_idx);
               number_strings+=1;
               str_ay2[number_strings]= inp2.substring(comma_idx+1);
-              inp2=str_ay2[number_strings];
-              comma_idx=inp2.indexOf(',');
+              inp2=str_ay2[number_strings]; comma_idx=inp2.indexOf(',');
               //Serial.print("the number of string so far is: ");
               //Serial.println(number_strings);
               //Serial.print("rest is: ");
@@ -92,7 +91,6 @@ char hydrogeolog::parse_argument_char(String str_source, char default_values, in
 
 
 
-//float hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
 void hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
     {
         digitalWrite(power_sw_idx,HIGH);
@@ -419,8 +417,46 @@ void hydrogeolog::read_DS18B20_by_addr(byte addr[8],int digi_pin) {
       Serial.print(celsius);
       Serial.print(delimiter);
 
-  return;
+    return;
+}
+
+void hydrogeolog::tcaselect(int i) {
+    #define TCAADDR 0x70
+    if (i > 7) return;
+    Wire.beginTransmission(TCAADDR);
+    Wire.write(1 << i);
+    Wire.endTransmission();
 }
 
 
+void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int measure_time_interval_ms)
+    {
+    //  ADDRESS_HIGH = 0x76
+    //  ADDRESS_LOW  = 0x77
+    MS5803 sensor(ADDRESS_HIGH);
+    float temperature_c;
+    double pressure_abs;
+    sensor.reset();
+    sensor.begin();
+    temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
+    
+
+
+
+    for (int j=0;j<number_of_dummies;j++){
+        sensor.getPressure(ADC_4096);
+    }
+    float t_results=0.;
+    for (int j=0;j<number_of_measurements;j++){
+        pressure_abs += double(sensor.getPressure(ADC_4096));
+        delay(measure_time_interval_ms);
+        }
+
+    pressure_abs /= double(number_of_measurements);
+
+    Serial.print(temperature_c);
+    Serial.print(delimiter);
+    Serial.print(pressure_abs);
+    Serial.print(delimiter);
+    }
 
