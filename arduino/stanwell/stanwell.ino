@@ -490,7 +490,7 @@ void loop() {
          if  ((tca9548_channel!=-1)&& (i2c_type!="")) {
             int number_of_measurements=hydrogeolog1.parse_argument("points",3,str_ay_size,str_ay);
             int number_of_dummies=hydrogeolog1.parse_argument("dummies",3,str_ay_size,str_ay);
-            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",1000,str_ay_size,str_ay);
+            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
             if (debug_sw==1)
             {            
                 hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
