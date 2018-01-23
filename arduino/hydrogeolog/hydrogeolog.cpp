@@ -437,9 +437,9 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
     float temperature_c;
     double pressure_abs;
     sensor.reset();
-    sleep(1000);
+    delay(1000);
     sensor.begin();
-    sleep(1000);
+    delay(1000);
     temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
     
 
