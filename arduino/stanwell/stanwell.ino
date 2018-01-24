@@ -516,7 +516,7 @@ void loop() {
     
          /*
          use sht75 to measure temperature and humidity
-         75,12,clk,11,debug,1
+         75,11,clk,12,power,42,debug,1
          */
          
          int sht75_data = hydrogeolog1.parse_argument("75",-1,str_ay_size,str_ay);

@@ -17,6 +17,28 @@ extern "C" {
 }
 // ----above required by ms5803 and tca9548 -----
 
+
+
+
+
+
+
+//// ----below required by sdi12-----
+//#include <SDI12.h>
+//
+//byte addressReg[8] = {
+//      0B00000000,
+//      0B00000000,
+//      0B00000000,
+//      0B00000000,
+//      0B00000000,
+//      0B00000000,
+//      0B00000000,
+//      0B00000000
+//      };   
+//// ----above required by sdi12-----
+
+
 class hydrogeolog
 {
     public:
@@ -40,12 +62,27 @@ class hydrogeolog
       void ms5803(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms);
       void tcaselect(int i);
       void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms);
-      private:
+      void sdi12(int digi_idx);
+    private:
       int _pin;
       String inp2; 
       String str_ay2[20];
       int number_opts;
       const char delimiter=',';
+      
+
+      //void sdi12_init(int digi_idx);
+      //void takeMeasurement_sdi12(int digi_idx,char i);
+      //void printBufferToScreen(int digi_idx);
+      //boolean checkActive(char i,int digi_idx);
+      //boolean setTaken(byte i);
+      //boolean setVacant(byte i);
+      //boolean isTaken(byte i);
+      //char printInfo(char i,int digi_idx);
+
+
+      //byte charToDec(char i);
+      //char decToChar(byte i);
 
 }; // class
 
