@@ -9,6 +9,8 @@
 #include <OneWire.h>
 //#include "hydrogeolog"
 #include <SparkFun_MS5803_I2C.h>
+#include <Sensirion.h>
+
 #include "Wire.h"
 extern "C" {
 #include "utility/twi.h"  // from Wire library, so we can do bus scanning
@@ -37,6 +39,7 @@ class hydrogeolog
       void read_DS18B20_by_addr(byte addr[8],int digi_pin);
       void ms5803(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms);
       void tcaselect(int i);
+      void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms);
       private:
       int _pin;
       String inp2; 

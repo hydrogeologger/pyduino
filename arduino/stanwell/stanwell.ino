@@ -476,15 +476,13 @@ void loop() {
                     
          }  // fred temperature by search.
 
-
          /*
          use tca9548 i2c multiplexer to obtain results from ms5803 pressure transducer 
+         9548,2,type,5803,debug,1
          */
-         //int ms5803_channel=hydrogeolog1.parse_argument("5803",-1,str_ay_size,str_ay);
-   
+         
          int tca9548_channel=hydrogeolog1.parse_argument("9548",-1,str_ay_size,str_ay);
          String i2c_type=hydrogeolog1.parse_argument_string("type","",str_ay_size,str_ay);
- 
 
          //if ( (ms5803!=-1) && (power_sw_pin!=-1))   
          if  ((tca9548_channel!=-1)&& (i2c_type!="")) {
@@ -493,6 +491,7 @@ void loop() {
             int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
             if (debug_sw==1)
             {            
+                hydrogeolog1.print_string_delimiter_value("9548"  ,String(tca9548_channel)  );
                 hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
                 hydrogeolog1.print_string_delimiter_value("points" ,String(number_of_measurements)  );
                 hydrogeolog1.print_string_delimiter_value("dummies",String(number_of_dummies)  );
@@ -504,7 +503,6 @@ void loop() {
              
 
              hydrogeolog1.tcaselect(tca9548_channel);
-             delay(1000);
              
              if (i2c_type=="5803")
                  {
@@ -516,7 +514,39 @@ void loop() {
              Serial.println();
          }  //tca9548_channel 
     
+         /*
+         use sht75 to measure temperature and humidity
+         75,12,clk,11,debug,1
+         */
+         
+         int sht75_data = hydrogeolog1.parse_argument("75",-1,str_ay_size,str_ay);
+         int sht75_clk  = hydrogeolog1.parse_argument("clk",-1,str_ay_size,str_ay);
+         power_sw_pin   = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
 
+ 
+         if  ((sht75_data!=-1)&& (sht75_clk!=-1)) {
+               
+            int number_of_measurements=hydrogeolog1.parse_argument("points",3,str_ay_size,str_ay);
+            int number_of_dummies=hydrogeolog1.parse_argument("dummies",3,str_ay_size,str_ay);
+            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
+            if (debug_sw==1)
+            {            
+                hydrogeolog1.print_string_delimiter_value("75"  ,String(sht75_data)  );
+                hydrogeolog1.print_string_delimiter_value("clock"  ,String(sht75_clk)  );
+                hydrogeolog1.print_string_delimiter_value("points" ,String(number_of_measurements)  );
+                hydrogeolog1.print_string_delimiter_value("dummies",String(number_of_dummies)  );
+                hydrogeolog1.print_string_delimiter_value("power",String(power_sw_pin)  );  
+                hydrogeolog1.print_string_delimiter_value("itv",String(measure_time_interval_ms)  );  
+                              
+            }
+
+             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
+             delay(1000);   
+             hydrogeolog1.sht75(sht75_data,sht75_clk,number_of_dummies,number_of_measurements,measure_time_interval_ms);
+                 
+             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
+             Serial.println();
+         }  //tca9548_channel 
     }//if string is not empty
 
 

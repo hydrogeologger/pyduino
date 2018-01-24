@@ -460,5 +460,39 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
     Serial.print(delimiter);
     Serial.print(pressure_abs);
     Serial.print(delimiter);
+    }   //5803
+
+
+void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms)
+    {
+    float temp;
+    float humi;
+    float dewp;
+    
+    float temp_avg=0.;
+    float humi_avg=0.;
+
+    Sensirion tempSensor = Sensirion(dataPin, clockPin);
+    delay(1000);
+    for (int j=0;j<number_of_dummies;j++){
+        tempSensor.measure(&temp, &humi, &dewp); //the reason of doing this is one function returns three values
+        delay(measure_time_interval_ms);
+        }
+
+    for (int j=0;j<number_of_measurements;j++){
+        tempSensor.measure(&temp, &humi, &dewp);
+        delay(measure_time_interval_ms);
+        temp_avg+=temp;
+        humi_avg+=humi;
+        }
+    temp_avg/=float(number_of_measurements);
+    humi_avg/=float(number_of_measurements);
+
+    Serial.print(temp_avg);
+    Serial.print(delimiter);
+    Serial.print(humi_avg);
+    Serial.print(delimiter);
     }
+
+
 
