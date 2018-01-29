@@ -7,7 +7,13 @@ from phant import Phant
 import serial_openlock
 import get_ip
 from upload_phant import upload_phant
-
+# below required by gpio
+import RPi.GPIO as GPIO            # import RPi.GPIO module  
+from time import sleep             # lets us have a delay  
+import subprocess
+GPIO.setmode(GPIO.BCM)             # choose BCM or BOARD  
+GPIO.setup(25, GPIO.OUT)           # set GPIO24 as an output   
+GPIO.setup(26, GPIO.OUT)           # set GPIO24 as an output   
 
 
 with open('/home/pi/script/pass/public_stanwell_moisture_suction', 'r') as myfile:
@@ -16,17 +22,12 @@ with open('/home/pi/script/pass/public_stanwell_moisture_suction', 'r') as myfil
 with open('/home/pi/script/pass/private_stanwell_moisture_suction', 'r') as myfile:
     private_stanwell_moisture_suction=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/public_stanwell_electrochem_o2', 'r') as myfile:
-    public_stanwell_electrochem_o2=myfile.read().replace('\n', '')
+with open('/home/pi/script/pass/public_stanwell_sali_gs3_p', 'r') as myfile:
+    public_stanwell_sali_gs3_p=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/private_stanwell_electrochem_o2', 'r') as myfile:
-    private_stanwell_electrochem_o2=myfile.read().replace('\n', '')
+with open('/home/pi/script/pass/private_stanwell_sali_gs3_p', 'r') as myfile:
+    private_stanwell_sali_gs3_p=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/public_stanwell_luo2', 'r') as myfile:
-    public_stanwell_luo2=myfile.read().replace('\n', '')
-
-with open('/home/pi/script/pass/private_stanwell_luo2', 'r') as myfile:
-    private_stanwell_luo2=myfile.read().replace('\n', '')
 with open('/home/pi/script/pass/nectar_address', 'r') as myfile:
     nectar_address=myfile.read().replace('\n', '')
 
@@ -42,28 +43,20 @@ pht_sensor = Phant(publicKey=public_stanwell_moisture_suction, fields=field_name
 
 
 
-###------------------------- below are definations for the sensors in the column ---------------------------------
-##field_name=['dtp0','dtp1','dtp2','dtp3','dtp6',
-##            'dox0','dox1','dox2','dox3','dox6',
-##            'drh0','drh1','drh2','drh3','drh6',
-##            'wtp0','wtp1','wtp2','wtp3','wtp4','wtp5','wtp7',
-##            'wox0','wox1','wox2','wox3','wox4','wox5','wox7']
-##ele_o2=dict((el,0.0) for el in field_name)
-##pht_ele_o2 = Phant(publicKey=public_stanwell_electrochem_o2, fields=field_name ,privateKey=private_stanwell_electrochem_o2,baseUrl=nectar_address)
-##
-##
-##
-###------------------------- below are definations for the sensors in the column ---------------------------------
-##field_name=['dluo4' , 'dluo5', 'wluo5', 'wluo6',
-##            'dlut4' , 'dlut5', 'wlut5', 'wlut6',
-##            'dlup4' , 'dlup5', 'wlup5', 'wlup6',
-##            'dlupe4','dlupe5','wlupe5','wlupe6',
-##            'uvb','ira','lra',
-##            'uvb','irb','lrb'
-##            'temp','rh','flow']
-##luo2=dict((el,0.0) for el in field_name)
-##pht_luo2 = Phant(publicKey=public_stanwell_luo2, fields=field_name ,privateKey=private_stanwell_luo2,baseUrl=nectar_address)
-
+#------------------------- below are definations for the sensors in the column ---------------------------------
+field_name=['tmp0','tmp1','tmp2','tmp3',
+            'hum0','hum1','hum2','hum3',
+            'dp0',
+            'ec0',
+            'gstmp0',
+            'pre0','pre1',
+            'pretmp0','pretmp1',
+            'dhttmp0',
+            'dhthum0',
+            'volt0',
+            'tmp4','tmp5','tmp6','tmp7','tmp8','tmp9','tmp10','tmp11','tmp12']
+sali_gs3_p=dict((el,0.0) for el in field_name)
+pht_salt_gs_p = Phant(publicKey=public_stanwell_sali_gs3_p, fields=field_name ,privateKey=private_stanwell_sali_gs3_p,baseUrl=nectar_address)
 
 
 port_sensor  = 'USB VID:PID=2341:0042 SNR=9563533373035110A2B1'
@@ -93,7 +86,6 @@ if save_to_file: fid= open(file_name,'a',0)
 while True: 
     ### -------------------- below is to processing data from suction, moisture-------------------------
     
-# ------------------------------- below goes to electrochem_o2  --------------------------------------------
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,E87C959F,dgin,50,snpw,42,htpw,22,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -133,7 +125,7 @@ while True:
     mo_su['su4']=float(current_read[7])-float(current_read[2])
 
 
-     msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,C205BB1D,dgin,13,snpw,6,htpw,27,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,C205BB1D,dgin,13,snpw,6,htpw,27,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -141,7 +133,7 @@ while True:
     mo_su['su5']=float(current_read[7])-float(current_read[2])
 
 
-     msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,4C0F973B,dgin,13,snpw,6,htpw,41,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,4C0F973B,dgin,13,snpw,6,htpw,41,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -242,9 +234,82 @@ while True:
 
     upload_phant(pht_sensor,mo_su,screen_display)
 
-    ### --------------------------- above is to processing data from column sensor--------------------------
+    ### below is for pressure 
+
+    GPIO.output(25, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+    GPIO.output(26, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,2,type,5803,dummies,3,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['pre0']=float(current_read[-1])
+    sali_gs3_p['pretmp0']=float(current_read[-2])
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,3,type,5803,dummies,0,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['pre1']=float(current_read[-1])
+    sali_gs3_p['pretmp1']=float(current_read[-2])
+
+    GPIO.output(25, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+    GPIO.output(26, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+
+    
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,51,clk,10,power,25,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['hum0']=float(current_read[-1])
+    sali_gs3_p['tmp0']=float(current_read[-2])
+
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,11,clk,12,power,23,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['hum1']=float(current_read[-1])
+    sali_gs3_p['tmp1']=float(current_read[-2])
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,5,clk,53,power,9,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['hum2']=float(current_read[-1])
+    sali_gs3_p['tmp2']=float(current_read[-2])
     
        
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,3,clk,4,power,8,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['hum3']=float(current_read[-1])
+    sali_gs3_p['tmp3']=float(current_read[-2])
+
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="12,52,power,7,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['ec0']=float(current_read[9])
+    sali_gs3_p['dp0']=float(current_read[7])
+    sali_gs3_p['gstmp0']=float(current_read[8])
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,200,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['dhthum0']=float(current_read[-1])
+    sali_gs3_p['dhttmp0']=float(current_read[-2])
+
+    # voltage measurement
+    # power,43,analog,15,point,3,interval_mm,200,debug,1
+    upload_phant(pht_salt_gs_p,sali_gs3_p,screen_display)
     # sleep to the next loop
     time.sleep(sleep_time_seconds)
 

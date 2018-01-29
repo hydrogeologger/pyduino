@@ -596,7 +596,9 @@ void loop() {
          }  //sht75
 
 
-
+        if (content=="abc"){
+          Serial.println(content);
+        }
 
 
 

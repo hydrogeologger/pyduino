@@ -503,6 +503,10 @@ void loop() {
              
 
              hydrogeolog1.tcaselect(tca9548_channel);
+             delay(2000);
+             hydrogeolog1.tcaselect(tca9548_channel);
+             delay(2000);
+
              
              if (i2c_type=="5803")
                  {
