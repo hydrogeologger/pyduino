@@ -59,7 +59,7 @@ class hydrogeolog
       void print_string_delimiter_value(String string_input,String value);
       void search_ds18b20(int digi_pin,int power_switch);
       void read_DS18B20_by_addr(byte addr[8],int digi_pin);
-      void ms5803(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms);
+      void ms5803(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms,int debug_sw,int tca9548_channel);
       void tcaselect(int i);
       void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms);
       void sdi12(int digi_idx);

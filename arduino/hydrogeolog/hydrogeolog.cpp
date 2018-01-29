@@ -377,34 +377,41 @@ void hydrogeolog::tcaselect(int i) {
 }
 
 // pressure transducers
-void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int measure_time_interval_ms)
+void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw,int tca9548_channel)
     {
     //  ADDRESS_HIGH = 0x76
     //  ADDRESS_LOW  = 0x77
     MS5803 sensor(ADDRESS_HIGH);
     float temperature_c;
-    double pressure_abs;
-    sensor.reset();
+    double pressure_abs=0.;
     delay(2000);
     sensor.reset();
     delay(2000);
     sensor.begin();
     delay(2000);
-    sensor.begin();
+    tcaselect(tca9548_channel);
 
     delay(2000);
     temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
     
+    delay(2000);
 
 
 
     for (int j=0;j<number_of_dummies;j++){
         sensor.getPressure(ADC_4096);
+        delay(2000);
     }
     float t_results=0.;
+    double pressure=0.;
     for (int j=0;j<number_of_measurements;j++){
-        pressure_abs += double(sensor.getPressure(ADC_4096));
+        pressure = double(sensor.getPressure(ADC_4096));
+        pressure_abs+=pressure;
         delay(measure_time_interval_ms);
+        if (debug_sw==1) {
+            Serial.print(pressure);
+            Serial.print(delimiter);
+        } //debug_sw
         }
 
     pressure_abs /= double(number_of_measurements);
