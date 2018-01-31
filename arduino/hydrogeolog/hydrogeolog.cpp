@@ -393,7 +393,6 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
 
     delay(2000);
     temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
-    
     delay(2000);
 
 

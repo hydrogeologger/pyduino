@@ -14,6 +14,7 @@ import subprocess
 GPIO.setmode(GPIO.BCM)             # choose BCM or BOARD  
 GPIO.setup(25, GPIO.OUT)           # set GPIO24 as an output   
 GPIO.setup(26, GPIO.OUT)           # set GPIO24 as an output   
+GPIO.setup(24, GPIO.OUT)           # set GPIO24 as an output   
 
 
 with open('/home/pi/script/pass/public_stanwell_moisture_suction', 'r') as myfile:
@@ -86,7 +87,7 @@ if save_to_file: fid= open(file_name,'a',0)
 while True: 
     ### -------------------- below is to processing data from suction, moisture-------------------------
     
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,E87C959F,dgin,50,snpw,42,htpw,22,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,E87C959F,dgin,50,snpw,42,htpw,22,itv,1000,otno,5",initialize=True)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -163,12 +164,14 @@ while True:
     mo_su['su9']=float(current_read[7])-float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,14,power,40,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     mo_su['mo0']=float(current_read[2])
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,13,power,26,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -176,6 +179,7 @@ while True:
     mo_su['mo1']=float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,12,power,28,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -183,6 +187,9 @@ while True:
     mo_su['mo2']=float(current_read[2])
 
 
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,11,power,30,point,3,interval_mm,200,debug,0",initialize=False)
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,11,power,30,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -190,6 +197,7 @@ while True:
     mo_su['mo3']=float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,10,power,32,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -197,6 +205,7 @@ while True:
     mo_su['mo4']=float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,9,power,44,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -204,6 +213,7 @@ while True:
     mo_su['mo5']=float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,8,power,44,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -211,12 +221,14 @@ while True:
     mo_su['mo6']=float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,7,power,44,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     mo_su['mo7']=float(current_read[2])
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,6,power,44,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -224,6 +236,7 @@ while True:
     mo_su['mo8']=float(current_read[2])
 
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,5,power,44,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -235,20 +248,29 @@ while True:
     upload_phant(pht_sensor,mo_su,screen_display)
 
     ### below is for pressure 
-
     GPIO.output(25, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(2)
+    sleep(5)
     GPIO.output(26, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(5)
+
+    GPIO.output(24, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+    GPIO.output(24, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
     sleep(2)
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,2,type,5803,dummies,3,debug,1",initialize=False)
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,2,type,5803,dummies,1,debug,1,points,2",initialize=True)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     sali_gs3_p['pre0']=float(current_read[-1])
     sali_gs3_p['pretmp0']=float(current_read[-2])
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,3,type,5803,dummies,0,debug,1",initialize=False)
+    GPIO.output(24, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+    GPIO.output(24, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+    sleep(2)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,3,type,5803,dummies,1,debug,1,points,2",initialize=True)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -260,8 +282,16 @@ while True:
     GPIO.output(26, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
     sleep(2)
 
+    sleep(10)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,3,clk,4,power,8,debug,1",initialize=True)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['hum3']=float(current_read[-1])
+    sali_gs3_p['tmp3']=float(current_read[-2])
     
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,51,clk,10,power,25,debug,1",initialize=False)
+    sleep(5)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,51,clk,10,power,25,debug,1",initialize=True)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -269,30 +299,27 @@ while True:
     sali_gs3_p['tmp0']=float(current_read[-2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,11,clk,12,power,23,debug,1",initialize=False)
+    sleep(5)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,11,clk,12,power,23,debug,1",initialize=True)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     sali_gs3_p['hum1']=float(current_read[-1])
     sali_gs3_p['tmp1']=float(current_read[-2])
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,5,clk,53,power,9,debug,1",initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    sali_gs3_p['hum2']=float(current_read[-1])
-    sali_gs3_p['tmp2']=float(current_read[-2])
+    #sleep(5)
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,5,clk,53,power,9,debug,1",initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #sali_gs3_p['hum2']=float(current_read[-1])
+    #sali_gs3_p['tmp2']=float(current_read[-2])
     
        
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,3,clk,4,power,8,debug,1",initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    sali_gs3_p['hum3']=float(current_read[-1])
-    sali_gs3_p['tmp3']=float(current_read[-2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="12,52,power,7,debug,1",initialize=False)
+    sleep(2)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="12,52,power,7,debug,1",initialize=True)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -300,6 +327,7 @@ while True:
     sali_gs3_p['dp0']=float(current_read[7])
     sali_gs3_p['gstmp0']=float(current_read[8])
 
+    sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,200,debug,1",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
