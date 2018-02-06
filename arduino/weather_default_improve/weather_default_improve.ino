@@ -173,7 +173,7 @@ void loop()
     //Keep track of which minute it is
   if(millis() - lastSecond >= 1000)
     {
-        digitalWrite(STAT1, HIGH); //Blink stat LED
+        //digitalWrite(STAT1, HIGH); //Blink stat LED
 
     lastSecond += 1000;
 
@@ -211,12 +211,13 @@ void loop()
 
             rainHour[minutes] = 0; //Zero out this minute's rainfall amount
             windgust_10m[minutes_10m] = 0; //Zero out this minute's gust
+        printWeather();
         }
 
         //Report all readings every second
-        printWeather();
+        //printWeather();
 
-        digitalWrite(STAT1, LOW); //Turn off stat LED
+        //digitalWrite(STAT1, LOW); //Turn off stat LED
     }
 
   delay(100);
@@ -469,6 +470,6 @@ void printWeather()
     Serial.print(light_lvl, 2);
     Serial.print(",");
     Serial.println("WeatherDone");
-    delay(60000);
+    //delay(60000);
 
 }
