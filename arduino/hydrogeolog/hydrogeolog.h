@@ -17,7 +17,7 @@ extern "C" {
 }
 // ----above required by ms5803 and tca9548 -----
 
-
+#include "Adafruit_SI1145.h"
 
 
 
@@ -63,6 +63,7 @@ class hydrogeolog
       void tcaselect(int i);
       void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms);
       void sdi12(int digi_idx);
+      void si1145(int power_sw,int number_readings_si1145,int sleep_interval_ms,int number_of_dummies);
     private:
       int _pin;
       String inp2; 

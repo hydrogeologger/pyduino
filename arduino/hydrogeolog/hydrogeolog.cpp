@@ -454,6 +454,66 @@ void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int num
     } //sht75
 
 
+// loop routine to obtain si1145 result
+void hydrogeolog::si1145(int power_sw,int number_readings_si1145,int measurement_time_interval,int number_of_dummies) {
+  //Adafruit_SI1145 uv = Adafruit_SI1145();
+  float vis =0.0;
+  float ir  =0.0;
+  float uvindex  =0.0;
+  digitalWrite(power_sw,HIGH);
+  delay(1000);
+  Adafruit_SI1145 uv = Adafruit_SI1145();
+  delay(1000);
+  uv.begin();
+  //if (! uv.begin()) {
+  //  Serial.println("Didn't find Si1145");
+  //  while (1);
+  //}
+    for (int j=0;j<number_of_dummies;j++){
+        uv.readVisible();
+        delay(1000);
+        uv.readIR();
+        delay(1000);
+        uv.readUV();
+        delay(measurement_time_interval);
+        }
+    for (int j=0;j<number_readings_si1145;j++){
+      vis+=uv.readVisible();
+      delay(100);
+      ir+=uv.readIR(); 
+      delay(100);
+      uvindex+=uv.readUV(); 
+      delay(measurement_time_interval);
+    }
+  vis/= float(number_readings_si1145);
+  ir /= float(number_readings_si1145);
+  uvindex /= float(number_readings_si1145);
+  Serial.print("Vis");
+  Serial.print(delimiter);
+  Serial.print(vis);
+  Serial.print(delimiter);
+  Serial.print("IR");
+  Serial.print(delimiter);
+  Serial.print(ir);
+  Serial.print(delimiter);
+
+
+  
+  // Uncomment if you have an IR LED attached to LED pin!
+  //Serial.print("Prox: "); Serial.println(uv.readProx());
+
+  //float UVindex = uv.readUV();
+  // the index is multiplied by 100 so to get the
+  // integer index, divide by 100!
+  //UVindex /= 100.0;  
+  Serial.print("UV");  
+  Serial.print(delimiter);
+  Serial.print(uvindex);
+  Serial.print(delimiter);
+  digitalWrite(power_sw,LOW);
+
+  delay(1000);
+}
 //void hydrogeolog::sdi12(int digi_idx)
 //    {
 //    #define DATAPIN digi_idx // change to the proper pin,pwm pins are needed, see tutorial, only limited pins are able to get this
