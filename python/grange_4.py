@@ -23,17 +23,17 @@ with open('/home/pi/script/pass/public_grange4_moisture_suction', 'r') as myfile
 with open('/home/pi/script/pass/private_grange4_moisture_suction', 'r') as myfile:
     private_grange4_moisture_suction=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/public_grange_3_luo2_dry', 'r') as myfile:
-    public_grange_3_luo2_dry=myfile.read().replace('\n', '')
+with open('/home/pi/script/pass/public_grange_4_luo2_dry', 'r') as myfile:
+    public_grange_4_luo2_dry=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/private_grange_3_luo2_dry', 'r') as myfile:
-    private_grange_3_luo2_dry=myfile.read().replace('\n', '')
+with open('/home/pi/script/pass/private_grange_4_luo2_dry', 'r') as myfile:
+    private_grange_4_luo2_dry=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/public_grange_3_luo2_wet', 'r') as myfile:
-    public_grange_3_luo2_wet=myfile.read().replace('\n', '')
+with open('/home/pi/script/pass/public_grange_4_luo2_wet', 'r') as myfile:
+    public_grange_4_luo2_wet=myfile.read().replace('\n', '')
 
-with open('/home/pi/script/pass/private_grange_3_luo2_wet', 'r') as myfile:
-    private_grange_3_luo2_wet=myfile.read().replace('\n', '')
+with open('/home/pi/script/pass/private_grange_4_luo2_wet', 'r') as myfile:
+    private_grange_4_luo2_wet=myfile.read().replace('\n', '')
 
 
 with open('/home/pi/script/pass/nectar_address', 'r') as myfile:
@@ -48,8 +48,8 @@ field_name=['mo0','mo1','mo2','mo3','mo4','mo5','mo6','mo7',
             'dluo7','dlupe7','dlup7',
             'wluo7','wlupe7','wlup7'
             ]
-grange_3_mo_su=dict((el,0.0) for el in field_name)
-pht_grange_3_mo_su = Phant(publicKey=public_grange4_moisture_suction, fields=field_name ,privateKey=private_grange4_moisture_suction,baseUrl=nectar_address)
+grange_4_mo_su=dict((el,0.0) for el in field_name)
+pht_grange_4_mo_su = Phant(publicKey=public_grange4_moisture_suction, fields=field_name ,privateKey=private_grange4_moisture_suction,baseUrl=nectar_address)
 
 
 
@@ -62,8 +62,8 @@ field_name=['dluo0','dlupe0','dlut0','dlup0',
             'dluo5','dlupe5','dlut5','dlup5',
             'dluo6','dlupe6','dlut6','dlup6',
             'rh','temp']
-grange_3_luo2_dry=dict((el,0.0) for el in field_name)
-pht_grange_3_luo2_dry= Phant(publicKey=public_grange_3_luo2_dry, fields=field_name ,privateKey=private_grange_3_luo2_dry,baseUrl=nectar_address)
+grange_4_luo2_dry=dict((el,0.0) for el in field_name)
+pht_grange_4_luo2_dry= Phant(publicKey=public_grange_4_luo2_dry, fields=field_name ,privateKey=private_grange_4_luo2_dry,baseUrl=nectar_address)
 
 
 #------------------------- below are definations for the sensors in the column ---------------------------------
@@ -75,15 +75,16 @@ field_name=['wluo0','wlupe0','wlut0','wlup0',
             'wluo5','wlupe5','wlut5','wlup5',
             'wluo6','wlupe6','wlut6','wlup6',
             'flow','tmp']
-grange_3_luo2_wet=dict((el,0.0) for el in field_name)
-pht_grange_3_luo2_wet= Phant(publicKey=public_grange_3_luo2_wet, fields=field_name ,privateKey=private_grange_3_luo2_wet,baseUrl=nectar_address)
+grange_4_luo2_wet=dict((el,0.0) for el in field_name)
+pht_grange_4_luo2_wet= Phant(publicKey=public_grange_4_luo2_wet, fields=field_name ,privateKey=private_grange_4_luo2_wet,baseUrl=nectar_address)
 
 
 
 
 #port_sensor  = 'USB VID:PID=2341:0042 SNR=5573631383735150B0E0'
-port_sensor  = 'USB VID:PID=2341:0042 SNR=55639303035351C07261'  #grange 3
+#port_sensor  = 'USB VID:PID=2341:0042 SNR=55639303035351C07261'  #grange 3
 
+port_sensor  = 'USB VID:PID=2341:0042 SNR=5563231363835151C1B1'  #grange 4
 # whether the result will be displayed on the screen
 screen_display=True
 
@@ -91,7 +92,7 @@ screen_display=True
 save_to_file=True
 
 # the Filename of the csv file for storing file
-file_name= 'grange4.csv'
+file_name= 'grange4__.csv'
 
 sleep_time_seconds=45*60
 
@@ -107,67 +108,67 @@ if save_to_file: fid= open(file_name,'a',0)
 
 while True: 
 # ------------------------------- below goes to electrochem_o2  --------------------------------------------
-    #msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,BF8F37D9,dgin,50,snpw,42,htpw,35,itv,1000,otno,5",initialize=False) # 9999
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,46AB9657,dgin,50,snpw,42,htpw,35,itv,1000,otno,5",initialize=False) 
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    grange_4_mo_su['tmp0']=float(current_read[2])
+    grange_4_mo_su['su0']=float(current_read[7])-float(current_read[2])
+    
+    
+    
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,E703BA53,dgin,50,snpw,42,htpw,37,itv,1000,otno,5",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    grange_4_mo_su['tmp1']=float(current_read[2])
+    grange_4_mo_su['su1']=float(current_read[7])-float(current_read[2])
+    
+    
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,B07E380C,dgin,50,snpw,42,htpw,39,itv,1000,otno,5",initialize=False)
     #if screen_display: print msg.rstrip()
     #if save_to_file: fid.write(delimiter+msg.rstrip())
     #current_read=msg.split(',')[0:-1]
-    #grange_3_mo_su['tmp0']=float(current_read[2])
-    #grange_3_mo_su['su0']=float(current_read[7])-float(current_read[2])
-    
-    
-    
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,52F4942D,dgin,50,snpw,42,htpw,37,itv,1000,otno,5",initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp1']=float(current_read[2])
-    grange_3_mo_su['su1']=float(current_read[7])-float(current_read[2])
-    
-    
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,B233BC1B,dgin,50,snpw,42,htpw,39,itv,1000,otno,5",initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp2']=float(current_read[2])
-    grange_3_mo_su['su2']=float(current_read[7])-float(current_read[2])
+    #grange_4_mo_su['tmp2']=float(current_read[2])
+    #grange_4_mo_su['su2']=float(current_read[7])-float(current_read[2])
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,28D3BB39,dgin,50,snpw,42,htpw,41,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,C859BAE9,dgin,50,snpw,42,htpw,41,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp3']=float(current_read[2])
-    grange_3_mo_su['su3']=float(current_read[7])-float(current_read[2])
+    grange_4_mo_su['tmp3']=float(current_read[2])
+    grange_4_mo_su['su3']=float(current_read[7])-float(current_read[2])
     
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,C53DBAAD,dgin,50,snpw,42,htpw,27,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,A05E96B8,dgin,50,snpw,42,htpw,27,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp4']=float(current_read[2])
-    grange_3_mo_su['su4']=float(current_read[7])-float(current_read[2])
+    grange_4_mo_su['tmp4']=float(current_read[2])
+    grange_4_mo_su['su4']=float(current_read[7])-float(current_read[2])
     
             
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,FF3CBA42,dgin,50,snpw,42,htpw,29,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,F8BABB1F,dgin,50,snpw,42,htpw,29,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp5']=float(current_read[2])
-    grange_3_mo_su['su5']=float(current_read[7])-float(current_read[2])   
+    grange_4_mo_su['tmp5']=float(current_read[2])
+    grange_4_mo_su['su5']=float(current_read[7])-float(current_read[2])   
     
     
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,1F81B940,dgin,50,snpw,42,htpw,31,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,D936BCF2,dgin,50,snpw,42,htpw,31,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp6']=float(current_read[2])
-    grange_3_mo_su['su6']=float(current_read[7])-float(current_read[2])   
+    grange_4_mo_su['tmp6']=float(current_read[2])
+    grange_4_mo_su['su6']=float(current_read[7])-float(current_read[2])   
     
     
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,883ABAC3,dgin,50,snpw,42,htpw,33,itv,1000,otno,5",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="fred,A333B9F6,dgin,50,snpw,42,htpw,33,itv,1000,otno,5",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['tmp7']=float(current_read[2])
-    grange_3_mo_su['su7']=float(current_read[7])-float(current_read[2])    
+    grange_4_mo_su['tmp7']=float(current_read[2])
+    grange_4_mo_su['su7']=float(current_read[7])-float(current_read[2])    
     
 
     sleep(2)
@@ -175,14 +176,14 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo0']=float(current_read[2])
+    grange_4_mo_su['mo0']=float(current_read[2])
 
     sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,9,power,44,point,3,interval_mm,200,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo1']=float(current_read[2])
+    grange_4_mo_su['mo1']=float(current_read[2])
 
 
     sleep(2)
@@ -190,7 +191,7 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo2']=float(current_read[2])
+    grange_4_mo_su['mo2']=float(current_read[2])
 
 
     sleep(2)
@@ -198,7 +199,7 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo3']=float(current_read[2])
+    grange_4_mo_su['mo3']=float(current_read[2])
 
 
     sleep(2)
@@ -206,7 +207,7 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo4']=float(current_read[2])
+    grange_4_mo_su['mo4']=float(current_read[2])
 
 
     sleep(2)
@@ -214,7 +215,7 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo5']=float(current_read[2])
+    grange_4_mo_su['mo5']=float(current_read[2])
 
 
     sleep(2)
@@ -222,7 +223,7 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo6']=float(current_read[2])
+    grange_4_mo_su['mo6']=float(current_read[2])
 
 
     sleep(2)
@@ -230,7 +231,7 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_mo_su['mo7']=float(current_read[2])
+    grange_4_mo_su['mo7']=float(current_read[2])
 
 
     sleep(5)
@@ -238,22 +239,22 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_mo_su['dluo7'] = float(current_read[-2])
-    grange_3_mo_su['dlupe7'] = float(current_read[-4])
-    #grange_3_luo2_dry['dlut0'] = float(current_read[-6])
-    grange_3_mo_su['dlup7'] = float(current_read[-8])
+    grange_4_mo_su['dluo7'] = float(current_read[-2])
+    grange_4_mo_su['dlupe7'] = float(current_read[-4])
+    #grange_4_luo2_dry['dlut0'] = float(current_read[-6])
+    grange_4_mo_su['dlup7'] = float(current_read[-8])
 
     sleep(5)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,6,serial,3",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_mo_su['wluo7'] = float(current_read[-2])
-    grange_3_mo_su['wlupe7'] = float(current_read[-4])
-    #grange_3_luo2_dry['wlut7'] = float(current_read[-6])
-    grange_3_mo_su['wlup7'] = float(current_read[-8])
+    grange_4_mo_su['wluo7'] = float(current_read[-2])
+    grange_4_mo_su['wlupe7'] = float(current_read[-4])
+    #grange_4_luo2_dry['wlut7'] = float(current_read[-6])
+    grange_4_mo_su['wlup7'] = float(current_read[-8])
 
-    upload_phant(pht_grange_3_mo_su,grange_3_mo_su,screen_display)
+    upload_phant(pht_grange_4_mo_su,grange_4_mo_su,screen_display)
     
 
     sleep(5)
@@ -261,20 +262,20 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry['dluo0'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe0'] = float(current_read[-4])
-    grange_3_luo2_dry['dlut0'] = float(current_read[-6])
-    grange_3_luo2_dry['dlup0'] = float(current_read[-8])
+    grange_4_luo2_dry['dluo0'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe0'] = float(current_read[-4])
+    grange_4_luo2_dry['dlut0'] = float(current_read[-6])
+    grange_4_luo2_dry['dlup0'] = float(current_read[-8])
 
     sleep(5)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,2",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry[ 'dluo1'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe1'] = float(current_read[-4])
-    grange_3_luo2_dry[ 'dlut1'] = float(current_read[-6])
-    grange_3_luo2_dry[ 'dlup1'] = float(current_read[-8])
+    grange_4_luo2_dry[ 'dluo1'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe1'] = float(current_read[-4])
+    grange_4_luo2_dry[ 'dlut1'] = float(current_read[-6])
+    grange_4_luo2_dry[ 'dlup1'] = float(current_read[-8])
     
 
     sleep(5)
@@ -282,10 +283,10 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry[ 'dluo2'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe2'] = float(current_read[-4])
-    grange_3_luo2_dry[ 'dlut2'] = float(current_read[-6])
-    grange_3_luo2_dry[ 'dlup2'] = float(current_read[-8])
+    grange_4_luo2_dry[ 'dluo2'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe2'] = float(current_read[-4])
+    grange_4_luo2_dry[ 'dlut2'] = float(current_read[-6])
+    grange_4_luo2_dry[ 'dlup2'] = float(current_read[-8])
 
 
     sleep(5)
@@ -293,10 +294,10 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry[ 'dluo3'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe3'] = float(current_read[-4])
-    grange_3_luo2_dry[ 'dlut3'] = float(current_read[-6])
-    grange_3_luo2_dry[ 'dlup3'] = float(current_read[-8])
+    grange_4_luo2_dry[ 'dluo3'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe3'] = float(current_read[-4])
+    grange_4_luo2_dry[ 'dlut3'] = float(current_read[-6])
+    grange_4_luo2_dry[ 'dlup3'] = float(current_read[-8])
 
 
 
@@ -304,39 +305,39 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry[ 'dluo4'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe4'] = float(current_read[-4])
-    grange_3_luo2_dry[ 'dlut4'] = float(current_read[-6])
-    grange_3_luo2_dry[ 'dlup4'] = float(current_read[-8])
+    grange_4_luo2_dry[ 'dluo4'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe4'] = float(current_read[-4])
+    grange_4_luo2_dry[ 'dlut4'] = float(current_read[-6])
+    grange_4_luo2_dry[ 'dlup4'] = float(current_read[-8])
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,22,serial,3",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry[ 'dluo5'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe5'] = float(current_read[-4])
-    grange_3_luo2_dry[ 'dlut5'] = float(current_read[-6])
-    grange_3_luo2_dry[ 'dlup5'] = float(current_read[-8])
+    grange_4_luo2_dry[ 'dluo5'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe5'] = float(current_read[-4])
+    grange_4_luo2_dry[ 'dlut5'] = float(current_read[-6])
+    grange_4_luo2_dry[ 'dlup5'] = float(current_read[-8])
 
 
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,23,serial,1",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_dry[ 'dluo6'] = float(current_read[-2])
-    grange_3_luo2_dry['dlupe6'] = float(current_read[-4])
-    grange_3_luo2_dry[ 'dlut6'] = float(current_read[-6])
-    grange_3_luo2_dry[ 'dlup6'] = float(current_read[-8])
+    grange_4_luo2_dry[ 'dluo6'] = float(current_read[-2])
+    grange_4_luo2_dry['dlupe6'] = float(current_read[-4])
+    grange_4_luo2_dry[ 'dlut6'] = float(current_read[-6])
+    grange_4_luo2_dry[ 'dlup6'] = float(current_read[-8])
 
     # enclosure temperature and humidity
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,2000,debug,0",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    grange_3_luo2_dry['rh']=float(current_read[-1])
-    grange_3_luo2_dry['temp']=float(current_read[-2])
+    grange_4_luo2_dry['rh']=float(current_read[-1])
+    grange_4_luo2_dry['temp']=float(current_read[-2])
 
-    upload_phant(pht_grange_3_luo2_dry,grange_3_luo2_dry,screen_display)
+    upload_phant(pht_grange_4_luo2_dry,grange_4_luo2_dry,screen_display)
 
 
     sleep(5)
@@ -344,10 +345,10 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo0'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe0'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut0'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup0'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo0'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe0'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut0'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup0'] = float(current_read[-8])
 
 
     sleep(5)
@@ -355,10 +356,10 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo1'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe1'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut1'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup1'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo1'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe1'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut1'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup1'] = float(current_read[-8])
 
 
 
@@ -367,10 +368,10 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo2'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe2'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut2'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup2'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo2'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe2'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut2'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup2'] = float(current_read[-8])
 
 
     sleep(5)
@@ -378,20 +379,20 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo3'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe3'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut3'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup3'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo3'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe3'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut3'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup3'] = float(current_read[-8])
 
     sleep(5)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,9,serial,3",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo4'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe4'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut4'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup4'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo4'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe4'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut4'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup4'] = float(current_read[-8])
 
 
     sleep(5)
@@ -399,23 +400,23 @@ while True:
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo5'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe5'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut5'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup5'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo5'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe5'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut5'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup5'] = float(current_read[-8])
 
     sleep(5)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,3",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    grange_3_luo2_wet[ 'wluo6'] = float(current_read[-2])
-    grange_3_luo2_wet['wlupe6'] = float(current_read[-4])
-    grange_3_luo2_wet[ 'wlut6'] = float(current_read[-6])
-    grange_3_luo2_wet[ 'wlup6'] = float(current_read[-8])
+    grange_4_luo2_wet[ 'wluo6'] = float(current_read[-2])
+    grange_4_luo2_wet['wlupe6'] = float(current_read[-4])
+    grange_4_luo2_wet[ 'wlut6'] = float(current_read[-6])
+    grange_4_luo2_wet[ 'wlup6'] = float(current_read[-8])
 
 
-    upload_phant(pht_grange_3_luo2_wet,grange_3_luo2_wet,screen_display)
+    upload_phant(pht_grange_4_luo2_wet,grange_4_luo2_wet,screen_display)
 
 
     #GPIO.output(25, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
