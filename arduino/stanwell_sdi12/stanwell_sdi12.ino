@@ -272,53 +272,66 @@ void loop() {
                   Serial1.print("M 1");
                   Serial1.print("\r\n");
                   delay(measure_time_interval_ms);
-                  Serial1.readStringUntil('\n');
+                  String aa1=Serial1.readStringUntil('\n');
+                  Serial.print(aa1);
                   Serial1.print("M 1");
                   Serial1.print("\r\n");
                   delay(measure_time_interval_ms);
-                  Serial1.readStringUntil('\n');
-
+                  aa1=Serial1.readStringUntil('\n');
+                  Serial.print(aa1);
                   Serial.print("result,");
                   Serial1.print(lumino2);
                   Serial1.print("\r\n");
                   delay(measure_time_interval_ms);
                   String aa= Serial1.readStringUntil('\n');
-                  Serial.println(aa);
-                
+                  Serial.print(aa);
+                  delay(measure_time_interval_ms);
+                  aa= Serial1.readStringUntil('\n');
+                  Serial.println(aa);                
 
                }
                if (serial_pin==2){
                   Serial2.print("M 1");
                   Serial2.print("\r\n");
                   delay(measure_time_interval_ms);
-                  Serial2.readStringUntil('\n');
+                  String aa2=Serial2.readStringUntil('\n');
                   Serial2.print("M 1");
                   Serial2.print("\r\n");
+                  Serial.print(aa2);
                   delay(measure_time_interval_ms);
-                  Serial2.readStringUntil('\n');
-                  
+                  aa2=Serial2.readStringUntil('\n');
+                  Serial.print(aa2);
                   Serial.print("result,");
                   Serial2.print(lumino2);
                   Serial2.print("\r\n");
                   delay(measure_time_interval_ms);
                   String aa= Serial2.readStringUntil('\n');
-                  Serial.println(aa);
+                  Serial.print(aa);
+                  delay(measure_time_interval_ms);
+                  aa= Serial1.readStringUntil('\n');
+                  Serial.println(aa);                  
                }
                if (serial_pin==3){
                   Serial3.print("M 1");
                   Serial3.print("\r\n");
                   delay(measure_time_interval_ms);
-                  Serial3.readStringUntil('\n');
+                  String aa3=Serial3.readStringUntil('\n');
+                  Serial.print(aa3);
+                  delay(1000);
                   Serial3.print("M 1");
                   Serial3.print("\r\n");
                   delay(measure_time_interval_ms);
-                  Serial3.readStringUntil('\n');                  
+                  aa3=Serial3.readStringUntil('\n');   
+                  Serial.print(aa3);               
                   Serial.print("result,");
                   Serial3.print(lumino2);
                   Serial3.print("\r\n");
                   delay(measure_time_interval_ms);
                   String aa= Serial3.readStringUntil('\n');
-                  Serial.println(aa);
+                  Serial.print(aa);
+                  delay(measure_time_interval_ms);
+                  aa= Serial3.readStringUntil('\n');
+                  Serial.println(aa);                  
                }
                digitalWrite(power_sw_pin,LOW);
         } // lumino2
@@ -498,6 +511,83 @@ void loop() {
         //          thermal_suction_ds18b20.getBytes(thermal_suction_sensor, numbersd) ;
                     
          }  // fred temperature by search.
+
+
+
+
+
+
+         String fredlund_suction_ds18b209=hydrogeolog1.parse_argument_string("fred9","",str_ay_size,str_ay);
+         if ( (fredlund_suction_ds18b209!="") && (power_sw_pin!=-1))
+             {
+              hydrogeolog1.print_string_delimiter_value("fred_ds18",String(fredlund_suction_ds18b209));
+              if (debug_sw==1)
+              {            
+              
+                  hydrogeolog1.print_string_delimiter_value("sensor_power"  ,String(power_sw_pin)  );
+                  hydrogeolog1.print_string_delimiter_value("digital_input"  ,String(digital_input)  );
+                  hydrogeolog1.print_string_delimiter_value("power_heating_pin"  ,String(power_heating_pin)  );
+                  hydrogeolog1.print_string_delimiter_value("interval_ms"  ,String(output_temp_interval_ms)  );
+                  hydrogeolog1.print_string_delimiter_value("output_number"  ,String(output_number_temp)  );
+              }
+              
+              //the reason i did not wrap this in hydrogeolog is because function in c normally can not return an array
+              byte CardNumberByte[4];          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
+              const char * CardNumber = fredlund_suction_ds18b209.c_str();
+              unsigned long number = strtoul( CardNumber, nullptr, 16);
+              for(int i=3; i>=0; i--)    // start with lowest byte of number
+              {
+                //Serial.println(number,HEX);
+                //Serial.println(byte(number));
+                //Serial.println(byte(number),HEX);
+                  CardNumberByte[i] = byte( number);
+                  number >>= 8;            // get next byte into position
+              }   
+//                 
+//            for(int i=0; i<4; i++)
+//            {
+//              Serial.print("0x");
+//              Serial.print(CardNumberByte[i], HEX);
+//              Serial.print(delimiter);
+//            }
+            byte heat_suction_sensor_addr[8];
+            heat_suction_sensor_addr[0]=0x28;
+            heat_suction_sensor_addr[1]=CardNumberByte[0];
+            heat_suction_sensor_addr[2]=CardNumberByte[1];
+            heat_suction_sensor_addr[3]=CardNumberByte[2];
+            heat_suction_sensor_addr[4]=0x09;
+            heat_suction_sensor_addr[5]=0x00;
+            heat_suction_sensor_addr[6]=0x00;
+            heat_suction_sensor_addr[7]=CardNumberByte[3]; 
+                       
+            
+            digitalWrite(power_sw_pin,HIGH);
+            delay(1000);
+     
+            hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+            digitalWrite(power_heating_pin,HIGH);
+            for(int i=0;i<output_number_temp;i++)
+            {
+                delay(output_temp_interval_ms);
+                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+            }
+            digitalWrite(power_heating_pin,LOW);
+            for(int i=0;i<output_number_temp;i++)
+            {
+                delay(output_temp_interval_ms);
+                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+            }
+
+
+            Serial.println();
+            digitalWrite(power_sw_pin,LOW);               
+                    
+         }  // ds18b209
+
+
+
+
+
 
          /*
          use tca9548 i2c multiplexer to obtain results from ms5803 pressure transducer 
