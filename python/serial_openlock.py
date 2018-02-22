@@ -58,7 +58,7 @@ def close_port(portname):
 def initialize(device_handle):
 ### this script is to make sure that arduino is ready to return the result as expected
     initialized=False
-    writing_string='ABC'
+    writing_string='abc'
     while initialized==False: 
         device_handle.write(writing_string)
         time.sleep(2)

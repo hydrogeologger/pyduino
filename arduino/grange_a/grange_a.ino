@@ -478,6 +478,29 @@ void loop() {
          }  // fred temperature by search.
 
 
+        int si1145_in_pin   = hydrogeolog1.parse_argument("1145",-1,str_ay_size,str_ay);
+        power_sw_pin    = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
+       /*si1145 measurement
+       1145,3,power,8,interval_mm,5000,debug,1
+       */
+       if ( (si1145_in_pin!=-1) && (power_sw_pin!=-1))   //&&(number_of_measurement!=-1) && (number_of_dummies!=-1) 
+        {
+            int number_of_measurement=hydrogeolog1.parse_argument("points",1,str_ay_size,str_ay);
+            int number_of_dummies=hydrogeolog1.parse_argument("dummies",0,str_ay_size,str_ay);
+            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",1000,str_ay_size,str_ay);
+            if (measure_time_interval_ms<1000) {measure_time_interval_ms=5000;}
+            // needs to be at leaset 1000 ms
+            hydrogeolog1.print_string_delimiter_value("si1145"  ,String(si1145_in_pin)  );
+            if (debug_sw==1)
+            {            
+                hydrogeolog1.print_string_delimiter_value("power"  ,String(power_sw_pin)  );
+                hydrogeolog1.print_string_delimiter_value("points" ,String(number_of_measurement)  );
+                hydrogeolog1.print_string_delimiter_value("dummies",String(number_of_dummies)  );
+                hydrogeolog1.print_string_delimiter_value("interval_mm",String(measure_time_interval_ms)  );
+            }
+            hydrogeolog1.si1145(power_sw_pin,number_of_measurement,measure_time_interval_ms,number_of_dummies);
+            Serial.println();
+        } // si1145 read
 
 
 }//if string is not empty
