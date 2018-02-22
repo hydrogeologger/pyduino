@@ -6,6 +6,7 @@ import numpy as np
 import sys
 from serial import tools
 from serial.tools import list_ports #from phant import Phant
+import pdb
 #In [36]: serial.tools.list_ports.comports()[0][0]
 #Out[36]: '/dev/ttyUSB0'
 #
@@ -17,7 +18,7 @@ from serial.tools import list_ports #from phant import Phant
 # i think here requires a bit more
 #tty=serial.tools.list_ports.comports()[0]
 
-def open_port(portname):
+def open_port(portname,time_out):
     ### this script is for the purpose of locking the port when it is  used by other script
     ### following http://stackoverflow.com/questions/19809867/how-to-check-if-serial-port-is-already-open-by-another-process-in-linux-using
     ### and http://arduino.stackexchange.com/questions/36621/allow-only-one-serial-connection-using-pyserial?noredirect=1#comment73104_36621
@@ -33,7 +34,8 @@ def open_port(portname):
         try:
             #port = serial.Serial(port=tty[0]) #,9600,timeout=None)
             #port = serial.Serial(port=tty[0],9600,timeout=None)
-            port = serial.Serial(port=tty[0])#,timeout=None)
+            #pdb.set_trace()
+            port = serial.Serial(port=tty[0],baudrate=9600,timeout=time_out)
             if port.isOpen():
                 try:
                     fcntl.flock(port.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -73,15 +75,16 @@ def get_result_by_input(**kwargs):
     arg_defaults = {
                 'port':'port',
                 'command':None,
-                'initialize':True
+                'initialize':True,
+                'timeout':600
                    }
     arg=arg_defaults
     for d in kwargs:
         arg[d]= kwargs.get(d)
 
-    [port_sensor_isopen, sensor_fid]=open_port(arg['port'])
+    [port_sensor_isopen, sensor_fid]=open_port(arg['port'],arg['timeout'])
     while port_sensor_isopen == False:
-        [port_sensor_isopen, sensor_fid]=open_port(arg['port'])
+        [port_sensor_isopen, sensor_fid]=open_port(arg['port'],arg['timeout'])
         time.sleep(10)
     if arg['initialize']: initialize(sensor_fid) 
     
