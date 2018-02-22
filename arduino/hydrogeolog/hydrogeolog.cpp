@@ -140,10 +140,12 @@ void hydrogeolog::switch_power(int power_sw_idx,int status)
     if (status==1)
     {
         digitalWrite(power_sw_idx,HIGH);
+        Serial.print("now is high");
     }
     else
     {
         digitalWrite(power_sw_idx,LOW);
+		Serial.print("now is low");
     }
 
 

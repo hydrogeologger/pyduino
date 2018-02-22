@@ -39,6 +39,8 @@ class pandas_scale:
             arg[d]= kwargs.get(d)
 
 
+        self.parse_dates=arg['parse_dates']
+
         #fn='/home/chenming/Dropbox/tailing_column/data/column_on_roof/'
         sys.path.append(file_path)
         # no good as it does not exclude other non-directory
@@ -88,7 +90,7 @@ class pandas_scale:
             # sorting the results using 
             #pdb.set_trace()
             if i>1: 
-                self.df=pd.concat(self.df_sub,axis=0).sort(['date_time'])
+                self.df=pd.concat(self.df_sub,axis=0).sort(self.parse_dates)
                 # http://stackoverflow.com/questions/16167829/in-pandas-how-can-i-reset-index-without-adding-a-new-column
                 # to make sure that it re list the system
                 self.df=self.df.reset_index(drop=True)
@@ -140,7 +142,7 @@ class pandas_scale:
             self.df_sub[i]=pd.read_csv(fn,**kwargs ) #,names=arg['names'],parse_dates=arg['parse_dates'],header=arg['header'])
             self.df=pd.concat([self.df,self.df_sub[i]])
             i+=1
-        self.df=self.df.sort(['date_time']).reset_index(drop=True)
+        self.df=self.df.sort(self.parse_dates).reset_index(drop=True)
         
 
             
@@ -183,6 +185,8 @@ class concat_data_roof():
         #pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),period=pd.Timedelta(600,unit='s' ) )
         # frequency is actually the duration between the neighbouring point not period
         #date_time=pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),freq=pd.Timedelta(600,unit='s' ) )
+
+        #pdb.set_trace()
         date_time=pd.date_range(start=start_time,end=end_time,freq=pd.Timedelta(dt_s,unit='s' ) )
         self.df = pd.DataFrame({ 'date_time' : date_time})
         self.df['time_days']=(self.df['date_time']-self.df['date_time'][0]).astype('timedelta64[s]')/86400.0
