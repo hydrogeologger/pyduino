@@ -61,7 +61,7 @@ class hydrogeolog
       void read_DS18B20_by_addr(byte addr[8],int digi_pin);
       void ms5803(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms,int debug_sw,int tca9548_channel);
       void tcaselect(int i);
-      void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms);
+      void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw);
       void sdi12(int digi_idx);
       void si1145(int power_sw,int number_readings_si1145,int sleep_interval_ms,int number_of_dummies);
     private:

@@ -424,7 +424,7 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
     }   //5803
 
 // temperature and humidity by sinsiren
-void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms)
+void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw)
     {
     float temp;
     float humi;
@@ -445,6 +445,12 @@ void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int num
         delay(measure_time_interval_ms);
         temp_avg+=temp;
         humi_avg+=humi;
+        if (debug_sw==1) {
+            Serial.print(temp);
+            Serial.print(delimiter);
+            Serial.print(humi);
+            Serial.print(delimiter);
+        } //debug_sw
         }
     temp_avg/=float(number_of_measurements);
     humi_avg/=float(number_of_measurements);

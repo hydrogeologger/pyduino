@@ -664,7 +664,7 @@ void loop() {
 
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
              delay(1000);   
-             hydrogeolog1.sht75(sht75_data,sht75_clk,number_of_dummies,number_of_measurements,measure_time_interval_ms);
+             hydrogeolog1.sht75(sht75_data,sht75_clk,number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw);
                  
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
              Serial.println();
