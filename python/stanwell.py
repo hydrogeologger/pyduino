@@ -135,13 +135,32 @@ while True:
     GPIO.output(26, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
     sleep(2)
 
-    sleep(10)
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,3,clk,4,power,8,debug,1",initialize=True)
+    #sleep(10)
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,3,clk,4,power,8,debug,1",initialize=True)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #sali_gs3_p['hum3']=float(current_read[-1])
+    #sali_gs3_p['tmp3']=float(current_read[-2])
+
+
+    sleep(2)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,4,power,38,points,2,dummies,1,interval_mm,200,debug,1",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    sali_gs3_p['hum3']=float(current_read[-1])
-    sali_gs3_p['tmp3']=float(current_read[-2])
+    sali_gs3_p['tmp5']=float(current_read[-1])
+    sali_gs3_p['tmp6']=float(current_read[-2])
+
+    sleep(2)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,3,power,36,points,2,dummies,1,interval_mm,200,debug,1",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['tmp7']=float(current_read[-1])
+    sali_gs3_p['tmp8']=float(current_read[-2])
+
+
     
     sleep(5)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,51,clk,10,power,25,debug,1",initialize=True)
@@ -179,6 +198,15 @@ while True:
     sali_gs3_p['ec0']=float(current_read[9])
     sali_gs3_p['dp0']=float(current_read[7])
     sali_gs3_p['gstmp0']=float(current_read[8])
+
+    sleep(2)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="12,52,power,7,debug,1",initialize=True)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    sali_gs3_p['tmp2']=float(current_read[9])
+    sali_gs3_p['tmp3']=float(current_read[7])
+    sali_gs3_p['tmp4']=float(current_read[8])
 
     sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,200,debug,1",initialize=False)
