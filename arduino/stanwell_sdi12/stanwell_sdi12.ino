@@ -518,6 +518,8 @@ void loop() {
 
 
          String fredlund_suction_ds18b209=hydrogeolog1.parse_argument_string("fred9","",str_ay_size,str_ay);
+        
+         
          if ( (fredlund_suction_ds18b209!="") && (power_sw_pin!=-1))
              {
               hydrogeolog1.print_string_delimiter_value("fred_ds18",String(fredlund_suction_ds18b209));
@@ -538,7 +540,7 @@ void loop() {
               for(int i=3; i>=0; i--)    // start with lowest byte of number
               {
                 //Serial.println(number,HEX);
-                //Serial.println(byte(number));
+               //Serial.println(byte(number));
                 //Serial.println(byte(number),HEX);
                   CardNumberByte[i] = byte( number);
                   number >>= 8;            // get next byte into position
