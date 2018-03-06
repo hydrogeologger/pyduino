@@ -183,6 +183,7 @@ void loop() {
                 hydrogeolog1.print_string_delimiter_value("power_switch"  ,String(pow_sw)  );
                 hydrogeolog1.print_string_delimiter_value("power_switch_status"  ,String(pow_sw_status) );
                 hydrogeolog1.switch_power(pow_sw,pow_sw_status);
+                Serial.println();
             }  //power switch
 
         int dht22_in_pin   = hydrogeolog1.parse_argument("dht22",-1,str_ay_size,str_ay);
