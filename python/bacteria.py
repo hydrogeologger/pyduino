@@ -9,7 +9,7 @@ import get_ip
 from upload_phant import upload_phant
 # below required by gpio
 #import RPi.GPIO as GPIO            # import RPi.GPIO module  
-from time import sleep,gmtime, strftime             # lets us have a delay  
+from time import sleep,gmtime, strftime,localtime             # lets us have a delay  
 #GPIO.setmode(GPIO.BCM)             # choose BCM or BOARD  
 #GPIO.setup(25, GPIO.OUT)           # set GPIO24 as an output   
 #GPIO.setup(26, GPIO.OUT)           # set GPIO24 as an output   
@@ -75,16 +75,16 @@ time.sleep(2)
 str_scale1=scale1.readline()
 str_scale2=scale2.readline()
 
-time.sleep(10)
-scale1.write('IP\n\r')
-scale2.write('IP\n\r')
+#time.sleep(10)
+#scale1.write('IP\n\r')
+#scale2.write('IP\n\r')
+#
+#time.sleep(2)
+#str_scale1=scale1.readline()
+#str_scale2=scale2.readline()
 
-time.sleep(2)
-str_scale1=scale1.readline()
-str_scale2=scale2.readline()
-
-weight_scale1=str_scale1.split()[0]
-weight_scale2=str_scale2.split()[0]
+#weight_scale1=str_scale1.split()[0]
+#weight_scale2=str_scale2.split()[0]
 
 #whether the result will be displayed on the screen
 screen_display=True
@@ -108,8 +108,8 @@ if save_to_file: fid= open(file_name,'a',0)
 
 while True: 
     ### -------------------- below is to processing data from suction, moisture-------------------------
-    if screen_display: print strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    if save_to_file: fid.write(strftime("%Y-%m-%d %H:%M:%S", gmtime())  )
+    if screen_display: print strftime("%Y-%m-%d %H:%M:%S", localtime())
+    if save_to_file: fid.write(strftime("%Y-%m-%d %H:%M:%S", localtime())  )
    
     # time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     #if screen_display: print time_now,delimiter,weight_scale1.rstrip(),delimiter,weight_scale2.rstrip().rstrip()
