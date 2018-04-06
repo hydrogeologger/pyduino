@@ -83,10 +83,18 @@ def rs1984(sw):
     return 3.5*(sw)**(-2.3)+33.5
    
 def swcc_fredlund_xing_1994(**kwargs):
-    '''Soil water retention curve from Fredlund and Xing [1994]'''
+    '''Soil water retention curve from Fredlund and Xing [1994]
+    input explanation:
+    af -- [kPa] a soil parameter which is primarily a function of air entry value
+    nf -- a soil parameter which is primarily a function of the rate of water extraction from the soil once the air-entry value has been exceeded
+    mf -- a soil parameter which is primarily a function of the residual water content
+    hr -- [kPa] suction at which residual water contents occurrs 
+    por-- porosity
+    psi-- input suction range [kPa]
+    '''
     psi_default=np.arange(10**-4,10**-4,10**-4)
     for i in np.arange(-3,6):
-       new=np.arange(10**i,10**(i+1),10**i)
+       new=np.arange(10.0**float(i),10.**(float(i)+1.),10.**float(i))
        psi_default=np.concatenate((psi_default,new))
     arg_defaults = {
                 'plot':True,
@@ -96,7 +104,6 @@ def swcc_fredlund_xing_1994(**kwargs):
                 'hr'  :223873.8,
                 'por':0.54,
                 'psi':psi_default}
-
     arg=arg_defaults
     for d in kwargs:
         arg[d]= kwargs.get(d)
@@ -164,14 +171,24 @@ def swcc_reverse_fredlund_xing_1994(**kwargs):
     '''Soil water retention curve from Fredlund and Xing [1994]
       reversing calculating from content to suction
       input should be volumetric water content
-      output unit is kpa'''
+      output unit is kpa
+      input:
+      input explanation:
+      af -- [kpa] a soil parameter which is primarily a function of air entry value
+      nf -- a soil parameter which is primarily a function of the rate of water extraction from the soil once the air-entry value has been exceeded
+      mf -- a soil parameter which is primarily a function of the residual water content
+      hr -- [kpa] suction at which residual water contents occurrs 
+      por-- porosity
+      psi_0  -- the suction kpa when volumetric water content is saturated
+      '''
     arg_defaults = {
                 'nf'  :0.85,
                 'mf'  :0.31,
                 'af'  :24.9999,
                 'hr'  :223873.8,
                 'por':0.54,
-                'vwc':0.1
+                'vwc':0.1,
+                'psi_0':1e-9
                 }
 
     arg=arg_defaults
@@ -188,7 +205,7 @@ def swcc_reverse_fredlund_xing_1994(**kwargs):
         
         #pdb.set_trace()
         if k>=arg['por']:
-            psi_1=0
+            psi_1=arg['psi_0']
         else:
             while abs(psi_0-psi_1)>0.0001:
                 psi_0=psi_1
