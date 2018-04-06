@@ -63,8 +63,8 @@ void setup() {
   for (int i=0; i<number_digi_out_pins;i++){
       pinMode(digi_out_pins[i],OUTPUT);
   }
-  delay(5000);
-  digitalWrite(46,HIGH); //switch on rpi 
+  //delay(5000);
+  //digitalWrite(46,HIGH); //switch on rpi 
 }
 
 // the loop routine runs over and over again forever:
@@ -619,13 +619,13 @@ void loop() {
             }
 
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
-             
+             delay(2000);
+             Wire.begin();
              delay(2000);
              hydrogeolog1.tcaselect(tca9548_channel);
              delay(2000);
              hydrogeolog1.tcaselect(tca9548_channel);
-             delay(2000);   
-             digitalWrite(power_sw_pin,HIGH);          
+             delay(2000);            
              if (i2c_type=="5803")
                  {
                   hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
