@@ -287,9 +287,7 @@ while True:
     qal_sali_gs3_p['tmp6']=float(current_read[-1])
     qal_sali_gs3_p['tmp7']=float(current_read[-2])
 
-
-
-   # sleep(2)
+    sleep(2)
    # msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,2,clk,52,power,36,debug,1",initialize=False)
    # if screen_display: print msg.rstrip()
    # if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -298,41 +296,52 @@ while True:
    # qal_sali_gs3_p['hum2'] = float(current_read[-1])
 
     ### below is for pressure 
-    GPIO.output(25, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(5)
-    GPIO.output(26, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    GPIO.output(25, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(5)
+#    GPIO.output(26, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(5)
+
+#    GPIO.output(24, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(1)
+#    GPIO.output(24, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(2)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="power_switch,9,power_switch_status,1",initialize=False)
     sleep(5)
 
-    GPIO.output(24, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(1)
-    GPIO.output(24, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(2)
-    
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,2,type,5803,points,2,dummies,1,debug,1",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,2,type,5803,dummies,1,power,9,debug,1,points,1",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    qal_sali_gs3_p['pre0'] = float(current_read[-1])
-    qal_sali_gs3_p['pretmp0'] = float(current_read[-2])
-    
-    GPIO.output(24, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(1)
-    GPIO.output(24, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+    try:   
+       qal_sali_gs3_p['pre0'] = float(current_read[-1])
+       qal_sali_gs3_p['pretmp0'] = float(current_read[-2])
+    except Exception, e:
+        if screen_display: print '5803 ,2,does not get results'
+        continue
+#    sleep(2)
+#    GPIO.output(24, 1)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(1)
+#    GPIO.output(24, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(2)
 
-    sleep(2)
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,3,type,5803,points,2,dummies,1,debug,1",initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="9548,3,type,5803,dummies,1,power,9,debug,1,points,1",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
-    qal_sali_gs3_p['pre1'] = float(current_read[-1])
-    qal_sali_gs3_p['pretmp1'] = float(current_read[-2])
-
+    try:
+       qal_sali_gs3_p['pre1'] = float(current_read[-1])
+       qal_sali_gs3_p['pretmp1'] = float(current_read[-2])
+    except Exception, e:
+        if screen_display: print '5803 ,3,does not get results'
+        continue
+#    sleep(2)
     ### below is for pressure 
-    GPIO.output(25, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(5)
-    GPIO.output(26, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
-    sleep(5)
+#    GPIO.output(25, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(5)
+#    GPIO.output(26, 0)         # set GPIO24 to 1/GPIO.HIGH/True  
+#    sleep(5)
 
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="power_switch,9,power_switch_status,0",initialize=False)
 
     sleep(2)
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="12,51,power,8,debug,1",initialize=False)
