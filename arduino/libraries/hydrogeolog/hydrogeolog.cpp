@@ -386,22 +386,22 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
     MS5803 sensor(ADDRESS_HIGH);
     float temperature_c;
     double pressure_abs=0.;
-    delay(2000);
+    delay(1000);
     sensor.reset();
-    delay(2000);
+    delay(1000);
     sensor.begin();
-    delay(2000);
+    delay(1000);
     tcaselect(tca9548_channel);
 
-    delay(2000);
+    delay(1000);
     temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
-    delay(2000);
+    delay(1000);
 
 
 
     for (int j=0;j<number_of_dummies;j++){
         sensor.getPressure(ADC_4096);
-        delay(2000);
+        delay(1000);
     }
     float t_results=0.;
     double pressure=0.;
@@ -422,6 +422,51 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
     Serial.print(pressure_abs);
     Serial.print(delimiter);
     }   //5803
+
+// pressure transducers
+void  hydrogeolog::ms5803l(int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw,int tca9548_channel)
+    {
+    //  ADDRESS_HIGH = 0x76
+    //  ADDRESS_LOW  = 0x77
+    MS5803 sensor(ADDRESS_LOW);
+    float temperature_c;
+    double pressure_abs=0.;
+    delay(1000);
+    sensor.reset();
+    delay(1000);
+    sensor.begin();
+    delay(1000);
+    tcaselect(tca9548_channel);
+
+    delay(1000);
+    temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
+    delay(1000);
+
+
+
+    for (int j=0;j<number_of_dummies;j++){
+        sensor.getPressure(ADC_4096);
+        delay(1000);
+    }
+    float t_results=0.;
+    double pressure=0.;
+    for (int j=0;j<number_of_measurements;j++){
+        pressure = double(sensor.getPressure(ADC_4096));
+        pressure_abs+=pressure;
+        delay(measure_time_interval_ms);
+        if (debug_sw==1) {
+            Serial.print(pressure);
+            Serial.print(delimiter);
+        } //debug_sw
+        }
+
+    pressure_abs /= double(number_of_measurements);
+
+    Serial.print(temperature_c);
+    Serial.print(delimiter);
+    Serial.print(pressure_abs);
+    Serial.print(delimiter);
+    }   //5803l
 
 // temperature and humidity by sinsiren
 void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw)
@@ -521,6 +566,32 @@ void hydrogeolog::si1145(int power_sw,int number_readings_si1145,int measurement
   digitalWrite(power_sw,LOW);
 
   delay(1000);
+}
+
+//  search 9548 sensors
+void hydrogeolog::search_9548_channels() {
+
+    while (!Serial);
+    delay(1000);
+ 
+    Wire.begin();
+    
+    Serial.println("TCAScanner ready!");
+    
+    for (uint8_t t=0; t<8; t++) {
+      tcaselect(t);
+      Serial.print("TCA Port #"); Serial.println(t);
+ 
+      for (uint8_t addr = 0; addr<=127; addr++) {
+        if (addr == TCAADDR) continue;
+      
+        uint8_t data;
+        if (! twi_writeTo(addr, &data, 0, 1, 1)) {
+           Serial.print("Found I2C 0x");  Serial.println(addr,HEX);
+        }
+      }
+    }
+    Serial.print("Done");
 }
 //void hydrogeolog::sdi12(int digi_idx)
 //    {

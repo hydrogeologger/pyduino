@@ -64,7 +64,7 @@ void setup() {
       pinMode(digi_out_pins[i],OUTPUT);
   }
   delay(5000);
-  //digitalWrite(46,HIGH); //switch on rpi 
+  digitalWrite(46,HIGH); //switch on rpi 
 }
 
 // the loop routine runs over and over again forever:
@@ -604,7 +604,9 @@ void loop() {
          if  ((tca9548_channel!=-1)&& (i2c_type!="")) {
             int number_of_measurements=hydrogeolog1.parse_argument("points",3,str_ay_size,str_ay);
             int number_of_dummies=hydrogeolog1.parse_argument("dummies",3,str_ay_size,str_ay);
-            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
+            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",1000,str_ay_size,str_ay);
+            int power_sw_pin= hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
+            int digital_input = hydrogeolog1.parse_argument("dgin",-1,str_ay_size,str_ay);
             if (debug_sw==1)
             {            
                 hydrogeolog1.print_string_delimiter_value("9548"  ,String(tca9548_channel)  );
@@ -613,6 +615,7 @@ void loop() {
                 hydrogeolog1.print_string_delimiter_value("dummies",String(number_of_dummies)  );
                 hydrogeolog1.print_string_delimiter_value("itv",String(measure_time_interval_ms)  );                
                 hydrogeolog1.print_string_delimiter_value("type"  ,i2c_type );
+                
             }
 
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
@@ -621,7 +624,8 @@ void loop() {
              hydrogeolog1.tcaselect(tca9548_channel);
              delay(2000);
              hydrogeolog1.tcaselect(tca9548_channel);
-             delay(2000);             
+             delay(2000);   
+             digitalWrite(power_sw_pin,HIGH);          
              if (i2c_type=="5803")
                  {
                   hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
@@ -634,7 +638,23 @@ void loop() {
                  {
                   hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
                  }  // 5803
+             delay(1000);
+             if (i2c_type=="5803l")
+                 {
+                  hydrogeolog1.ms5803l(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
+                  delay(1000);
+                  hydrogeolog1.tcaselect(tca9548_channel);             
+                  delay(1000);
+                  hydrogeolog1.ms5803l(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
+                 }  // 5803
+             delay(1000);
+             
              delay(2000);
+             if (i2c_type=="5803l")
+                 {
+                 }  // 5803
+             delay(2000);
+
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
              Serial.println();
          }  //tca9548_channel 
@@ -696,6 +716,28 @@ void loop() {
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
              Serial.println();
          }  //sht75
+
+
+          /*
+         search channels for 9548 i2c multiplexer
+         9548_search
+         */
+         
+         int search_9548 = hydrogeolog1.parse_argument("9548_search",-1,str_ay_size,str_ay);
+         power_sw_pin   = hydrogeolog1.parse_argument("power",-1,str_ay_size,str_ay);
+
+ 
+         if  (search_9548!=-1) {
+               
+            //int number_of_measurements=hydrogeolog1.parse_argument("9548_search",3,stsearch_9548,1,power,2r_ay_size,str_ay);
+            hydrogeolog1.print_string_delimiter_value("9548_search"  ,String(search_9548)  );
+
+             hydrogeolog1.search_9548_channels();
+                 
+             Serial.println();
+         }  //9548_search
+
+
 
 
         if (content=="abc"){
