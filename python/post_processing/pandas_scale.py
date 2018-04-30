@@ -172,6 +172,9 @@ class pandas_scale:
 
     
 class concat_data_roof():
+#"""
+#this is to creat new data series that are ready to be interpolated
+#"""
     import pandas as pd
     #def __init__(self,start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
     #def __init__(self,start_time=inp_start_time,end_time=inp_end_time,dt_s=inp_dt_s):
@@ -198,11 +201,17 @@ class concat_data_roof():
     
 #    def merge_data(self,var_in=a ): this is not good because if a is not defined, this is not going to be useful
     def merge_data(self,**kwargs ):
+        '''
+        import matplotlib.pyplot as plt
+        #    properties:
+        #      rm_nan --  whether delete the nan data
+        #      keys   --  the property that needs to be interpolated
+        #      df     --  the panel data that gets the source data
+         
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
         import pdb
         import pandas as pd
         import wafo.interpolate as wf
-#        import matplotlib.pyplot as plt
-        "the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ]"
         arg_defaults = {'plot':    False,
                     'keys': ['scale'],
                     'newkeys':None ,
@@ -226,10 +235,10 @@ class concat_data_roof():
             if arg['rm_nan']==True:
                 
                 #pdb.set_trace()
-                mask_idx=source_df[ i   ].isnull()
-                source_sec_no_nan=source_sec[~mask_idx]
-                source_df_no_nan=source_df[ i   ][~mask_idx]
-                interp_method=wf.SmoothSpline(source_sec_no_nan,source_df_no_nan,p=arg['coef'])
+                mask_idx          =  source_df[ i   ].isnull()
+                source_sec_no_nan =  source_sec[~mask_idx]
+                source_df_no_nan  =  source_df[ i   ][~mask_idx]
+                interp_method     =  wf.SmoothSpline(source_sec_no_nan,source_df_no_nan,p=arg['coef'])
             else:
                 interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
             #interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
@@ -237,16 +246,123 @@ class concat_data_roof():
             sp_sec=(self.df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
             self.df[i]=interp_method(sp_sec)
         
+            if arg['plot']==True:
+                #fig, ax = plt.subplots(2,sharex=False)
+                import matplotlib.pyplot as plt 
+                fig = plt.figure() 
+                fig.subplots_adjust(bottom=0.2)
+                fig.canvas.set_window_title('interpolate '+ i)
+                plt.plot(source_df['date_time'],source_df [i]  ,'b+')
+                plt.plot(self.df['date_time'],self.df[i],'ro')
+                plt.title('interpolated '+i+' result, coef='+str(arg['coef']))
+                plt.xticks(rotation=45)
+                plt.show(block=False)
+            # http://stackoverflow.com/questions/28694025/converting-a-datetime-column-back-to-a-string-columns-pandas-python
+            #cc=b.df['date_time'].dt.strftime('%Y-%m-%d')
+        #  http://stackoverflow.com/questions/17134716/convert-dataframe-column-type-from-string-to-datetime
+        #bbb=pd.to_datetime( b.df['date_time'])
+
+         #(g[9]-g[1])/np.timedelta64(1, 's')
+         #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
+        #(self.df['date_time']-self.df['date_time'][0])/np.timedelta64(1, 's') 
+
+#    def merge_data2(self,var_in=a ): this is not good because if a is not defined, this is not going to be useful
+    def merge_data2(self,**kwargs ):
+        '''
+        the difference between merge_data2 and merge data is merge data2 uses all the data for interpolation
+        merge_data_only use choped results
+        import matplotlib.pyplot as plt
+        #    properties:
+        #      rm_nan --  whether delete the nan data
+        #      keys   --  the property that needs to be interpolated
+        #      df     --  the panel data that gets the source data
+        # start_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
+        #   end_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
+
+         
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        import pdb
+        import pandas as pd
+        import wafo.interpolate as wf
+        arg_defaults = {'plot':    False,
+                    'keys': ['scale'],
+                    'newkeys':None ,
+                    'coef': 1e-14,
+                    'rm_nan':True,
+                    'start_time': None,
+                    'end_time': None}
+        arg=arg_defaults
+        for d in kwargs:
+            arg[d]= kwargs.get(d)
+
+        #this is composory
+        source_df=arg['df']  # this is the whole panel
+        #this is composory
+        source_keys=arg['keys']  # the keys needs to be interpolated
+        if arg['start_time']==None: arg['start_time']= self.df['date_time'][0]
+        if arg['end_time']  ==None: arg['end_time']= self.df['date_time'].iloc[-1]
+          
+        #for i in arg['new_keys']:
+        #    if i==None : arg['new_keys'][i]=
         
+        #pdb.set_trace()
+        #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
+        #source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
+        #mask_source_df=source_df0['date_time'].between(arg['start_time'],arg['end_time'])
+        #mask_source_df=
+        #source_df=source_df0[mask_source_df]
+        source_df=arg['df']
+
+
+        #pdb.set_trace()
+        # this is not going to work for slicing as the first row is not indexed as 0
+        #source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
+        #source_sec=(source_df['date_time']-source_df['date_time'].iloc[0])/np.timedelta64(1,'s')
+
+        # the two below is exactly the same thing
+        source_sec=(arg['df']['date_time']-datetime.datetime(1970,1,1)).dt.total_seconds()
+        # this one is found not working for mac 
+        #source_sec=(arg['df']['date_time']-np.datetime64('1970-01-01')).dt.total_seconds()
+        for i in source_keys:
+            if arg['rm_nan']==True:
+                
+                #pdb.set_trace()
+                mask_idx          =  source_df[ i   ].isnull()
+                source_sec_no_nan =  source_sec[~mask_idx]
+                source_df_no_nan  =  source_df[ i   ][~mask_idx]
+                interp_method     =  wf.SmoothSpline(source_sec_no_nan,source_df_no_nan,p=arg['coef'])
+            else:
+                interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
+            #interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
+            # warning, it is found that the Smoothspline is dependent on the x axis!!!
+            mask_slice=self.df['date_time'].between(arg['start_time'],arg['end_time'])
+            sp_sec=(self.df[mask_slice]['date_time']-datetime.datetime(1970,1,1)).dt.total_seconds()
+            
+            #sp_sec=(self.df['date_time']-source_df['date_time'].iloc[0])/np.timedelta64(1,'s')
+
+            #sp_sec=(source_df['date_time']-source_df['date_time'].iloc[0])/np.timedelta64(1,'s')
+
+            #sp_sec=(arg['start_time']-arg['end_time'][0])/np.timedelta64(1,'s')
+            #mask_new_array=self.df['date_time'].between(arg['start_time'],arg['end_time'])
+            # TO180413 the below is not going to assign values to pandas
+            #self.df[mask_new_array][i] = interp_method(sp_sec)
+            #pdb.set_trace()
+            #self.df.loc[mask_new_array,i] = interp_method(sp_sec)
+            #self.df.iloc[i] = interp_method(sp_sec)
+            self.df.loc[mask_slice,i] = interp_method(sp_sec)
+            
+            #self.df[i].between(arg['start_time'],arg['end_time']) = interp_method(sp_sec)
         
             if arg['plot']==True:
                 #fig, ax = plt.subplots(2,sharex=False)
                 import matplotlib.pyplot as plt 
                 fig = plt.figure() 
+                fig.subplots_adjust(bottom=0.2)
                 fig.canvas.set_window_title('interpolate '+ i)
                 plt.plot(source_df['date_time'],source_df [i]  ,'b+')
-                plt.plot(self.df['date_time'],self.df[i],'ro')
+                plt.plot(self.df[mask_slice]['date_time'],self.df[mask_slice][i],'ro')
                 plt.title('interpolated '+i+' result, coef='+str(arg['coef']))
+                plt.xticks(rotation=45)
                 plt.show(block=False)
             # http://stackoverflow.com/questions/28694025/converting-a-datetime-column-back-to-a-string-columns-pandas-python
             #cc=b.df['date_time'].dt.strftime('%Y-%m-%d')
