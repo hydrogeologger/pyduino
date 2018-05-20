@@ -10,6 +10,10 @@ from upload_phant import upload_phant
 import RPi.GPIO as GPIO            # import RPi.GPIO module  
 from time import sleep,gmtime, strftime,localtime             # lets us have a delay  
 import subprocess
+import os 
+
+pyduino_path=os.environ['pyduino']
+
 
 with open('/home/pi/script/pass/public_pizo_pre', 'r') as myfile:
     public_pizo_pre=myfile.read().replace('\n', '')

@@ -1,5 +1,7 @@
-# csv_tools aims to make reading csv file more convinent
 def tail( f, lines=20 ):
+    '''
+     csv_tools aims to make reading csv file more convinentpublic_pizo_preip
+    '''
     total_lines_wanted = lines
 
     BLOCK_SIZE = 5024
@@ -27,3 +29,10 @@ def tail( f, lines=20 ):
     return '\n'.join(all_read_text.splitlines()[-total_lines_wanted:])
 #def tail_linux(f,lines=1):
     
+def get_one_line(f):
+    '''
+    get_one_line is used to get the first line from a file
+    '''
+    with open(f, 'r') as myfile:
+        public_pizo_pre=myfile.read().replace('\n', '')
+    return public_pizo_pre
