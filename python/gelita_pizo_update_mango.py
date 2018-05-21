@@ -57,6 +57,10 @@ pizo_pre["pre2"]=float(current_read[pre_ind[2]+17])
 pizo_pre["tmp2"]=float(current_read[pre_ind[2]+16])
 
 
+pizo_pre["pretmp1"]=pizo_pre["pre1"]-pizo_pre["pre0"]
+pizo_pre["pretmp2"]=pizo_pre["pre2"]-pizo_pre["pre0"]
+
+
 pre_ind=[i for i,x in enumerate(current_read) if x == 'analog']
 pizo_pre["volt0"]=float(current_read[pre_ind[0]+2])
 
