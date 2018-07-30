@@ -36,3 +36,12 @@ def get_one_line(f):
     with open(f, 'r') as myfile:
         public_pizo_pre=myfile.read().replace('\n', '')
     return public_pizo_pre
+
+
+def get_first_line(f):
+    '''
+    get_one_line is used to get the first line from a file
+    '''
+    with open(f, 'r') as f:
+        first_line = f.readline()
+    return first_line
