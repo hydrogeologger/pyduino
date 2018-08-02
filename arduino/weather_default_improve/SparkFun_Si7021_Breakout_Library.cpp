@@ -58,7 +58,7 @@
 
   if(x == 1)
   {
-    Serial.println("Si7021 Found");
+    //Serial.println("Si7021 Found");
     //Serial.println(ID_Temp_Hum, HEX);
   }
   else if(x == 2)

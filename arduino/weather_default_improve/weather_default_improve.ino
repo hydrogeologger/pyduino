@@ -134,7 +134,7 @@ void wspeedIRQ()
 void setup()
 {
     Serial.begin(9600);
-    Serial.println("Weather Shield Example");
+    //Serial.println("Weather Shield Example");
 
     pinMode(STAT1, OUTPUT); //Status LED Blue
     pinMode(STAT2, OUTPUT); //Status LED Green
@@ -164,7 +164,7 @@ void setup()
     // turn on interrupts
     interrupts();
 
-    Serial.println("Weather Shield online!");
+    //Serial.println("Weather Shield online!");
 
 }
 
