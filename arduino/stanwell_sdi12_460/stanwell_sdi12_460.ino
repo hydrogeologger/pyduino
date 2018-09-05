@@ -594,6 +594,10 @@ void loop() {
 
          /*
          use tca9548 i2c multiplexer to obtain results from ms5803 pressure transducer 
+         TO180915 updates on using 9548 chip with ximing.
+         this chip works only all the attached sensors are powered at the same time. if powering each sensor, do the readings, it may not work...
+         this brings a risk that if one of the all the sensors connected to 9548 becomes disfunctional, all the other sensors may not work. 
+         the next stage is to do measurement in the following order: 1. power one sensor, 2. reset 9548, 3. do measurement
          9548,2,type,5803,debug,1
          */
          
@@ -619,41 +623,41 @@ void loop() {
             }
 
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
-             delay(2000);
+             delay(500);
              Wire.begin();
-             delay(2000);
-             hydrogeolog1.tcaselect(tca9548_channel);
-             delay(2000);
-             hydrogeolog1.tcaselect(tca9548_channel);
-             delay(2000);            
-             if (i2c_type=="5803")
-                 {
-                  hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
-                 }  // 5803
-             delay(2000);
+             delay(500);
+             //hydrogeolog1.tcaselect(tca9548_channel);
+             //delay(500);
+             //hydrogeolog1.tcaselect(tca9548_channel);
+             //delay(500);            
+             //if (i2c_type=="5803")
+             //    {
+             //     hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
+             //    }  // 5803
+             //delay(500);
              
              hydrogeolog1.tcaselect(tca9548_channel);             
-             delay(2000);
+             delay(500);
              if (i2c_type=="5803")
                  {
                   hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
                  }  // 5803
-             delay(1000);
+             delay(500);
              if (i2c_type=="5803l")
                  {
                   hydrogeolog1.ms5803l(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
-                  delay(1000);
+                  delay(500);
                   hydrogeolog1.tcaselect(tca9548_channel);             
-                  delay(1000);
+                  delay(500);
                   hydrogeolog1.ms5803l(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
                  }  // 5803
-             delay(1000);
+             delay(500);
              
-             delay(2000);
+             delay(500);
              if (i2c_type=="5803l")
                  {
                  }  // 5803
-             delay(2000);
+             delay(500);
 
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
              Serial.println();
