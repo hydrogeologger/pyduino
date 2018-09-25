@@ -52,6 +52,8 @@
   employee) at the local, and you've found our code helpful,
   please buy us a round!
   Distributed as-is; no warranty is given.
+  copy the following criteria into sparkfun server
+   "winddir", "windspeedmps" ,"rainmm","dailyrainmm","tempcel","humidity","barotempCel","hectopascals","soiltempCel","soilmoisture","uv_up","uv_down","ir_up","ir_down","vis_up","vis_down"
 *******************************************************************************/
 #include "SparkFun_Photon_Weather_Shield_Library.h"
 #include "OneWire.h"
@@ -187,7 +189,9 @@ void setup()
 
     //Initialize the I2C sensors and ping them
     sensor.begin();
-
+    Serial.print('report interval is');
+    Serial.print(REPORT_INTERVAL_SECOND);
+    Serial.println();
     /*You can only receive acurate barrometric readings or acurate altitiude
     readings at a given time, not both at the same time. The following two lines
     tell the sensor what mode to use. You could easily write a function that
@@ -273,7 +277,8 @@ void loop()
     // still take readings and do work in between printing out data.
     count++;
     //alter this number to change the amount of time between each reading
-    if(count == 50)
+    //if(count == 30)
+    if(count == REPORT_INTERVAL_SECOND)
     {
       //Get readings from all sensors
        getWeather();
@@ -290,6 +295,31 @@ void printInfo()
       Serial.print("Wind_Dir:");
       switch (winddir)
       {
+        case 0:
+          Serial.print("0");
+          break;
+        case 1:
+          Serial.print("45");
+          break;
+        case 2:
+          Serial.print("90");
+          break;
+        case 3:
+          Serial.print("135");
+          break;
+        case 4:
+          Serial.print("180");
+          break;
+        case 5:
+          Serial.print("225");
+          break;
+        case 6:
+          Serial.print("270");
+          break;
+        case 7:
+          Serial.print("315");
+          break;
+        /*
         case 0:
           Serial.print("North");
           break;
@@ -314,35 +344,36 @@ void printInfo()
         case 7:
           Serial.print("NW");
           break;
+        */
         default:
           Serial.print("No Wind");
           // if nothing else matches, do the
           // default (which is optional)
       }
 
-      Serial.print(" Wind_Speed:");
+      Serial.print(" Wind_Speed,");
       Serial.print(windspeedmph, 1);
-      Serial.print("mph, ");
+      Serial.print(",mph, ");
 
-      Serial.print("Rain:");
+      Serial.print("Rain,");
       Serial.print(rainin, 2);
-      Serial.print("in., ");
+      Serial.print(",in., ");
 
-      Serial.print("Temp:");
+      Serial.print("Temp,");
       Serial.print(tempf);
-      Serial.print("F, ");
+      Serial.print(",F, ");
 
-      Serial.print("Humidity:");
+      Serial.print("Humidity,");
       Serial.print(humidity);
-      Serial.print("%, ");
+      Serial.print(",%, ");
 
-      Serial.print("Baro_Temp:");
+      Serial.print("Baro_Temp,");
       Serial.print(baroTemp);
-      Serial.print("F, ");
+      Serial.print(",F, ");
 
-      Serial.print("Pressure:");
+      Serial.print("Pressure,");
       Serial.print(pascals/100);
-      Serial.print("hPa, ");
+      Serial.print(",hPa, ");
       //The MPL3115A2 outputs the pressure in Pascals. However, most weather stations
       //report pressure in hectopascals or millibars. Divide by 100 to get a reading
       //more closely resembling what online weather reports may say in hPa or mb.
@@ -356,11 +387,11 @@ void printInfo()
       //Serial.print(altf);
       //Serial.println("ft.");
 
-      Serial.print("Soil_Temp:");
+      Serial.print("Soil_Temp,");
       Serial.print(soiltempf);
-      Serial.print("F, ");
+      Serial.print(",F, ");
 
-      Serial.print("Soil_Mositure:");
+      Serial.print("Soil_Mositure,");
       Serial.println(soilMoisture);//Mositure Content is expressed as an analog
       //value, which can range from 0 (completely dry) to the value of the
       //materials' porosity at saturation. The sensor tends to max out between
@@ -521,23 +552,35 @@ void getWeather()
 int postToPhant()
 {
     //phant.add("altf", altf);//add this line if using altitude instead
-    //phant.add("barotemp", baroTemp);
-    //phant.add("humidity", humidity);
-    //phant.add("hectopascals", pascals/100);
-    //phant.add("rainin", rainin);
-    //phant.add("soiltempf", soiltempf);
-    //phant.add("soilmoisture", soilMoisture);
-    //phant.add("tempf", tempf);
-    //phant.add("winddir", winddir);
-    //phant.add("windspeedmph", windspeedmph);
-    phant.add("humidity", "22.0");
-    phant.add("temp", "24.0");
+
+    phant.add("winddir", winddir);
+    phant.add("windspeedmps", windspeedmph*0.447);
+    phant.add("rainmm", rainin*25.4);
+    phant.add("dailyrainmm",dailyrainin*25.4);
+    phant.add("tempcel", (tempf-32.)*5./9. );
+    phant.add("humidity", humidity);
+    phant.add("barotempcel", (baroTemp-32.)*5./9.);
+    phant.add("hectopascals", pascals/100.);
+    phant.add("soiltempcel", (soiltempf-32.)*5./9.);
+    phant.add("soilmoisture", soilMoisture);
+    phant.add("uv_up", 0);
+    phant.add("uv_down", 0);
+    phant.add("ir_up", 0);
+    phant.add("ir_down", 0);
+    phant.add("vis_up", 0);
+    phant.add("vis_down", 0);
+    //barotempcel dailyrainmm hectopascals ir_down ir_up rainmm soilmoisture soiltempcel tempcel humidity uv_down uv_up vis_down vis_up winddir windspeedmps
+    //
+
+    //phant.add("humidity", "22.0");
+    //phant.add("temp", "24.0");
     TCPClient client;
     char response[512];
     int i = 0;
     int retVal = 0;
 
-    if (client.connect(server, 8080))
+    if (client.connect(server, SPARKFUN_SERVER_PORT))
+    //if (client.connect(server, 8080))
     {
         Serial.println("Posting!");
         client.print(phant.post());
