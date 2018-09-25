@@ -57,6 +57,7 @@
 #include "OneWire.h"
 #include "spark-dallas-temperature.h"
 #include "SparkFunPhant.h"
+#include "credentials.h"
 
 #define ONE_WIRE_BUS D4
 #define TEMPERATURE_PRECISION 11
@@ -132,10 +133,9 @@ volatile unsigned long raintime, rainlast, raininterval, rain;
 Weather sensor;
 
 ////////////PHANT STUFF//////////////////////////////////////////////////////////////////
-//const char server[] = "144.6.225.24:8080";
-const char server[] = "144.6.225.24";
-const char publicKey[] = "2DG1298g0PSMaX9JeYJeHwNQPxma";
-const char privateKey[] = "vVW3MzgNmDt3BD7ja5jaH7LrMAlg";
+const char server[] = SPARKFUN_SERVER_ADDR;
+const char publicKey[] = SPARKFUN_SERVER_KEY_PUBLIC;
+const char privateKey[] = SPARKFUN_SERVER_KEY_PRIVATE;
 Phant phant(server, publicKey, privateKey);
 /////////////////////////////////////////////////////////////////////////////////////////
 
