@@ -75,6 +75,27 @@ time.sleep(2)
 str_scale1=scale1.readline()
 str_scale2=scale2.readline()
 
+scale_attempts=1
+while scale_attempts<6:
+    try:
+        scale1.write('IP\n\r')
+        scale2.write('IP\n\r')
+        time.sleep(2)#wait for two seconds before leaving   
+        str_scale1=scale1.readline()
+        str_scale2=scale2.readline()
+        weight_scale1=str_scale1.split()[0]
+        weight_scale2=str_scale2.split()[0]
+        break
+    except Exception, e:
+        if screen_display: print "scale reading failed,"+str(scale_attempts)+" " + str(e)
+        scale_attempts+=1
+        time.sleep(3)
+        scale1.close()
+        scale2.close()
+        time.sleep(2)
+        scale1 = serial.Serial(port_scale1,timeout=20)
+        scale2 = serial.Serial(port_scale2,timeout=20)
+        continue
 #time.sleep(10)
 #scale1.write('IP\n\r')
 #scale2.write('IP\n\r')
@@ -94,7 +115,7 @@ save_to_file=True
 
 # the Filename of the csv file for storing file
 file_name= 'bacteria.csv'
-sleep_time_seconds=30*60
+sleep_time_seconds=240*60
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 delimiter=','
@@ -145,13 +166,13 @@ while True:
     bacteria_mo_su_sali['tmp0']=float(current_read[-1])
     bacteria_mo_su_sali['hum0']=float(current_read[-2])
 
-    sleep(5)
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,5,clk,11,power,9,debug,1",initialize=True)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    bacteria_mo_su_sali['tmp1']=float(current_read[-1])
-    bacteria_mo_su_sali['hum1']=float(current_read[-2])
+#    sleep(5)
+#    msg=serial_openlock.get_result_by_input(port=port_sensor,command="75,5,clk,11,power,9,debug,1",initialize=True)
+#    if screen_display: print msg.rstrip()
+#    if save_to_file: fid.write(delimiter+msg.rstrip())
+#    current_read=msg.split(',')[0:-1]
+#    bacteria_mo_su_sali['tmp1']=float(current_read[-1])
+#    bacteria_mo_su_sali['hum1']=float(current_read[-2])
     
     
     sleep(2)
