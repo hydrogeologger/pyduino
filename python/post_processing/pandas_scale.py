@@ -95,8 +95,10 @@ class pandas_scale:
                 # to make sure that it re list the system
                 self.df=self.df.reset_index(drop=True)
                 print i,','
-            else:
+            elif i==1:
                 self.df=self.df_sub[0]
+            else:
+                print 'no file has been extracted, please ensure the directory is ended with slash! '
 
             
              
