@@ -218,22 +218,29 @@ class concat_data_roof():
                     'keys': ['scale'],
                     'newkeys':None ,
                     'coef': 1e-14,
-                    'rm_nan':True}
+                    'rm_nan':True,
+                    'new_keys':None}
         arg=arg_defaults
         for d in kwargs:
             arg[d]= kwargs.get(d)
 
         source_df=arg['df']
         source_keys=arg['keys']
-        #for i in arg['new_keys']:
-        #    if i==None : arg['new_keys'][i]=
+        
+        if arg['new_keys']==None:
+            arg['new_keys']=source_keys
+        #else:
+        #    for i in arg['new_keys']:
+        #        arg['new_keys'][i]=arg['keys'][i]
         
         #pdb.set_trace()
         #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
         source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
         #pdb.set_trace()
 
-        for i in source_keys:
+        # TO181023 making sure that we can name a new string
+        # https://stackoverflow.com/questions/522563/accessing-the-index-in-for-loops
+        for idx,i in enumerate(source_keys):
             if arg['rm_nan']==True:
                 
                 #pdb.set_trace()
@@ -246,7 +253,8 @@ class concat_data_roof():
             #interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
             # warning, it is found that the Smoothspline is dependent on the x axis!!!
             sp_sec=(self.df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
-            self.df[i]=interp_method(sp_sec)
+            #self.df[i]=interp_method(sp_sec)
+            self.df[ arg['new_keys'][idx] ]=interp_method(sp_sec)
         
             if arg['plot']==True:
                 #fig, ax = plt.subplots(2,sharex=False)
@@ -255,7 +263,7 @@ class concat_data_roof():
                 fig.subplots_adjust(bottom=0.2)
                 fig.canvas.set_window_title('interpolate '+ i)
                 plt.plot(source_df['date_time'],source_df [i]  ,'b+')
-                plt.plot(self.df['date_time'],self.df[i],'ro')
+                plt.plot(self.df['date_time'],self.df[  arg['new_keys'][idx]  ],'ro')
                 plt.title('interpolated '+i+' result, coef='+str(arg['coef']))
                 plt.xticks(rotation=45)
                 plt.show(block=False)

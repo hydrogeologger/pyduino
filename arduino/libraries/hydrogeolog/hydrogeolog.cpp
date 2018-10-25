@@ -386,22 +386,22 @@ void  hydrogeolog::ms5803(int number_of_dummies,int number_of_measurements,int m
     MS5803 sensor(ADDRESS_HIGH);
     float temperature_c;
     double pressure_abs=0.;
-    delay(1000);
+    delay(500);
     sensor.reset();
-    delay(1000);
+    delay(500);
     sensor.begin();
-    delay(1000);
+    delay(500);
     tcaselect(tca9548_channel);
 
-    delay(1000);
+    delay(500);
     temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
-    delay(1000);
+    delay(500);
 
 
 
     for (int j=0;j<number_of_dummies;j++){
         sensor.getPressure(ADC_4096);
-        delay(1000);
+        delay(500);
     }
     float t_results=0.;
     double pressure=0.;
@@ -431,22 +431,22 @@ void  hydrogeolog::ms5803l(int number_of_dummies,int number_of_measurements,int 
     MS5803 sensor(ADDRESS_LOW);
     float temperature_c;
     double pressure_abs=0.;
-    delay(1000);
+    delay(500);
     sensor.reset();
-    delay(1000);
+    delay(500);
     sensor.begin();
-    delay(1000);
+    delay(500);
     tcaselect(tca9548_channel);
 
-    delay(1000);
+    delay(500);
     temperature_c = sensor.getTemperature(CELSIUS, ADC_512);
-    delay(1000);
+    delay(500);
 
 
 
     for (int j=0;j<number_of_dummies;j++){
         sensor.getPressure(ADC_4096);
-        delay(1000);
+        delay(500);
     }
     float t_results=0.;
     double pressure=0.;
