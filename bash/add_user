@@ -1,0 +1,17 @@
+#!/bin/bash
+
+new_user_name=$1
+echo "now creating new user $new_user_name"
+useradd $new_user_name
+passwd $new_user_name
+
+mkdir /home/$new_user_name
+chown $new_user_name:$new_user_name /home/$new_user_name
+chmod 744 /home/$new_user_name
+
+#add below:
+#chenming:x:1001:1001::/home/chenming:/bin/bash
+
+sed -i '${s/$/\/bin\/bash/}' /etc/passwd
+
+usermod -aG ssh,netdev,crontab,users,plugdev,video,backup,www-data,audio,dialout,man,disk $new_user_name
