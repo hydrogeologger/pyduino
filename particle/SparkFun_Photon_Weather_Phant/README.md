@@ -5,8 +5,12 @@ create a new file called 'credential.h' with the following contents
 //"winddir","windspeedmps","rainmm","dailyrainmm","tempcel","humidity","barotempCel","hectopascals","soiltempCel","soilmoisture","uv_up","uv_down","ir_up","ir_down","vis_up","vis_down"
 
 ----------------------------------------------
+
+
+```C
 #define SPARKFUN_SERVER_ADDR "your bare web address in quote, no port number, no http://"
 #define SPARKFUN_SERVER_KEY_PUBLIC "your publickey in the quote"
 #define SPARKFUN_SERVER_KEY_PRIVATE "your private in the quote"
 #define REPORT_INTERVAL_SECOND 60
 #define SPARKFUN_SERVER_PORT 8080
+```
