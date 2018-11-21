@@ -37,8 +37,10 @@ pht_sensor = Phant(publicKey=public_kathy_tensiometer, fields=field_name ,privat
 
 #port_sensor  = 'USB VID:PID=2341:0042 SNR=55639303035351A04171'
 #port_sensor = '/dev/ttyACM0'  # remember when using device at /dev/folder rather than USB VID:PID, serial_openlock needs to have match_existing=False
-port_sensor0 = '/dev/ttyUSB0' # port for serial connection 
-#port_sensor1 = '/dev/ttyUSB1'
+#port_sensor0 = '/dev/ttyUSB0' # port for serial connection 
+#port_sensor1 = '/dev/ttyUSB4'
+port_sensor0 = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.2:1.0-port0'
+port_sensor1 = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.3:1.0-port0'
 port_sensor2  = '/dev/ttyACM0'
 port_scale1='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.5.2:1.0-port0'
 port_scale2='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.5.3:1.0-port0'
@@ -84,6 +86,8 @@ while scale_attempts<6:
         scale1 = serial.Serial(port_scale1,timeout=20)
         scale2 = serial.Serial(port_scale2,timeout=20)
         scale3 = serial.Serial(port_scale3,timeout=20)
+        pass
+
 
 #
 
@@ -140,14 +144,7 @@ try:
         msg=ard.write("GN\r")
         msg2=ard.read_until('\r') 
     
-        #tensiometer1 = serial.Serial(port_sensor0)
-        #tensiometer1.write("OP1\r")
-        #tensiometer1.read_until('\r')
-        #tensiometer1.write("GN\r")
-        #tensiometer1.read_until('\r')
-         
-    
-        sleep(5)
+        sleep(2)
     
         ard.close()
         
@@ -166,36 +163,39 @@ try:
         current_read=upload_msg.split()[0]
         kathy_tensiometer['temp1_tensiometer']=float(current_read)
     
-    
-        #ard=serial.Serial(port_sensor1) 
-        #msg=ard.write("OP1\r")
-        #msg=ard.read_until('\r')
-        #sleep(1)
-        #msg=ard.write("GN\r")
-        #msg1=ard.read_until('\r')
-        #sleep(1)
-        #msg=ard.write("OP2\r")
-        #msg=ard.read_until('\r')
-        #sleep(1)
-        #msg=ard.write("GN\r")
-        #msg2=ard.read_until('\r')
+        sleep(5)        
+ 
+        ard=serial.Serial(port_sensor1) 
+        msg=ard.write("OP3\r")
+        msg=ard.read_until('\r')
+        sleep(1)
+        msg=ard.write("GN\r")
+        msg1=ard.read_until('\r')
+        sleep(1)
+        msg=ard.write("OP4\r")
+        msg=ard.read_until('\r')
+        sleep(1)
+        msg=ard.write("GN\r")
+        msg2=ard.read_until('\r')
       
-        #sleep(5)
+        sleep(2)
     
-        #ard.close()  
+        ard.close()  
     
-        #if screen_display: print msg1.rstrip()
-        #if save_to_file: fid.write(delimiter+msg1.rstrip())
-        #upload_msg=msg1.rstrip()
+        if screen_display: print msg1.rstrip()
+        if save_to_file: fid.write(delimiter+msg1.rstrip())
+        upload_msg=msg1.rstrip()
         #current_read=msg1.split(',')[0:-1]
-        #kathy_tensiometer['pressure2']=float(current_read[-1]) 
-        #
+        current_read=upload_msg.split()[0]
+        kathy_tensiometer['pressure2']=float(current_read) 
+        
     
-        #if screen_display: print msg2.rstrip()
-        #if save_to_file: fid.write(delimiter+msg2.rstrip())
-        #upload_msg=msg2.rstrip()
+        if screen_display: print msg2.rstrip()
+        if save_to_file: fid.write(delimiter+msg2.rstrip())
+        upload_msg=msg2.rstrip()
         #current_read=msg2.split(',')[0:-1]
-        #kathy_tensiometer['temp2_tensiometer']=float(current_read[-1])
+        current_read=upload_msg.split()[0]
+        kathy_tensiometer['temp2_tensiometer']=float(current_read)
     
         sleep(5)   
         msg=serial_openlock.get_result_by_input(port=port_sensor2,command="dht22,10,power,48,points,1,dummies,1,interval_mm,200,debug,0",initialize=False,match_existing_ports=False)         
