@@ -33,7 +33,7 @@ with open('/home/pi/pyduino/credential/scale_habib.json') as f:
         credential = json.load(f) #,object_pairs_hook=collections.OrderedDict)
 
 #------------------------- below are definations for the scales ---------------------------------
-field_name=['scale1','scale2','scale3','scale4','scale5','scale6']
+field_name=['scale1','scale2','scale3','scale4','scale5','scale6','pressure1','pressure2','temperature1','temperature2']
 
 scales_habib=dict((el,0.0) for el in field_name)
 pht_scales_habib= Phant(publicKey=credential['public_scales_habib'], fields=field_name ,privateKey=credential['private_scales_habib'],baseUrl=credential['nectar_address'])
@@ -45,6 +45,9 @@ port_scale3='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.4.1.2:1.0-port0'
 port_scale4='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.4.4:1.0-port0'
 port_scale5='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.4.3:1.0-port0'
 port_scale6='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.4.2:1.0-port0'
+port_sensor1 ='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.2:1.0-port0'
+port_sensor2 ='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.3:1.0-port0'
+
 
 scale1 = serial.Serial(port_scale1,baudrate=2400,bytesize=7,parity='E',timeout=20)
 scale2 = serial.Serial(port_scale2,baudrate=2400,bytesize=7,parity='E',timeout=20)
@@ -164,8 +167,44 @@ try:
 
     while True: 
         ### -------------------- below is to processing data from suction, moisture-------------------------
-        #if screen_display: print strftime("%Y-%m-%d %H:%M:%S", localtime())
-        #if save_to_file: fid.write(strftime("%Y-%m-%d %H:%M:%S", localtime())  )
+        if screen_display: print strftime("%Y-%m-%d %H:%M:%S", localtime())
+        if save_to_file: fid.write(strftime("%Y-%m-%d %H:%M:%S", localtime())  )
+
+        ard=serial.Serial(port_sensor1)
+        msg=ard.write("OP1\r")
+        msg=ard.read_until('\r')
+        sleep(1)
+        msg=ard.write("GN\r")
+        msg1=ard.read_until('\r')
+        sleep(1)
+        msg=ard.write("OP2\r")
+        msg=ard.read_until('\r')
+        sleep(1)
+        msg=ard.write("GN\r")
+        msg2=ard.read_until('\r')
+        sleep(2)
+        ard.close()
+        
+        if screen_display: print msg1.rstrip()
+        if save_to_file: fid.write(delimiter+msg1.rstrip())
+        upload_msg=msg1.rstrip()
+        #current_read=msg1.split(',')[0:-1]
+        current_read=upload_msg.split()[0]
+        scales_habib['pressure1']=float(current_read)
+
+
+        if screen_display: print msg2.rstrip()
+        if save_to_file: fid.write(delimiter+msg2.rstrip())
+        upload_msg=msg2.rstrip()
+        #current_read=msg2.split(',')[0:-1]
+        current_read=upload_msg.split()[0]
+        scales_habib['tensiometer1']=float(current_read)
+
+        sleep(5)
+
+
+
+
         time_now=time.strftime("%d/%b/%Y %H:%M:%S")
     #    if screen_display: print time_now,delimiter,weight_scale1.rstrip(),delimiter,weight_scale2.rstrip(),delimiter,weight_scale3.rstrip(),delimiter,weight_scale4.rstrip(),delimiter,weight_scale5.rstrip(),delimiter,weight_scale6.rstrip()
     #    if save_to_file: fid.write(time_now+delimiter+weight_scale1+delimiter+weight_scale2+delimiter+weight_scale3+delimiter+weight_scale4+delimiter+weight_scale5+delimiter+weight_scale6+'\n\r')
