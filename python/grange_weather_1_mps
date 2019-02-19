@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
+Traceback (most recent call last):
+  File "grange_weather_1_mps.py", line 16, in <module>
+    with open('/home/pi/script/pass/public_grange_ad_weather_nectar', 'r') as myfile:
+IOError: [Errno 2] No such file or directory: '/home/pi/script/pass/public_grange_ad_weather_nectar'
