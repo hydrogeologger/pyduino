@@ -90,7 +90,7 @@ class pandas_scale:
             # sorting the results using 
             #pdb.set_trace()
             if i>1: 
-                self.df=pd.concat(self.df_sub,axis=0).sort(self.parse_dates)
+                self.df=pd.concat(self.df_sub,axis=0).sort_values(self.parse_dates)
                 # http://stackoverflow.com/questions/16167829/in-pandas-how-can-i-reset-index-without-adding-a-new-column
                 # to make sure that it re list the system
                 self.df=self.df.reset_index(drop=True)
@@ -144,7 +144,7 @@ class pandas_scale:
             self.df_sub[i]=pd.read_csv(fn,**kwargs ) #,names=arg['names'],parse_dates=arg['parse_dates'],header=arg['header'])
             self.df=pd.concat([self.df,self.df_sub[i]])
             i+=1
-        self.df=self.df.sort(self.parse_dates).reset_index(drop=True)
+        self.df=self.df.sort_values(self.parse_dates).reset_index(drop=True)
         
 
             
@@ -214,16 +214,20 @@ class concat_data_roof():
         import pdb
         import pandas as pd
         import wafo.interpolate as wf
+
+        # below is optional
         arg_defaults = {'plot':    False,
                     'keys': ['scale'],
                     'newkeys':None ,
                     'coef': 1e-14,
                     'rm_nan':True,
-                    'new_keys':None}
+                    'new_keys':None,
+                    'mask':None}
         arg=arg_defaults
         for d in kwargs:
             arg[d]= kwargs.get(d)
 
+        # below is essential
         source_df=arg['df']
         source_keys=arg['keys']
         
@@ -254,7 +258,10 @@ class concat_data_roof():
             # warning, it is found that the Smoothspline is dependent on the x axis!!!
             sp_sec=(self.df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
             #self.df[i]=interp_method(sp_sec)
-            self.df[ arg['new_keys'][idx] ]=interp_method(sp_sec)
+            if arg['mask'] == None:
+                self.df[ arg['new_keys'][idx] ]=interp_method(sp_sec)
+            else:
+                self.df[ arg['new_keys'][idx] ][arg['mask']]=interp_method(sp_sec)
         
             if arg['plot']==True:
                 #fig, ax = plt.subplots(2,sharex=False)
@@ -276,9 +283,13 @@ class concat_data_roof():
          #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
         #(self.df['date_time']-self.df['date_time'][0])/np.timedelta64(1, 's') 
 
+
+
+
 #    def merge_data2(self,var_in=a ): this is not good because if a is not defined, this is not going to be useful
     def merge_data2(self,**kwargs ):
         '''
+        subroutine to slice data
         the difference between merge_data2 and merge data is merge data2 uses all the data for interpolation
         merge_data_only use choped results
         import matplotlib.pyplot as plt

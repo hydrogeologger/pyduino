@@ -15,6 +15,19 @@ g2kg=0.001
 psych=62.2  # pa/K  # https://en.wikipedia.org/wiki/Psychrometric_constant
 molecular_weight_water=0.018
 R=8.314
+air_density_kgPm3=1.27
+heat_capacity_air_JPkgPK=1010.0
+kgPg=0.001
+gPkg=1000.
+mmPm=1000.
+mPmm=.001
+gPkg = 1000.
+kgPg = 0.001
+msPmmday=3600.*24*1000
+psychrometric_paPK=66.0
+mPkm=1000
+kmPm=0.001
+
 #class constitutive_relation:
 
 def dv(tk):
@@ -231,3 +244,16 @@ def swcc_reverse_fredlund_xing_1994(**kwargs):
 
     return psi_outcome
 
+def latlon_two_ponts_to_delta_xy_m(latlon1, latlon2):
+    '''
+    def latlon_two_ponts_to_delta_xy([lat1,lon1] [lat2,lon2]):
+    https://stackoverflow.com/questions/24617013/convert-latitude-and-longitude-to-x-and-y-grid-system-using-python
+    input 
+    out put in meters
+    latlon1 is the origin point
+    '''
+    #dx = (lon2-lon1)*40000*np.cos((lat1+lat2)*np.pi/360)/360
+    #dy = (lat1-lat2)*40000/360
+    dx = (latlon2[1]-latlon1[1])*40000*np.cos((latlon1[0]+latlon2[0])*np.pi/360)/360*mPkm
+    dy = (latlon2[0]-latlon1[0])*40000/360*mPkm
+    return [dx,dy]
