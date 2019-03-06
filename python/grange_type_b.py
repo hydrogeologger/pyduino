@@ -180,14 +180,15 @@ while True:
     upload_phant(pht_ele_o2,ele_o2,screen_display)
     
 
+    # not working from 180807
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,2",initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(' ')[0:-1]
-    luo2['wluo5'] = float(current_read[7])
-    luo2['wlupe5']= float(current_read[5])
-    luo2['wlut5'] = float(current_read[3])
-    luo2['wlup5'] = float(current_read[1])
+    #luo2['wluo5'] = float(current_read[7])
+    #luo2['wlupe5']= float(current_read[5])
+    #luo2['wlut5'] = float(current_read[3])
+    #luo2['wlup5'] = float(current_read[1])
 
     
     msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,8,serial,1",initialize=False)
@@ -224,6 +225,17 @@ while True:
     current_read=msg.split(',')[0:-1]
     luo2['temp']=float(current_read[2])
     luo2['rh']=float(current_read[3])
+
+
+
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command="1145,3,power,9,dummies,1,interval_mm,2000,debug,0",initialize=False)
+    if screen_display: print msg.rstrip()
+    if save_to_file: fid.write(delimiter+msg.rstrip())
+    current_read=msg.split(',')[0:-1]
+    luo2['uvb']=float(current_read[-1])
+    luo2['irb']=float(current_read[-3])
+    luo2['lrbtemp']=float(current_read[-5])
+
     upload_phant(pht_luo2,luo2,screen_display)
 #anaay,1,power,42,point,3,interval_mm,200,debug,1
 #analog,13,power,35,point,3,interval_mm,200,debug,1
@@ -300,19 +312,19 @@ while True:
 
     
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,28DFB91F,dgin,50,snpw,44,htpw,32,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,28DFB91F,dgin,50,snpw,44,htpw,32,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
     parsed_data['tmp0']=float(current_read[2])
     parsed_data['su0']=float(current_read[12])-float(current_read[2])
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,FD9BBBC1,dgin,50,snpw,44,htpw,30,itv,3000,otno,10',initialize=False)
-    if screen_display: print msg.rstrip()
-    if save_to_file: fid.write(delimiter+msg.rstrip())
-    current_read=msg.split(',')[0:-1]
-    parsed_data['tmp1']=float(current_read[2])
-    parsed_data['su1']=float(current_read[12])-float(current_read[2])
+    #msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,FD9BBBC1,dgin,50,snpw,44,htpw,30,itv,6000,otno,10',initialize=False)
+    #if screen_display: print msg.rstrip()
+    #if save_to_file: fid.write(delimiter+msg.rstrip())
+    #current_read=msg.split(',')[0:-1]
+    #parsed_data['tmp1']=float(current_read[2])
+    #parsed_data['su1']=float(current_read[12])-float(current_read[2])
 
 
     #fred,28DFB91F,digin,50,snpw,44,htpw,32,itv,1000,otno,5
@@ -325,7 +337,7 @@ while True:
     #fred,7232B9C8,digin,50,snpw,44,htpw,34,itv,1000,otno,5
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,2BE2B92E,dgin,50,snpw,44,htpw,28,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,2BE2B92E,dgin,50,snpw,44,htpw,28,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -334,7 +346,7 @@ while True:
     parsed_data['s2']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,8254BABF,dgin,50,snpw,44,htpw,26,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,8254BABF,dgin,50,snpw,44,htpw,26,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -343,7 +355,7 @@ while True:
     parsed_data['s3']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,E7C9B944,dgin,50,snpw,44,htpw,40,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,E7C9B944,dgin,50,snpw,44,htpw,40,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -352,7 +364,7 @@ while True:
     parsed_data['s4']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,C911BD8F,dgin,50,snpw,44,htpw,38,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,C911BD8F,dgin,50,snpw,44,htpw,38,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -361,7 +373,7 @@ while True:
     parsed_data['s5']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,1E86BB21,dgin,50,snpw,44,htpw,36,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,1E86BB21,dgin,50,snpw,44,htpw,36,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
@@ -370,7 +382,7 @@ while True:
     parsed_data['s6']=float(current_read[5])-float(current_read[2])
 
 
-    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,7232B9C8,dgin,50,snpw,44,htpw,34,itv,3000,otno,10',initialize=False)
+    msg=serial_openlock.get_result_by_input(port=port_sensor,command='fred,7232B9C8,dgin,50,snpw,44,htpw,34,itv,6000,otno,10',initialize=False)
     if screen_display: print msg.rstrip()
     if save_to_file: fid.write(delimiter+msg.rstrip())
     current_read=msg.split(',')[0:-1]
