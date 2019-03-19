@@ -128,6 +128,7 @@ void hydrogeolog::switch_power(int power_sw_idx,int status)
             power_sw_idx == 8 || power_sw_idx == 9) {
         analogWrite(power_sw_idx, status);
         Serial.print("PWM value: "); Serial.print(status);
+	return;
     }
     if (status==1)
     {
