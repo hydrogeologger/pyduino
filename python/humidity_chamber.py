@@ -37,9 +37,9 @@ screen_display=True
 save_to_file=True
 
 # the Filename of the csv file for storing file
-file_name= 'pizo.csv'
+file_name= 'humidity_chamber.csv'
 
-sleep_time_seconds=30*60
+sleep_time_seconds=20*60
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 delimiter=','
@@ -149,7 +149,12 @@ try:
         current_read=msg1.split(',')[0:-1]
         humchamber['rh0']=float(current_read[-1])
         humchamber['t0']=float(current_read[-2])
-    
+   
+        if 50.0 <= humchamber['rh0']:
+	    msg=ard.write("rc_sw,5,code,011101101101100000000111100101100,pulse_len,306")
+	    msg=ard.flushInput()
+ 	else:
+	    pass	     
     
         if screen_display: print msg2.rstrip()
         if save_to_file: fid.write(delimiter+msg2.rstrip())
@@ -197,6 +202,8 @@ try:
         humchamber['rh7']=float(current_read[-1])
         humchamber['t7']=float(current_read[-2])
 
+
+        
 
         msg=ard.write("analog,15,power,9,point,3,interval_mm,200,debug,1")
         msg=ard.flushInput()
