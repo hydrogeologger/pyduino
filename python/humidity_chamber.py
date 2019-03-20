@@ -62,6 +62,63 @@ while True:
 if save_to_file: fid= open(file_name,'a',0)
 
 
+
+def power_sensor(ard, sensorPin, state):
+    msg=ard.write("power_switch,"+ str(sensorPin) +",power_switch_status," + str(state))
+    msg=ard.flushInput()
+    sleep(5)
+
+def read_sensor(ard, channel, timeout):
+
+    msg=ard.write("9548," + str(channel) + ",type,sht31,dummies,1,power,28,debug,1,points,1,timeout," + str(60))
+    msg=ard.flushInput()
+    msg=ard.readline()
+    sleep(5)
+    current_read=msg.split(',')[0:-1]
+    humidity = float(current_read[-1])
+    temperature = float(current_read[-2])
+    return (temperature, humidity)
+
+
+def return_average_reading_set(ard, times, startPin, endPin, timeout):
+    #create a reading set
+    avgReadingSet = []
+    for i in range(startPin, endPin + 1):
+        power_sensor(ard, i, 1)
+    for j in range (0, times):
+        #give a set of normalised reading for 22-25 sensors
+        readingSet = []
+        for i in range(startPin, endPin + 1):
+            result = read_sensor(ard, i - startPin, timeout)
+            readingSet.append(result)
+        if (j == 0):
+            avgReadingSet = readingSet
+        else:
+            for i in range(0, endPin - startPin + 1):
+                avgValue = avgReadingSet[i]
+                value = readingSet[i]
+                avgValue[0] = avgValue[0] + value[0]
+                avgValue[1] = avgValue[1] + value[1]
+                avgReadingSet[i] = avgValue
+    for i in range(startPin, endPin + 1):
+        power_sensor(ard, i, 0)
+        value = avgReadingSet[i - startPin]
+        value[0] = value[0] / times
+        value[1] = value[1] / times
+        avgReadingSet[i - startPin] = value
+    return avgReadingSet
+
+
+ard=serial.Serial(port_sensor,timeout=60)
+readExample = return_average_reading_set(ard, 10, 22, 23, 60)
+
+print(readExample)
+
+
+
+
+exit()
+#=====================================================================================
 try:
 
     while True: 
@@ -201,9 +258,6 @@ try:
         current_read=msg8.split(',')[0:-1]
         humchamber['rh7']=float(current_read[-1])
         humchamber['t7']=float(current_read[-2])
-
-
-        
 
         msg=ard.write("analog,15,power,9,point,3,interval_mm,200,debug,1")
         msg=ard.flushInput()
