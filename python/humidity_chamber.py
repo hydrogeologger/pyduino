@@ -62,21 +62,22 @@ while True:
 if save_to_file: fid= open(file_name,'a',0)
 
 
-
+#=====================================================================================
 def power_sensor(ard, sensorPin, state):
     msg=ard.write("power_switch,"+ str(sensorPin) +",power_switch_status," + str(state))
     msg=ard.flushInput()
-    sleep(5)
+    sleep(0.5)
 
 def read_sensor(ard, channel, timeout):
 
     msg=ard.write("9548," + str(channel) + ",type,sht31,dummies,1,power,28,debug,1,points,1,timeout," + str(60))
     msg=ard.flushInput()
     msg=ard.readline()
-    sleep(5)
+    sleep(0.5)
     current_read=msg.split(',')[0:-1]
     humidity = float(current_read[-1])
     temperature = float(current_read[-2])
+    print("Channel " + str(channel) + " temp: " + str(temperature) + " hum: " + str(humidity))
     return (temperature, humidity)
 
 
@@ -97,25 +98,18 @@ def return_average_reading_set(ard, times, startPin, endPin, timeout):
             for i in range(0, endPin - startPin + 1):
                 avgValue = avgReadingSet[i]
                 value = readingSet[i]
-                avgValue[0] = avgValue[0] + value[0]
-                avgValue[1] = avgValue[1] + value[1]
-                avgReadingSet[i] = avgValue
+                avgReadingSet[i] = (avgValue[0] + value[0], avgValue[1] + value[1])
     for i in range(startPin, endPin + 1):
         power_sensor(ard, i, 0)
         value = avgReadingSet[i - startPin]
-        value[0] = value[0] / times
-        value[1] = value[1] / times
-        avgReadingSet[i - startPin] = value
+        avgReadingSet[i - startPin] = (value[0] / times, value[1] / times)
     return avgReadingSet
 
 
 ard=serial.Serial(port_sensor,timeout=60)
-readExample = return_average_reading_set(ard, 10, 22, 23, 60)
+readExample = return_average_reading_set(ard, 3, 22, 23, 60)
 
 print(readExample)
-
-
-
 
 exit()
 #=====================================================================================
