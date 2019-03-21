@@ -1056,7 +1056,8 @@ void loop() {
                 hydrogeolog1.print_string_delimiter_value("power",String(power_sw_pin)  );              
             }
             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
-            delay(1000);   
+            delay(1000);
+            Serial.println("HERE");   
             sdi12_init(sdi12_data);
             delay(2000);
             sdi12_loop(sdi12_data);
