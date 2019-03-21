@@ -1046,6 +1046,11 @@ void loop() {
             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
             Serial.println();
          }  //sht75
+         
+         //TO-DO SDI 12 implementation need to be changed for v2 board
+         //also try to remove the dead lock of while (true) if no sensor is found
+         //X.lei J.tran 
+         /*
          int sdi12_data = hydrogeolog1.parse_argument("12",-1,str_ay_size,str_ay);
          if  (sdi12_data!=-1) {
             int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
@@ -1063,6 +1068,8 @@ void loop() {
             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
             Serial.println();
          }  //sht75
+        */
+
         /*
         search channels for 9548 i2c multiplexer
         9548_search
