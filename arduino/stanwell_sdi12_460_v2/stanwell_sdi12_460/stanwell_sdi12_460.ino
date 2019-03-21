@@ -3,7 +3,7 @@
 in /home/pi/Arduino/libraries
 place new libraries in this location and include as
 #include <library.h>
-*note the <> not ""
+*note the <> not ""r
 */
 #include <SDI12.h>
 #include <hydrogeolog.h>
@@ -968,8 +968,7 @@ void loop() {
          }  //tca9548_channel
 
         /*rcswitch for arlec RC213 sockets 
-        rc_sw,10,code,Aon,pulse_len,306
-        rc_sw,10,code,Aoff,pulse_len,306
+        rc_sw,5,code,011101101101100000001111100111100,pulse_len,306
         */        
         int rc_sw= hydrogeolog1.parse_argument("rc_sw",-1,str_ay_size,str_ay);
         String sw_code=hydrogeolog1.parse_argument_string("code","",str_ay_size,str_ay);
