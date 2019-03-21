@@ -121,6 +121,7 @@ void hydrogeolog::analog_read(int analog_idx,int number_of_dummies,int number_of
 
     } // analog_read
 
+//pwm function
 void hydrogeolog::switch_power(int power_sw_idx,int status)
     {
     if (power_sw_idx == 10 || power_sw_idx == 11 || power_sw_idx == 12 || power_sw_idx == 13 ||
@@ -524,10 +525,12 @@ void hydrogeolog::rcswitch(int rc_switch, int pulselength, const char *sw_code)
     
     RCSwitch mySwitch = RCSwitch();
     mySwitch.setProtocol(1);
-    mySwitch.setRepeatTransmit(7);
+    mySwitch.setRepeatTransmit(15);
     mySwitch.enableTransmit(rc_switch);
     //mySwitch.enableTransmit(10);
     mySwitch.setPulseLength(pulselength);
+    //Serial.print("pulselength ");
+    //Serial.println(pulselength);
     //mySwitch.setPulseLength(306);
     //mySwitch.send(binary_code); 
     //Serial.println(pulselength);
@@ -540,8 +543,8 @@ void hydrogeolog::rcswitch(int rc_switch, int pulselength, const char *sw_code)
     // below is now successful
     //char* abc="011101101101100000001111100111100";
     //Serial.println(abc);
-	Serial.print("sw_code ");
-	Serial.println(sw_code);	
+	//Serial.print("sw_code ");
+	//Serial.println(sw_code);	
     mySwitch.send(sw_code); 
     //for (sw_code=="Aon"){
     //mySwitch.send("011101101101100000001111100111100"); 
