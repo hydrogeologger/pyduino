@@ -39,7 +39,7 @@ save_to_file=True
 # the Filename of the csv file for storing file
 file_name= 'humidity_chamber.csv'
 
-sleep_time_seconds=20*60
+sleep_time_seconds=40*60
 
 # the delimiter between files, it is prefered to use ',' which is standard for csv file
 delimiter=','
@@ -122,6 +122,28 @@ try:
      
     
         ard=serial.Serial(port_sensor,timeout=60)
+
+        msg=ard.write("analog,15,power,9,point,3,interval_mm,200,debug,1")
+        msg=ard.flushInput()
+        msg=ard.readline()
+    
+        if screen_display: print msg.rstrip()
+        if save_to_file: fid.write(delimiter+msg.rstrip())
+        current_read=msg.split(',')[0:-1]
+        humchamber['volt0']=float(current_read[-1])
+        sleep(2)
+
+        msg=ard.write("dht22,54,power,2,points,2,dummies,1,interval_mm,2000,debug,1")
+        msg=ard.flushInput()
+        msg=ard.readline()
+
+        if screen_display: print msg.rstrip()
+        if save_to_file: fid.write(delimiter+msg)
+        current_read=msg.split(',')[0:-1]
+        humchamber['dht22_rh']=float(current_read[-1])
+        humchamber['dht22_t']=float(current_read[-2])
+        sleep(2)
+
         msg=ard.write("power_switch,22,power_switch_status,1")
         msg=ard.flushInput()
         sleep(5)
@@ -197,77 +219,87 @@ try:
 
         if screen_display: print msg1.rstrip()
         if save_to_file: fid.write(delimiter+msg1.rstrip())
-        current_read=msg1.split(',')[0:-1]
-        humchamber['rh0']=float(current_read[-1])
-        humchamber['t0']=float(current_read[-2])
-   
-    
+        try:
+            current_read=msg1.split(',')[0:-1]
+            humchamber['rh0']=float(current_read[-1])
+            humchamber['t0']=float(current_read[-2])
+        except Exception, e:
+            if screen_display: print 'sht31,rh0,t0 does not get results'
+ 
         if screen_display: print msg2.rstrip()
         if save_to_file: fid.write(delimiter+msg2.rstrip())
-        current_read=msg2.split(',')[0:-1]
-        humchamber['rh1']=float(current_read[-1])
-        humchamber['t1']=float(current_read[-2])
-    
+        try:
+            current_read=msg2.split(',')[0:-1]
+            humchamber['rh1']=float(current_read[-1])
+            humchamber['t1']=float(current_read[-2])
+        except Exception, e:
+            if screen_display: print 'sht31,rh1,t1, does not get results'   
+
+        if humchamber['rh1'] >= 85.0 and humchamber['rh0'] >= 85.0:
+            msg=ard.write("power_switch,10,power_switch_status,255")           
+            msg=ard.flushInput()
+            print 'relative humidity is higher than 85% in tankA'  
+           
+        else:
+            msg=ard.write("power_switch,10,power_switch_status,191")
+            msg=ard.flushInput()   
+            print 'relative humidity is lower than 85% in tankA'
+ 
         if screen_display: print msg3.rstrip()
         if save_to_file: fid.write(delimiter+msg3.rstrip())
-        current_read=msg3.split(',')[0:-1]
-        humchamber['rh2']=float(current_read[-1])
-        humchamber['t2']=float(current_read[-2])
-
+        try:
+            current_read=msg3.split(',')[0:-1]
+            humchamber['rh2']=float(current_read[-1])
+            humchamber['t2']=float(current_read[-2])
+	except Exception, e:
+            if screen_display: print 'sht31,rh2,t2, does not get results'
+      
 
         if screen_display: print msg4.rstrip()
         if save_to_file: fid.write(delimiter+msg4.rstrip())
-        current_read=msg4.split(',')[0:-1]
-        humchamber['rh3']=float(current_read[-1])
-        humchamber['t3']=float(current_read[-2])
-
+        try:
+            current_read=msg4.split(',')[0:-1]
+            humchamber['rh3']=float(current_read[-1])
+            humchamber['t3']=float(current_read[-2])
+	except Exception, e:
+            if screen_display: print 'sht31,rh3,t3, does not get results'
 
         if screen_display: print msg5.rstrip()
         if save_to_file: fid.write(delimiter+msg5.rstrip())
-        current_read=msg5.split(',')[0:-1]
-        humchamber['rh4']=float(current_read[-1])
-        humchamber['t4']=float(current_read[-2])
-
+        try:
+            current_read=msg5.split(',')[0:-1]
+            humchamber['rh4']=float(current_read[-1])
+            humchamber['t4']=float(current_read[-2])
+	except Exception, e:
+            if screen_display: print 'sht31,rh4,t4, does not get results'
 
         if screen_display: print msg6.rstrip()
         if save_to_file: fid.write(delimiter+msg6.rstrip())
-        current_read=msg6.split(',')[0:-1]
-        humchamber['rh5']=float(current_read[-1])
-        humchamber['t5']=float(current_read[-2])
+        try:
+            current_read=msg6.split(',')[0:-1]
+            humchamber['rh5']=float(current_read[-1])
+            humchamber['t5']=float(current_read[-2])
+	except Exception, e:
+ 	    if screen_display: print 'sht31,rh5,t5, does not get results'
 
 
         if screen_display: print msg7.rstrip()
         if save_to_file: fid.write(delimiter+msg7.rstrip())
-        current_read=msg7.split(',')[0:-1]
-        humchamber['rh6']=float(current_read[-1])
-        humchamber['t6']=float(current_read[-2])
+        try:
+            current_read=msg7.split(',')[0:-1]
+            humchamber['rh6']=float(current_read[-1])
+            humchamber['t6']=float(current_read[-2])
+	except Exception, e:
+	    if screen_display: print 'sht31,rh6,t6, does not get results'
 
         if screen_display: print msg8.rstrip()
         if save_to_file: fid.write(delimiter+msg8.rstrip())
-        current_read=msg8.split(',')[0:-1]
-        humchamber['rh7']=float(current_read[-1])
-        humchamber['t7']=float(current_read[-2])
-
-        msg=ard.write("analog,15,power,9,point,3,interval_mm,200,debug,1")
-        msg=ard.flushInput()
-        msg=ard.readline()
-    
-        if screen_display: print msg.rstrip()
-        if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(',')[0:-1]
-        humchamber['volt0']=float(current_read[-1])
-        sleep(2)
-    
-        msg=ard.write("dht22,54,power,2,points,2,dummies,1,interval_mm,2000,debug,1")
-        msg=ard.flushInput()
-        msg=ard.readline()
-
-        if screen_display: print msg.rstrip()
-        if save_to_file: fid.write(delimiter+msg)
-        current_read=msg.split(',')[0:-1]
-        humchamber['dht22_rh']=float(current_read[-1])
-        humchamber['dht22_t']=float(current_read[-2])
-        sleep(2)
+ 	try:
+            current_read=msg8.split(',')[0:-1]
+            humchamber['rh7']=float(current_read[-1])
+            humchamber['t7']=float(current_read[-2])
+	except Exception, e:
+	    if screen_display: print 'sht31,rh7,t7, does not get results'
 
         ard.close()
     
