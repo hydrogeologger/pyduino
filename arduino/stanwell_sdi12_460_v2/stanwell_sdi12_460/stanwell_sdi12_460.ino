@@ -6,6 +6,7 @@ place new libraries in this location and include as
 *note the <> not ""
 */
 #include <SDI12.h>
+#include "SDI12_function.h"
 #include <hydrogeolog.h>
 /*===========================================================================*/
 
