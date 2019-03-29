@@ -1,4 +1,4 @@
-#include "SDI12.h"
+#include "SDI12_function.h"
 
 /*
 initiate sdi12 on a pin
