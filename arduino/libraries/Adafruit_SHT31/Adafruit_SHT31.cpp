@@ -16,7 +16,8 @@
 #include "Adafruit_SHT31.h"
 
 Adafruit_SHT31::Adafruit_SHT31() {
-  _i2caddr = NULL;
+//  _i2caddr = NULL;
+  _i2caddr = 0x44;
   humidity = 0.0f;
   temp = 0.0f;
 }

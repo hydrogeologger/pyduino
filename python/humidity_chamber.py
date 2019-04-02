@@ -235,15 +235,15 @@ try:
         except Exception, e:
             if screen_display: print 'sht31,rh1,t1, does not get results'   
 
-        if humchamber['rh1'] >= 85.0 and humchamber['rh0'] >= 85.0:
+        if humchamber['rh1'] >= 80.0 and humchamber['rh0'] >= 80.0:
             msg=ard.write("power_switch,10,power_switch_status,255")           
             msg=ard.flushInput()
-            print 'relative humidity is higher than 85% in tankA'  
+            print 'relative humidity is higher than 80% in tankA'  
            
         else:
             msg=ard.write("power_switch,10,power_switch_status,191")
             msg=ard.flushInput()   
-            print 'relative humidity is lower than 85% in tankA'
+            print 'relative humidity is lower than 80% in tankA'
  
         if screen_display: print msg3.rstrip()
         if save_to_file: fid.write(delimiter+msg3.rstrip())
