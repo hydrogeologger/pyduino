@@ -1,12 +1,14 @@
+#include "common.h"
+#include <SDI12.h>
 #include "SDI12_function.h"
+#include "timing.h"
 
 /*
 initiate sdi12 on a pin
 */
 boolean sdi12_init(int sdi12_data)
 {
-#define DATAPIN sdi12_data
-    SDI12 mySDI12(DATAPIN);
+    SDI12 mySDI12(sdi12_data);
 
     mySDI12.begin();
     delay(500); // allow things to settle
@@ -14,12 +16,10 @@ boolean sdi12_init(int sdi12_data)
     for (byte i = '0'; i <= '9'; i++)
         if (checkActive(i, sdi12_data))
             setTaken(i); // scan address space 0-9
-    boolean found = false;
     for (byte i = 0; i < 62; i++)
     {
         if (isTaken(i))
         {
-            found = true;
             return true;
         }
     }
@@ -43,13 +43,12 @@ void sdi12_loop(int sdi12_data)
 
 void takeMeasurement_sdi12(char i, int sdi12_data)
 {
-#define DATAPIN sdi12_data // change to the proper pin,pwm pins are needed, see tutorial, only limited pins are able to get this
-    SDI12 mySDI12(DATAPIN);
+    SDI12 mySDI12(sdi12_data);
     String command = "";
     command += i;
     command += "M!"; // SDI-12 measurement command format  [address]['M'][!]
     mySDI12.sendCommand(command);
-    while (!mySDI12.available() > 5); 
+    while (mySDI12.available() < 5); 
     // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
     delay(100);
 
@@ -78,7 +77,7 @@ void takeMeasurement_sdi12(char i, int sdi12_data)
     command += i;
     command += "D0!"; // SDI-12 command to get data [address][D][dataOption][!]
     mySDI12.sendCommand(command);
-    while (!mySDI12.available() > 1)
+    while (mySDI12.available() < 1)
         ;       // wait for acknowlegement
     delay(300); // let the data transfer
     printBufferToScreen(sdi12_data);
@@ -88,8 +87,7 @@ void takeMeasurement_sdi12(char i, int sdi12_data)
 
 void printBufferToScreen(int sdi12_data)
 {
-#define DATAPIN sdi12_data // change to the proper pin,pwm pins are needed, see tutorial, only limited pins are able to get this
-    SDI12 mySDI12(DATAPIN);
+    SDI12 mySDI12(sdi12_data);
     String buffer = "";
     mySDI12.read(); // consume address
     while (mySDI12.available())
@@ -109,17 +107,14 @@ void printBufferToScreen(int sdi12_data)
     }
     buffer.replace("\n", ""); // to remove the cartriage from the buffer
     buffer.replace("\r", ""); // added to make sure all cartriage is removed
-    //Serial.print(delimiter);
     Serial.print(buffer);
-    //Serial.print(delimiter);
 }
 
 // this checks for activity at a particular address
 // expects a char, '0'-'9', 'a'-'z', or 'A'-'Z'
 boolean checkActive(char i, int sdi12_data)
 {
-#define DATAPIN sdi12_data // change to the proper pin,pwm pins are needed, see tutorial, only limited pins are able to get this
-    SDI12 mySDI12(DATAPIN);
+    SDI12 mySDI12(sdi12_data);
 
     String myCommand = "";
     myCommand = "";
@@ -177,4 +172,67 @@ boolean isTaken(byte i)
     byte j = i / 8;                       // byte #
     byte k = i % 8;                       // bit #
     return addressRegister[j] & (1 << k); // return bit status
+}
+
+// gets identification information from a sensor, and prints it to the serial port
+// expects a character between '0'-'9', 'a'-'z', or 'A'-'Z'.
+void printInfo(char i, int sdi12_data)
+{
+    SDI12 mySDI12(sdi12_data);
+    int j;
+    String command = "";
+    command += (char)i;
+    command += "I!";
+    for (j = 0; j < 1; j++)
+    {
+        mySDI12.sendCommand(command);
+        delay(30);
+        if (mySDI12.available() > 1)
+        {
+            Serial.write("SuTp");
+            Serial.print(DELIMITER);
+            break;
+        }
+        if (mySDI12.available())
+            mySDI12.read();
+    }
+    while (mySDI12.available())
+    {
+        char c = mySDI12.read();
+        if ((c != '\n') && (c != '\r'))
+        {
+            Serial.write(c); //print sensor info and type
+        }
+        delay(5);
+    }
+    Serial.print(DELIMITER);
+}
+
+
+
+// converts allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
+// to a decimal number between 0 and 61 (inclusive) to cover the 62 possible addresses
+byte charToDec(char i)
+{
+    if ((i >= '0') && (i <= '9'))
+        return i - '0';
+    if ((i >= 'a') && (i <= 'z'))
+        return i - 'a' + 10;
+    if ((i >= 'A') && (i <= 'Z'))
+        return i - 'A' + 37;
+    return 0;
+}
+
+// THIS METHOD IS UNUSED IN THIS EXAMPLE, BUT IT MAY BE HELPFUL.
+// maps a decimal number between 0 and 61 (inclusive) to
+// allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
+char decToChar(byte i)
+{
+    if ((i >= 0) && (i <= 9))
+        return i + '0';
+    if ((i >= 10) && (i <= 36))
+        return i + 'a' - 10;
+    if ((i >= 37) && (i <= 62))
+        return i + 'A' - 37;
+    return 0;
 }
