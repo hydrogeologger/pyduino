@@ -5,156 +5,27 @@ place new libraries in this location and include as
 #include <library.h>
 *note the <> not ""
 */
+
 #include <SDI12.h>
-#include "SDI12_function.h"
 #include <hydrogeolog.h>
+#include "timing.h"
+#include "common.h"
+#include "SDI12_function.h"
+
 /*===========================================================================*/
 
 /*Global variables and defines ==============================================*/
-extern volatile unsigned long timer0_millis;
-#define TRUE 1
-#define FALSE 0
-#define TIMEOUT (unsigned long)(5ul * 60ul * 60ul * 1000ul)
-#define DOWN_TIME 3 * 1000 //seconds
-/*
-keeps track of active addresses
-each bit represents an address:
-1 is active (taken), 0 is inactive (available)
-setTaken('A') will set the proper bit for sensor 'A'
-set
-*/
-byte addressRegister[8] = {
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000};
-
-/*
-v 2.0 PCB global pins variables
-*/
-static const int digi_dht_ay[] = {50, 51, 52, 53, 14, 15};
-static const uint8_t ana_o2_ay[] = {A0, A1, A2, A3, A5, A6};
-#define DIGITAL_DHT_COUNT = 6;
-static const uint8_t ana_moisture_ay[] = {A7, A8, A9, A10, A11, A12};
-#define ANALOG_MOIS_COUNT 6
-static const uint8_t analog_pins[] = {A0, A1, A2, A3, A4,
-                                      A5, A6, A7, A8, A9,
-                                      A10, A11, A12, A13, A14,
-                                      A15};
-#define ANALOG_PIN_COUNT 16;
-#define MULTIPLEXER_SW 7
-#define PI_SW 6
-#define HUMIDITY_SEN_SW 2
-#define REVERSE_SW_1 10
-#define REVERSE_SW_2 11
-#define REVERSE_SW_3 12
-#define REVERSE_SW_4 13
-#define _12V5V_SW_1 8
-#define _12V5V_SW_2 9
-static int digi_out_pins[] = {
-    22, 23, 24, 25, 26, 27, 28,
-    29, 30, 31, 32, 33, 34, 35,
-    36, 37, 38, 39, 40, 41, 42,
-    43, 44, 45, 46, 47, 48, 49,
-    MULTIPLEXER_SW, PI_SW, HUMIDITY_SEN_SW,
-    REVERSE_SW_1, REVERSE_SW_2, REVERSE_SW_3, REVERSE_SW_4,
-    _12V5V_SW_1, _12V5V_SW_2};
-#define DIGITAL_PIN_COUNT 37
-
-#define DELIMITER ','
 hydrogeolog hydrogeolog1(DELIMITER);
 String str_ay[20];
+unsigned char noComm = FALSE;
 /*===========================================================================*/
 
 /*Function prototypes========================================================*/
 
-
-void printInfo(char i, int sdi12_data);
-byte charToDec(char i);
-char decToChar(byte i);
 /*===========================================================================*/
 
 /*Function definition========================================================*/
-/*
-set the new value for millis()
-*/
-void setMillis(unsigned long new_millis)
-{
-    uint8_t oldSREG = SREG;
-    cli();
-    timer0_millis = new_millis;
-    SREG = oldSREG;
-    sei();
-}
 
-
-// gets identification information from a sensor, and prints it to the serial port
-// expects a character between '0'-'9', 'a'-'z', or 'A'-'Z'.
-void printInfo(char i, int sdi12_data)
-{
-// change to the proper pin,pwm pins are needed, see tutorial, only limited pins are able to get this
-#define DATAPIN sdi12_data
-    SDI12 mySDI12(DATAPIN);
-    int j;
-    int ii;
-    String command = "";
-    command += (char)i;
-    command += "I!";
-    for (j = 0; j < 1; j++)
-    {
-        mySDI12.sendCommand(command);
-        delay(30);
-        if (mySDI12.available() > 1)
-        {
-            Serial.write("SuTp");
-            Serial.print(DELIMITER);
-            break;
-        }
-        if (mySDI12.available())
-            mySDI12.read();
-    }
-    while (mySDI12.available())
-    {
-        char c = mySDI12.read();
-        if ((c != '\n') && (c != '\r'))
-        {
-            Serial.write(c); //print sensor info and type
-        }
-        delay(5);
-    }
-    Serial.print(DELIMITER);
-}
-
-// converts allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
-// to a decimal number between 0 and 61 (inclusive) to cover the 62 possible addresses
-byte charToDec(char i)
-{
-    if ((i >= '0') && (i <= '9'))
-        return i - '0';
-    if ((i >= 'a') && (i <= 'z'))
-        return i - 'a' + 10;
-    if ((i >= 'A') && (i <= 'Z'))
-        return i - 'A' + 37;
-    return 0;
-}
-
-// THIS METHOD IS UNUSED IN THIS EXAMPLE, BUT IT MAY BE HELPFUL.
-// maps a decimal number between 0 and 61 (inclusive) to
-// allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
-char decToChar(byte i)
-{
-    if ((i >= 0) && (i <= 9))
-        return i + '0';
-    if ((i >= 10) && (i <= 36))
-        return i + 'a' - 10;
-    if ((i >= 37) && (i <= 62))
-        return i + 'A' - 37;
-    return 0;
-}
 
 void setup()
 {
@@ -169,7 +40,6 @@ void setup()
     }
 }
 
-unsigned char noComm = FALSE;
 // the loop routine runs over and over again forever:
 void loop()
 {
@@ -399,7 +269,7 @@ void loop()
         if ((lumino2 != "") && (power_sw_pin != -1) && (serial_pin != -1)) //&&(number_of_measurements!=-1) && (number_of_dummies!=-1)
         {
             String input_linebreak = hydrogeolog1.parse_argument_string("inp_linebreak", "\r\n", str_ay_size, str_ay);
-            char ouput_linebreak = hydrogeolog1.parse_argument_char("otp_linebreak", '\n', str_ay_size, str_ay);
+            //char ouput_linebreak = hydrogeolog1.parse_argument_char("otp_linebreak", '\n', str_ay_size, str_ay);
             hydrogeolog1.print_string_delimiter_value("lumino2_cmd", lumino2);
             hydrogeolog1.print_string_delimiter_value("pow", String(power_sw_pin));
             hydrogeolog1.print_string_delimiter_value("serial", String(serial_pin));
@@ -726,7 +596,7 @@ void loop()
             int number_of_dummies = hydrogeolog1.parse_argument("dummies", 3, str_ay_size, str_ay);
             int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 1000, str_ay_size, str_ay);
             int power_sw_pin = hydrogeolog1.parse_argument("power", -1, str_ay_size, str_ay);
-            int digital_input = hydrogeolog1.parse_argument("dgin", -1, str_ay_size, str_ay);
+            //int digital_input = hydrogeolog1.parse_argument("dgin", -1, str_ay_size, str_ay);
             if (debug_sw == 1)
             {
                 hydrogeolog1.print_string_delimiter_value("9548", String(tca9548_channel));
