@@ -9,8 +9,8 @@
 #include <OneWire.h>
 //#include "hydrogeolog"
 #include <SparkFun_MS5803_I2C.h>
-#include <Sensirion.h>
-
+#include <Sensirion.h> //sht1x and sht7x
+//#include <SHTSensor.h> //sht3x
 #include "Wire.h"
 extern "C" {
 #include "utility/twi.h"  // from Wire library, so we can do bus scanning
@@ -18,7 +18,9 @@ extern "C" {
 // ----above required by ms5803 and tca9548 -----
 
 #include "Adafruit_SI1145.h"
-
+#include "Adafruit_SHT31.h"
+//#include "RCSwitch.h"
+#include <RCSwitch.h>
 
 
 
@@ -63,13 +65,23 @@ class hydrogeolog
       void ms5803l(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms,int debug_sw,int tca9548_channel);
       void tcaselect(int i);
       void sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw);
+      void sht31(int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw,int tca9548_channel); 
       void sdi12(int digi_idx);
+      //bellow are hardcoding for rc_switch
+      //void rcswitchAon(int rc_switch, int pulselength);
+      //void rcswitchAoff(int rc_switch, int pulselength);
+      //void rcswitchBon(int rc_switch, int pulselength);
+      //void rcswitchBoff(int rc_switch, int pulselength);
+      //void rcswitchCon(int rc_switch, int pulselength);
+      //void rcswitchCoff(int rc_switch, int pulselength);
+      void rcswitch(int rc_switch, int pulselength, const char *sw_code);
+      //above for rc_switch
       void si1145(int power_sw,int number_readings_si1145,int sleep_interval_ms,int number_of_dummies);
       void search_9548_channels();
     private:
       int _pin;
       String inp2; 
-      String str_ay2[20];
+      String str_ay2[50];
       int number_opts;
       const char delimiter=',';
       
@@ -90,4 +102,5 @@ class hydrogeolog
 }; // class
 
 #endif
+
 

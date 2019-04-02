@@ -7,7 +7,6 @@ Released into the public domain.
 #include "Arduino.h"
 #include "hydrogeolog.h"
 
-
 hydrogeolog::hydrogeolog(const char delimiter)
 {
   //pinMode(pin, OUTPUT);
@@ -122,8 +121,15 @@ void hydrogeolog::analog_read(int analog_idx,int number_of_dummies,int number_of
 
     } // analog_read
 
+//pwm function
 void hydrogeolog::switch_power(int power_sw_idx,int status)
     {
+    if (power_sw_idx == 10 || power_sw_idx == 11 || power_sw_idx == 12 || power_sw_idx == 13 ||
+          power_sw_idx == 9 || power_sw_idx == 8) {
+        analogWrite(power_sw_idx, status);
+        Serial.print("PWM value "); Serial.print(status);
+        return;
+    }
     if (status==1)
     {
         digitalWrite(power_sw_idx,HIGH);
@@ -468,7 +474,144 @@ void  hydrogeolog::ms5803l(int number_of_dummies,int number_of_measurements,int 
     Serial.print(delimiter);
     }   //5803l
 
-// temperature and humidity by sinsiren
+//sht31 RH&T sensor (I2C interface)
+void hydrogeolog::sht31(int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw,int tca9548_channel)
+    {
+    //default_addr = 0x44
+    //Set to 0x45 for alternate i2c addr
+    Adafruit_SHT31 sht31 = Adafruit_SHT31();
+    sht31.begin(0x44);
+    float t;
+    float h;
+
+    float temp_avg=0.;
+    float humi_avg=0.;
+    
+    tcaselect(tca9548_channel);
+
+    for (int j=0;j<number_of_dummies;j++){
+        t = sht31.readTemperature(); 
+        h = sht31.readHumidity();
+        delay(measure_time_interval_ms);
+        }
+
+    for (int j=0;j<number_of_measurements;j++){
+        t = sht31.readTemperature(); 
+        h = sht31.readHumidity();
+        delay(measure_time_interval_ms);
+        temp_avg+=t;
+        humi_avg+=h;
+        if (debug_sw==1) {
+            Serial.print(t);
+            Serial.print(delimiter);
+            Serial.print(h);
+            Serial.print(delimiter);
+        } //debug_sw
+        }
+    temp_avg/=float(number_of_measurements);
+    humi_avg/=float(number_of_measurements);
+
+    Serial.print(temp_avg);
+    Serial.print(delimiter);
+    Serial.print(humi_avg);
+    Serial.print(delimiter);
+    }
+
+
+//rcswitch
+void hydrogeolog::rcswitch(int rc_switch, int pulselength, const char *sw_code)
+//void hydrogeolog::rcswitchAon(int rc_switch, int pulselength)
+    {
+    
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.setProtocol(1);
+    mySwitch.setRepeatTransmit(15);
+    mySwitch.enableTransmit(rc_switch);
+    //mySwitch.enableTransmit(10);
+    mySwitch.setPulseLength(pulselength);
+    //Serial.print("pulselength ");
+    //Serial.println(pulselength);
+    //mySwitch.setPulseLength(306);
+    //mySwitch.send(binary_code); 
+    //Serial.println(pulselength);
+    //Serial.println(binary_code);
+    //Serial.println("011101101101100000001111100111100"); 
+    // below not sucessful
+    //char abc="011101101101100000001111100111100";
+    //Serial.println(abc);
+
+    // below is now successful
+    //char* abc="011101101101100000001111100111100";
+    //Serial.println(abc);
+	//Serial.print("sw_code ");
+	//Serial.println(sw_code);	
+    mySwitch.send(sw_code); 
+    //for (sw_code=="Aon"){
+    //mySwitch.send("011101101101100000001111100111100"); 
+    //}
+    }
+/*
+void hydrogeolog::rcswitchAoff(int rc_switch, int pulselength)
+    {
+
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.setProtocol(1);
+    mySwitch.setRepeatTransmit(7);
+    mySwitch.enableTransmit(rc_switch);
+    mySwitch.setPulseLength(pulselength);
+    mySwitch.send("011101101101100000001110100111110");
+    
+    }
+
+void hydrogeolog::rcswitchBon(int rc_switch, int pulselength)
+    {
+
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.setProtocol(1);
+    mySwitch.setRepeatTransmit(7);
+    mySwitch.enableTransmit(rc_switch);
+    mySwitch.setPulseLength(pulselength);
+    mySwitch.send("011101101101100000001101100111000");
+    
+    }
+
+void hydrogeolog::rcswitchBoff(int rc_switch, int pulselength)
+    {
+
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.setProtocol(1);
+    mySwitch.setRepeatTransmit(7);
+    mySwitch.enableTransmit(rc_switch);
+    mySwitch.setPulseLength(pulselength);
+    mySwitch.send("011101101101100000001100100111010");
+
+    }
+
+void hydrogeolog::rcswitchCon(int rc_switch, int pulselength)
+    {
+
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.setProtocol(1);
+    mySwitch.setRepeatTransmit(7);
+    mySwitch.enableTransmit(rc_switch);
+    mySwitch.setPulseLength(pulselength);
+    mySwitch.send("011101101101100000001011100110100");
+
+    }
+
+void hydrogeolog::rcswitchCoff(int rc_switch, int pulselength)
+    {
+
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.setProtocol(1);
+    mySwitch.setRepeatTransmit(7);
+    mySwitch.enableTransmit(rc_switch);
+    mySwitch.setPulseLength(pulselength);
+    mySwitch.send("011101101101100000001010100110110");
+    
+    }
+*/
+// temperature and humidity by sensirion
 void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies,int number_of_measurements,int measure_time_interval_ms,int debug_sw)
     {
     float temp;
@@ -820,3 +963,4 @@ void hydrogeolog::search_9548_channels() {
 //
 //
 //
+
