@@ -7,10 +7,8 @@
 
 // ----below required by ms5803 and tca9548 -----
 #include <OneWire.h>
-//#include "hydrogeolog"
 #include <SparkFun_MS5803_I2C.h>
 #include <Sensirion.h> //sht1x and sht7x
-//#include <SHTSensor.h> //sht3x
 #include "Wire.h"
 extern "C"
 {
@@ -22,21 +20,6 @@ extern "C"
 #include "Adafruit_SHT31.h"
 //#include "RCSwitch.h"
 #include <RCSwitch.h>
-
-//// ----below required by sdi12-----
-//#include <SDI12.h>
-//
-//byte addressReg[8] = {
-//      0B00000000,
-//      0B00000000,
-//      0B00000000,
-//      0B00000000,
-//      0B00000000,
-//      0B00000000,
-//      0B00000000,
-//      0B00000000
-//      };
-//// ----above required by sdi12-----
 
 class hydrogeolog
 {
