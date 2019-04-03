@@ -228,6 +228,21 @@ void luminox_reading(int str_ay_size, String lumino2, int serial_pin, int power_
     }
 }
 
+void ds18b20_search(int ds18b20_search_pin, int power_sw_pin)
+{
+    /*ds18b20 search
+    ds18b20_search,13,power,42
+    */
+    if ((ds18b20_search_pin != INVALID) && (power_sw_pin != INVALID))
+    {
+        hydrogeolog1.print_string_delimiter_value("ds18b20_search", String(ds18b20_search_pin));
+        digitalWrite(power_sw_pin, HIGH);
+        delay(1000);
+        hydrogeolog1.search_ds18b20(ds18b20_search_pin, power_sw_pin);
+        digitalWrite(power_sw_pin, LOW);
+    }
+}
+
 // the loop routine runs over and over again forever:
 void loop()
 {
@@ -282,19 +297,8 @@ void loop()
                         hydrogeolog1.parse_argument("serial", -1, str_ay_size, str_ay),
                         power_sw_pin, str_ay);
 
-        /*ds18b20 search
-        ds18b20_search,13,power,42
-       */
-        int ds18b20_search_pin = hydrogeolog1.parse_argument("ds18b20_search", -1, str_ay_size, str_ay);
-        power_sw_pin = hydrogeolog1.parse_argument("power", -1, str_ay_size, str_ay);
-        if ((ds18b20_search_pin != INVALID) && (power_sw_pin != INVALID))
-        {
-            hydrogeolog1.print_string_delimiter_value("ds18b20_search", String(ds18b20_search_pin));
-            digitalWrite(power_sw_pin, HIGH);
-            delay(1000);
-            hydrogeolog1.search_ds18b20(ds18b20_search_pin, power_sw_pin);
-            digitalWrite(power_sw_pin, LOW);
-        }
+        ds18b20_search(hydrogeolog1.parse_argument("ds18b20_search", -1, str_ay_size, str_ay),
+                       power_sw_pin);
 
         /*
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,numbersd,1
