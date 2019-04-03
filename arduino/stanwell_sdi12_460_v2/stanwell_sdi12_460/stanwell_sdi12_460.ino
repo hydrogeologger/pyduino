@@ -26,7 +26,6 @@ unsigned char noComm = FALSE;
 
 /*Function definition========================================================*/
 
-
 void setup()
 {
     // initialize serial communication at 9600 bits per second:

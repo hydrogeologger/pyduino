@@ -11,4 +11,3 @@ void setMillis(unsigned long new_millis)
     SREG = oldSREG;
     sei();
 }
-

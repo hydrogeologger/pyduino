@@ -144,19 +144,18 @@ SDI-12.org, official site of the SDI-12 Support Group.
 
 */
 
-#include "SDI12.h"                   // 0.1 header file for this library
+#include "SDI12.h" // 0.1 header file for this library
 
-#define _BUFFER_SIZE 64              // 0.2 max RX buffer size
-#define DISABLED 0                   // 0.3 value for DISABLED state
-#define ENABLED 1                    // 0.4 value for ENABLED state
-#define HOLDING 2                    // 0.5 value for DISABLED state
-#define TRANSMITTING 3               // 0.6 value for TRANSMITTING state
-#define LISTENING 4                  // 0.7 value for LISTENING state
-#define SPACING 830                  // 0.8 bit timing in microseconds
-int TIMEOUT = -9999;                 // 0.9 value to return to indicate TIMEOUT
+#define _BUFFER_SIZE 64 // 0.2 max RX buffer size
+#define DISABLED 0      // 0.3 value for DISABLED state
+#define ENABLED 1       // 0.4 value for ENABLED state
+#define HOLDING 2       // 0.5 value for DISABLED state
+#define TRANSMITTING 3  // 0.6 value for TRANSMITTING state
+#define LISTENING 4     // 0.7 value for LISTENING state
+#define SPACING 830     // 0.8 bit timing in microseconds
+int TIMEOUT = -9999;    // 0.9 value to return to indicate TIMEOUT
 
-SDI12 *SDI12::_activeObject = NULL;  // 0.10 pointer to active SDI12 object
-
+SDI12 *SDI12::_activeObject = NULL; // 0.10 pointer to active SDI12 object
 
 /* =========== 1. Buffer Setup ============================================
 
@@ -182,10 +181,9 @@ buffer tail. (unsigned 8-bit integer, can map from 0-255)
 */
 
 // See section 0 above.           // 1.1 - max buffer size
-char _rxBuffer[_BUFFER_SIZE];     // 1.2 - buff for incoming
-uint8_t _rxBufferHead = 0;        // 1.3 - index of buff head
-uint8_t _rxBufferTail = 0;        // 1.4 - index of buff tail
-
+char _rxBuffer[_BUFFER_SIZE]; // 1.2 - buff for incoming
+uint8_t _rxBufferHead = 0;    // 1.3 - index of buff head
+uint8_t _rxBufferTail = 0;    // 1.4 - index of buff tail
 
 /* =========== 2. Data Line States ===============================
 
@@ -242,100 +240,112 @@ This may be needed for implementing a slave-side device, which should
 relinquish control of the data line when not transmitting.
 */
 
-
 // 2.1 - Processor specific parity and interrupts
 #if defined __AVR__
-  #include <avr/interrupt.h>      // interrupt handling
-  #include <util/parity.h>        // optimized parity bit handling
+#include <avr/interrupt.h> // interrupt handling
+#include <util/parity.h>   // optimized parity bit handling
 #else
 // Added MJB: parity fuction to replace the one specific for AVR from util/parity.h
 // look for a better optimized code in
 // http://www.avrfreaks.net/forum/easy-method-calculate-even-parity-16-bit
 uint8_t SDI12::parity_even_bit(uint8_t v)
 {
-  uint8_t parity = 0;
-  while (v)
-  {
-    parity = !parity;
-    v = v & (v - 1);
-  }
-  return parity;
+    uint8_t parity = 0;
+    while (v)
+    {
+        parity = !parity;
+        v = v & (v - 1);
+    }
+    return parity;
 }
 #endif
 
 // 2.2 - Returns the current state
 const char *SDI12::getStateName(uint8_t state)
 {
-    const char * retval = "UNKNOWN";
-    if (state == HOLDING) {
+    const char *retval = "UNKNOWN";
+    if (state == HOLDING)
+    {
         retval = "HOLDING";
     }
-    else if (state == TRANSMITTING) {
+    else if (state == TRANSMITTING)
+    {
         retval = "TRANSMITTING";
     }
-    else if (state == LISTENING) {
+    else if (state == LISTENING)
+    {
         retval = "LISTENING";
     }
-    else if (state == ENABLED) {
+    else if (state == ENABLED)
+    {
         retval = "ENABLED";
     }
-    else if (state == DISABLED) {
+    else if (state == DISABLED)
+    {
         retval = "DISABLED";
     }
     return retval;
 }
 
 // 2.3 - sets the state of the SDI-12 object.
-void SDI12::setState(uint8_t state){
-  if(state == HOLDING){
-    pinMode(_dataPin,INPUT);  // added to make output work after pinMode to OUTPUT (don't know why, but works)
-    pinMode(_dataPin,OUTPUT);
-    digitalWrite(_dataPin,LOW);
-    #if defined __AVR__
-      *digitalPinToPCMSK(_dataPin) &= ~(1<<digitalPinToPCMSKbit(_dataPin));
-    #else
-      detachInterrupt(digitalPinToInterrupt(_dataPin));
-    #endif
-    return;
-  }
-  if(state == TRANSMITTING){
-    pinMode(_dataPin,INPUT);  // added to make output work after pinMode to OUTPUT (don't know why, but works)
-    pinMode(_dataPin,OUTPUT);
-    noInterrupts();             // supplied by Arduino.h, same as cli()
-    return;
-  }
-  if(state == LISTENING) {
-    digitalWrite(_dataPin,LOW);
-    pinMode(_dataPin,INPUT);
-    interrupts();                // supplied by Arduino.h, same as sei()
-    #if defined __AVR__
-      *digitalPinToPCICR(_dataPin) |= (1<<digitalPinToPCICRbit(_dataPin));
-      *digitalPinToPCMSK(_dataPin) |= (1<<digitalPinToPCMSKbit(_dataPin));
-    #else
-      attachInterrupt(digitalPinToInterrupt(_dataPin),handleInterrupt, CHANGE);
-    #endif
-  }
-  else {                         // implies state==DISABLED
-      digitalWrite(_dataPin,LOW);
-      pinMode(_dataPin,INPUT);
-      #if defined __AVR__
-        *digitalPinToPCMSK(_dataPin) &= ~(1<<digitalPinToPCMSKbit(_dataPin));
-        if(!*digitalPinToPCMSK(_dataPin)){
-            *digitalPinToPCICR(_dataPin) &= ~(1<<digitalPinToPCICRbit(_dataPin));
-        }
-      #else
+void SDI12::setState(uint8_t state)
+{
+    if (state == HOLDING)
+    {
+        pinMode(_dataPin, INPUT); // added to make output work after pinMode to OUTPUT (don't know why, but works)
+        pinMode(_dataPin, OUTPUT);
+        digitalWrite(_dataPin, LOW);
+#if defined __AVR__
+        *digitalPinToPCMSK(_dataPin) &= ~(1 << digitalPinToPCMSKbit(_dataPin));
+#else
         detachInterrupt(digitalPinToInterrupt(_dataPin));
-      #endif
-  }
+#endif
+        return;
+    }
+    if (state == TRANSMITTING)
+    {
+        pinMode(_dataPin, INPUT); // added to make output work after pinMode to OUTPUT (don't know why, but works)
+        pinMode(_dataPin, OUTPUT);
+        noInterrupts(); // supplied by Arduino.h, same as cli()
+        return;
+    }
+    if (state == LISTENING)
+    {
+        digitalWrite(_dataPin, LOW);
+        pinMode(_dataPin, INPUT);
+        interrupts(); // supplied by Arduino.h, same as sei()
+#if defined __AVR__
+        *digitalPinToPCICR(_dataPin) |= (1 << digitalPinToPCICRbit(_dataPin));
+        *digitalPinToPCMSK(_dataPin) |= (1 << digitalPinToPCMSKbit(_dataPin));
+#else
+        attachInterrupt(digitalPinToInterrupt(_dataPin), handleInterrupt, CHANGE);
+#endif
+    }
+    else
+    { // implies state==DISABLED
+        digitalWrite(_dataPin, LOW);
+        pinMode(_dataPin, INPUT);
+#if defined __AVR__
+        *digitalPinToPCMSK(_dataPin) &= ~(1 << digitalPinToPCMSKbit(_dataPin));
+        if (!*digitalPinToPCMSK(_dataPin))
+        {
+            *digitalPinToPCICR(_dataPin) &= ~(1 << digitalPinToPCICRbit(_dataPin));
+        }
+#else
+        detachInterrupt(digitalPinToInterrupt(_dataPin));
+#endif
+    }
 }
 
 // 2.4 - forces a HOLDING state.
-void SDI12::forceHold(){
+void SDI12::forceHold()
+{
     setState(HOLDING);
 }
 
 // 2.5 - forces a LISTENING state.
-void SDI12::forceListen(){
+void SDI12::forceListen()
+{
     setState(LISTENING);
 }
 
@@ -363,23 +373,24 @@ destructor, as it will maintain the memory buffer.
 */
 
 //  3.1 Constructor
-SDI12::SDI12(uint8_t dataPin){
-  _bufferOverflow = false;
-  _dataPin = dataPin;
+SDI12::SDI12(uint8_t dataPin)
+{
+    _bufferOverflow = false;
+    _dataPin = dataPin;
 }
 
 //  3.2 Destructor
-SDI12::~SDI12(){ setState(DISABLED); }
+SDI12::~SDI12() { setState(DISABLED); }
 
 //  3.3 Begin
-void SDI12::begin(){
-  // setState(HOLDING);
-  setActive();
+void SDI12::begin()
+{
+    // setState(HOLDING);
+    setActive();
 }
 
 //  3.4 End
 void SDI12::end() { setState(DISABLED); }
-
 
 /* ============= 4. Waking up, and talking to, the sensors. ===================
 
@@ -454,64 +465,71 @@ recorder for another SDI-12 device
 */
 
 // 4.1 - this function wakes up the entire sensor bus
-void SDI12::wakeSensors(){
-  setState(TRANSMITTING);
-  digitalWrite(_dataPin, HIGH);
-  delayMicroseconds(12100);  // Required break of 12 milliseconds
-  // delayMicroseconds(12500);  // Required break of 12 milliseconds
-  digitalWrite(_dataPin, LOW);
-  delayMicroseconds(8400);  // Required marking of 8.33 milliseconds
-  // delayMicroseconds(8800);  // Required marking of 8.33 milliseconds
+void SDI12::wakeSensors()
+{
+    setState(TRANSMITTING);
+    digitalWrite(_dataPin, HIGH);
+    delayMicroseconds(12100); // Required break of 12 milliseconds
+    // delayMicroseconds(12500);  // Required break of 12 milliseconds
+    digitalWrite(_dataPin, LOW);
+    delayMicroseconds(8400); // Required marking of 8.33 milliseconds
+                             // delayMicroseconds(8800);  // Required marking of 8.33 milliseconds
 }
 
 // 4.2 - this function writes a character out on the data line
 void SDI12::writeChar(uint8_t out)
 {
-  out |= (parity_even_bit(out)<<7);          // 4.2.1 - parity bit
+    out |= (parity_even_bit(out) << 7); // 4.2.1 - parity bit
 
-  digitalWrite(_dataPin, HIGH);              // 4.2.2 - start bit
-  delayMicroseconds(SPACING);
-
-  for (byte mask = 0x01; mask; mask<<=1){    // 4.2.3 - send payload
-    if(out & mask){
-      digitalWrite(_dataPin, LOW);
-    }
-    else{
-      digitalWrite(_dataPin, HIGH);
-    }
+    digitalWrite(_dataPin, HIGH); // 4.2.2 - start bit
     delayMicroseconds(SPACING);
-  }
 
-  digitalWrite(_dataPin, LOW);                // 4.2.4 - stop bit
-  delayMicroseconds(SPACING);
+    for (byte mask = 0x01; mask; mask <<= 1)
+    { // 4.2.3 - send payload
+        if (out & mask)
+        {
+            digitalWrite(_dataPin, LOW);
+        }
+        else
+        {
+            digitalWrite(_dataPin, HIGH);
+        }
+        delayMicroseconds(SPACING);
+    }
+
+    digitalWrite(_dataPin, LOW); // 4.2.4 - stop bit
+    delayMicroseconds(SPACING);
 }
 
 //    4.3    - this function sends out the characters of the String cmd, one by one
 void SDI12::sendCommand(String &cmd)
 {
-  wakeSensors();             // wake up sensors
-  for (int unsigned i = 0; i < cmd.length(); i++){
-    writeChar(cmd[i]);       // write each character
-  }
-  setState(LISTENING);       // listen for reply
+    wakeSensors(); // wake up sensors
+    for (int unsigned i = 0; i < cmd.length(); i++)
+    {
+        writeChar(cmd[i]); // write each character
+    }
+    setState(LISTENING); // listen for reply
 }
 
 void SDI12::sendCommand(const char *cmd)
 {
-  wakeSensors();             // wake up sensors
-  for (int unsigned i = 0; i < strlen(cmd); i++){
-    writeChar(cmd[i]);      // write each character
-  }
-  setState(LISTENING);      // listen for reply
+    wakeSensors(); // wake up sensors
+    for (int unsigned i = 0; i < strlen(cmd); i++)
+    {
+        writeChar(cmd[i]); // write each character
+    }
+    setState(LISTENING); // listen for reply
 }
 
 void SDI12::sendCommand(FlashString cmd)
 {
-  wakeSensors();            // wake up sensors
-  for (int unsigned i = 0; i < strlen_P((PGM_P)cmd); i++){
-    writeChar((char)pgm_read_byte((const char *)cmd + i));  // write each character
-  }
-  setState(LISTENING);      // listen for reply
+    wakeSensors(); // wake up sensors
+    for (int unsigned i = 0; i < strlen_P((PGM_P)cmd); i++)
+    {
+        writeChar((char)pgm_read_byte((const char *)cmd + i)); // write each character
+    }
+    setState(LISTENING); // listen for reply
 }
 
 //  4.4 - this function sets up for a response to a separate data recorder by
@@ -520,35 +538,38 @@ void SDI12::sendCommand(FlashString cmd)
 //        acting as an SDI-12 device rather than a recorder).
 void SDI12::sendResponse(String &resp)
 {
-  setState(TRANSMITTING);   // Get ready to send data to the recorder
-  digitalWrite(_dataPin, LOW);
-  delayMicroseconds(8330);  // 8.33 ms marking before response
-  for (int unsigned i = 0; i < resp.length(); i++){
-    writeChar(resp[i]);     // write each character
-  }
-  setState(LISTENING);      // return to listening state
+    setState(TRANSMITTING); // Get ready to send data to the recorder
+    digitalWrite(_dataPin, LOW);
+    delayMicroseconds(8330); // 8.33 ms marking before response
+    for (int unsigned i = 0; i < resp.length(); i++)
+    {
+        writeChar(resp[i]); // write each character
+    }
+    setState(LISTENING); // return to listening state
 }
 
 void SDI12::sendResponse(const char *resp)
 {
-  setState(TRANSMITTING);   // Get ready to send data to the recorder
-  digitalWrite(_dataPin, LOW);
-  delayMicroseconds(8330);  // 8.33 ms marking before response
-  for (int unsigned i = 0; i < strlen(resp); i++){
-    writeChar(resp[i]);     // write each character
-  }
-  setState(LISTENING);      // return to listening state
+    setState(TRANSMITTING); // Get ready to send data to the recorder
+    digitalWrite(_dataPin, LOW);
+    delayMicroseconds(8330); // 8.33 ms marking before response
+    for (int unsigned i = 0; i < strlen(resp); i++)
+    {
+        writeChar(resp[i]); // write each character
+    }
+    setState(LISTENING); // return to listening state
 }
 
 void SDI12::sendResponse(FlashString resp)
 {
-  setState(TRANSMITTING);   // Get ready to send data to the recorder
-  digitalWrite(_dataPin, LOW);
-  delayMicroseconds(8330);  // 8.33 ms marking before response
-  for (int unsigned i = 0; i < strlen_P((PGM_P)resp); i++){
-    writeChar((char)pgm_read_byte((const char *)resp + i));  // write each character
-  }
-  setState(LISTENING);      // return to listening state
+    setState(TRANSMITTING); // Get ready to send data to the recorder
+    digitalWrite(_dataPin, LOW);
+    delayMicroseconds(8330); // 8.33 ms marking before response
+    for (int unsigned i = 0; i < strlen_P((PGM_P)resp); i++)
+    {
+        writeChar((char)pgm_read_byte((const char *)resp + i)); // write each character
+    }
+    setState(LISTENING); // return to listening state
 }
 
 /* ============= 5. Reading from the SDI-12 object.  ===================
@@ -615,46 +636,53 @@ can be changed dynamically within a program by calling:
 // 5.1 - reveals the number of characters available in the buffer
 int SDI12::available()
 {
-  if(_bufferOverflow) return -1;
-  return (_rxBufferTail + _BUFFER_SIZE - _rxBufferHead) % _BUFFER_SIZE;
+    if (_bufferOverflow)
+        return -1;
+    return (_rxBufferTail + _BUFFER_SIZE - _rxBufferHead) % _BUFFER_SIZE;
 }
 
 // 5.2 - reveals the next character in the buffer without consuming
 int SDI12::peek()
 {
-  if (_rxBufferHead == _rxBufferTail) return -1;  // Empty buffer? If yes, -1
-  return _rxBuffer[_rxBufferHead];                // Otherwise, read from "head"
+    if (_rxBufferHead == _rxBufferTail)
+        return -1;                   // Empty buffer? If yes, -1
+    return _rxBuffer[_rxBufferHead]; // Otherwise, read from "head"
 }
 
 // 5.3 - a public function that clears the buffer contents and
 // resets the status of the buffer overflow.
 void SDI12::clearBuffer()
 {
-  _rxBufferHead = _rxBufferTail = 0;
-  _bufferOverflow = false;
+    _rxBufferHead = _rxBufferTail = 0;
+    _bufferOverflow = false;
 }
 
 // 5.4 - reads in the next character from the buffer (and moves the index ahead)
 int SDI12::read()
 {
-  _bufferOverflow = false;                             // Reading makes room in the buffer
-  if (_rxBufferHead == _rxBufferTail) return -1;       // Empty buffer? If yes, -1
-  uint8_t nextChar = _rxBuffer[_rxBufferHead];         // Otherwise, grab char at head
-  _rxBufferHead = (_rxBufferHead + 1) % _BUFFER_SIZE;  // increment head
-  return nextChar;                                     // return the char
+    _bufferOverflow = false; // Reading makes room in the buffer
+    if (_rxBufferHead == _rxBufferTail)
+        return -1;                                      // Empty buffer? If yes, -1
+    uint8_t nextChar = _rxBuffer[_rxBufferHead];        // Otherwise, grab char at head
+    _rxBufferHead = (_rxBufferHead + 1) % _BUFFER_SIZE; // increment head
+    return nextChar;                                    // return the char
 }
 
 // 5.5 - this function is called by the Stream class when parsing digits
 int SDI12::peekNextDigit()
 {
-  int c;
-  while (1) {
-    c = timedPeek();
-    if (c < 0) return TIMEOUT; // timeout
-    if (c == '-') return c;
-    if (c >= '0' && c <= '9') return c;
-    read(); // discard non-numeric
-  }
+    int c;
+    while (1)
+    {
+        c = timedPeek();
+        if (c < 0)
+            return TIMEOUT; // timeout
+        if (c == '-')
+            return c;
+        if (c >= '0' && c <= '9')
+            return c;
+        read(); // discard non-numeric
+    }
 }
 
 /* ============= 6. Using more than one SDI-12 object.  ===================
@@ -709,18 +737,17 @@ true if the object is currently the active object, false otherwise.
 // 6.1 - a method for setting the current object as the active object
 bool SDI12::setActive()
 {
-  if (_activeObject != this)
-  {
-    setState(HOLDING);
-    _activeObject = this;
-    return true;
-  }
-  return false;
+    if (_activeObject != this)
+    {
+        setState(HOLDING);
+        _activeObject = this;
+        return true;
+    }
+    return false;
 }
 
 // 6.2 - a method for checking if this object is the active object
 bool SDI12::isActive() { return this == _activeObject; }
-
 
 /* ============== 7. Interrupt Service Routine  ===================
 
@@ -772,64 +799,81 @@ overflow, and then advance the tail index.
 the ISR is instructed to call _handleInterrupt() when they trigger. */
 
 // 7.1 - Passes off responsibility for the interrupt to the active object.
-void SDI12::handleInterrupt(){
-  if (_activeObject) _activeObject->receiveChar();
+void SDI12::handleInterrupt()
+{
+    if (_activeObject)
+        _activeObject->receiveChar();
 }
 
 // 7.2 - Quickly reads a new character into the buffer.
 void SDI12::receiveChar()
 {
-  if (digitalRead(_dataPin))                // 7.2.1 - Start bit?
-  {
-    uint8_t newChar = 0;                    // 7.2.2 - Make room for char.
-
-    delayMicroseconds(SPACING/2);           // 7.2.3 - Wait 1/2 SPACING
-
-    for (uint8_t i=0x1; i<0x80; i <<= 1)    // 7.2.4 - read the 7 data bits
+    if (digitalRead(_dataPin)) // 7.2.1 - Start bit?
     {
-      delayMicroseconds(SPACING);
-      uint8_t noti = ~i;
-      if (!digitalRead(_dataPin))
-        newChar |= i;
-      else
-        newChar &= noti;
-    }
+        uint8_t newChar = 0; // 7.2.2 - Make room for char.
 
-    delayMicroseconds(SPACING);              // 7.2.5 - Skip the parity bit.
-    delayMicroseconds(SPACING);              // 7.2.6 - Skip the stop bit.
+        delayMicroseconds(SPACING / 2); // 7.2.3 - Wait 1/2 SPACING
 
-    // 7.2.7 - Overflow? If not, proceed.
-    if ((_rxBufferTail + 1) % _BUFFER_SIZE == _rxBufferHead)
-    { _bufferOverflow = true;
-    } else {                                 // 7.2.8 - Save char, advance tail.
-      _rxBuffer[_rxBufferTail] = newChar;
-      _rxBufferTail = (_rxBufferTail + 1) % _BUFFER_SIZE;
+        for (uint8_t i = 0x1; i < 0x80; i <<= 1) // 7.2.4 - read the 7 data bits
+        {
+            delayMicroseconds(SPACING);
+            uint8_t noti = ~i;
+            if (!digitalRead(_dataPin))
+                newChar |= i;
+            else
+                newChar &= noti;
+        }
+
+        delayMicroseconds(SPACING); // 7.2.5 - Skip the parity bit.
+        delayMicroseconds(SPACING); // 7.2.6 - Skip the stop bit.
+
+        // 7.2.7 - Overflow? If not, proceed.
+        if ((_rxBufferTail + 1) % _BUFFER_SIZE == _rxBufferHead)
+        {
+            _bufferOverflow = true;
+        }
+        else
+        { // 7.2.8 - Save char, advance tail.
+            _rxBuffer[_rxBufferTail] = newChar;
+            _rxBufferTail = (_rxBufferTail + 1) % _BUFFER_SIZE;
+        }
     }
-  }
 }
 
 //7.3
 #if defined __AVR__
 
 #ifdef SDI12_EXTERNAL_PCINT
-  // Client code must call SDI12::handleInterrupt() in PCINT handler for the data pin
+// Client code must call SDI12::handleInterrupt() in PCINT handler for the data pin
 #else
 
 #if defined(PCINT0_vect)
-ISR(PCINT0_vect){ SDI12::handleInterrupt(); }
+ISR(PCINT0_vect)
+{
+    SDI12::handleInterrupt();
+}
 #endif
 
 #if defined(PCINT1_vect)
-ISR(PCINT1_vect){ SDI12::handleInterrupt(); }
+ISR(PCINT1_vect)
+{
+    SDI12::handleInterrupt();
+}
 #endif
 
 #if defined(PCINT2_vect)
-ISR(PCINT2_vect){ SDI12::handleInterrupt(); }
+ISR(PCINT2_vect)
+{
+    SDI12::handleInterrupt();
+}
 #endif
 
 #if defined(PCINT3_vect)
-ISR(PCINT3_vect){ SDI12::handleInterrupt(); }
+ISR(PCINT3_vect)
+{
+    SDI12::handleInterrupt();
+}
 #endif
 
-#endif  // SDI12_EXTERNAL_PCINT
-#endif  // __AVR__
+#endif // SDI12_EXTERNAL_PCINT
+#endif // __AVR__

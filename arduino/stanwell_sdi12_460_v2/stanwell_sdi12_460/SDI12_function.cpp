@@ -48,7 +48,8 @@ void takeMeasurement_sdi12(char i, int sdi12_data)
     command += i;
     command += "M!"; // SDI-12 measurement command format  [address]['M'][!]
     mySDI12.sendCommand(command);
-    while (mySDI12.available() < 5); 
+    while (mySDI12.available() < 5)
+        ;
     // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
     delay(100);
 
@@ -83,7 +84,6 @@ void takeMeasurement_sdi12(char i, int sdi12_data)
     printBufferToScreen(sdi12_data);
     mySDI12.flush();
 }
-
 
 void printBufferToScreen(int sdi12_data)
 {
@@ -207,8 +207,6 @@ void printInfo(char i, int sdi12_data)
     }
     Serial.print(DELIMITER);
 }
-
-
 
 // converts allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
 // to a decimal number between 0 and 61 (inclusive) to cover the 62 possible addresses
