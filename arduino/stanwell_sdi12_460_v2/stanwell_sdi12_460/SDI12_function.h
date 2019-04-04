@@ -19,8 +19,7 @@ static volatile byte addressRegister[8] = {
     0B00000000,
     0B00000000,
     0B00000000,
-    0B00000000
-};
+    0B00000000};
 
 boolean sdi12_init(int sdi12_data);
 void sdi12_loop(int sdi12_data);

@@ -5,6 +5,10 @@
 
 #define TRUE 1
 #define FALSE 0
+#define INVALID -1
+#define DEFAULT_POINTS 5
+#define DEFAULT_DUMMIES 3
+#define DEFAULT_INTERVAL 10
 
 /*
 v 2.0 PCB global pins variables
