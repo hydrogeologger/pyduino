@@ -504,6 +504,7 @@ void check_serial(String content) {
     {
         Serial.println(content);
     }
+    Serial.print("CMD: "); Serial.println(content);
 }
 
 // the loop routine runs over and over again forever:
