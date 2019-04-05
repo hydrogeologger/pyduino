@@ -7684,3 +7684,373 @@ relative humidity is lower than 80% in tankA
 9548,6,power,28,points,1,dummies,1,itv,1000,type,sht31,31.83,43.27,31.83,43.27,
 9548,7,power,28,points,1,dummies,1,itv,1000,type,sht31,31.63,43.17,31.63,43.17,
 uploaded
+2019-04-04 12:27:55
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,27.50,52.90,
+9548,0,power,28,points,1,dummies,1,itv,1000,type,sht31,33.57,39.56,33.57,39.56,
+9548,1,power,28,points,1,dummies,1,itv,1000,type,sht31,34.29,38.52,34.29,38.52,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,itv,1000,type,sht31,28.53,50.50,28.53,50.50,
+9548,3,power,28,points,1,dummies,1,itv,1000,type,sht31,30.38,46.24,30.38,46.24,
+9548,4,power,28,points,1,dummies,1,itv,1000,type,sht31,31.43,43.28,31.43,43.28,
+9548,5,power,28,points,1,dummies,1,itv,1000,type,sht31,31.91,43.01,31.91,43.01,
+9548,6,power,28,points,1,dummies,1,itv,1000,type,sht31,31.75,43.32,31.75,43.32,
+9548,7,power,28,points,1,dummies,1,itv,1000,type,sht31,31.53,43.21,31.53,43.21,
+uploaded
+2019-04-04 13:10:35
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.60,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,27.55,52.20,
+9548,0,power,28,points,1,dummies,1,itv,1000,type,sht31,33.59,38.85,33.59,38.85,
+9548,1,power,28,points,1,dummies,1,itv,1000,type,sht31,34.33,37.90,34.33,37.90,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,itv,1000,type,sht31,28.63,49.52,28.63,49.52,
+9548,3,power,28,points,1,dummies,1,itv,1000,type,sht31,30.47,45.33,30.47,45.33,
+9548,4,power,28,points,1,dummies,1,itv,1000,type,sht31,31.49,42.55,31.49,42.55,
+9548,5,power,28,points,1,dummies,1,itv,1000,type,sht31,31.90,42.32,31.90,42.32,
+9548,6,power,28,points,1,dummies,1,itv,1000,type,sht31,31.75,42.58,31.75,42.58,
+9548,7,power,28,points,1,dummies,1,itv,1000,type,sht31,31.56,42.57,31.56,42.57,
+uploaded
+2019-04-04 13:53:15
+analog,15,power,9,points,5,dummies,3,interval_mm,200,575.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,27.25,50.85,
+9548,0,power,28,points,1,dummies,1,itv,1000,type,sht31,33.19,37.41,33.19,37.41,
+9548,1,power,28,points,1,dummies,1,itv,1000,type,sht31,33.64,37.07,33.64,37.07,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,itv,1000,type,sht31,28.55,46.98,28.55,46.98,
+9548,3,power,28,points,1,dummies,1,itv,1000,type,sht31,30.24,43.62,30.24,43.62,
+9548,4,power,28,points,1,dummies,1,itv,1000,type,sht31,31.02,41.27,31.02,41.27,
+9548,5,power,28,points,1,dummies,1,itv,1000,type,sht31,31.54,40.96,31.54,40.96,
+9548,6,power,28,points,1,dummies,1,itv,1000,type,sht31,31.40,41.30,31.40,41.30,
+9548,7,power,28,points,1,dummies,1,itv,1000,type,sht31,31.21,41.16,31.21,41.16,
+uploaded
+2019-04-04 14:35:55
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.20,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,27.00,51.10,
+9548,0,power,28,points,1,dummies,1,itv,1000,type,sht31,32.77,39.12,32.77,39.12,
+9548,1,power,28,points,1,dummies,1,itv,1000,type,sht31,33.04,38.98,33.04,38.98,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,itv,1000,type,sht31,28.59,48.08,28.59,48.08,
+9548,3,power,28,points,1,dummies,1,itv,1000,type,sht31,30.33,44.34,30.33,44.34,
+9548,4,power,28,points,1,dummies,1,itv,1000,type,sht31,30.89,42.38,30.89,42.38,
+9548,5,power,28,points,1,dummies,1,itv,1000,type,sht31,31.42,42.02,31.42,42.02,
+9548,6,power,28,points,1,dummies,1,itv,1000,type,sht31,31.22,42.42,31.22,42.42,
+9548,7,power,28,points,1,dummies,1,itv,1000,type,sht31,30.99,42.33,30.99,42.33,
+uploaded
+2019-04-04 17:43:35
+2019-04-04 17:45:22
+analog,15,power,9,points,5,dummies,3,interval_mm,200,574.00,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,23.30,63.10,
+9548,0,power,28,points,1,dummies,1,itv,1000,type,sht31,33.43,39.58,33.43,39.58,
+9548,1,power,28,points,1,dummies,1,itv,1000,type,sht31,32.59,42.05,32.59,42.05,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,itv,1000,type,sht31,29.74,48.13,29.74,48.13,
+9548,3,power,28,points,1,dummies,1,itv,1000,type,sht31,33.54,39.83,33.54,39.83,
+9548,4,power,28,points,1,dummies,1,itv,1000,type,sht31,32.18,42.22,32.18,42.22,
+9548,5,power,28,points,1,dummies,1,itv,1000,type,sht31,33.42,40.23,33.42,40.23,
+9548,6,power,28,points,1,dummies,1,itv,1000,type,sht31,32.08,43.31,32.08,43.31,
+9548,7,power,28,points,1,dummies,1,itv,1000,type,sht31,31.90,42.81,31.90,42.81,
+uploaded
+2019-04-04 18:29:16
+Traceback (most recent call last):
+  File "humidity_chamber.py", line 124, in <module>
+    ard=serial.Serial(port_sensor,timeout=60)
+  File "/usr/lib/python2.7/dist-packages/serial/serialutil.py", line 236, in __init__
+    self.open()
+  File "/usr/lib/python2.7/dist-packages/serial/serialposix.py", line 268, in open
+    raise SerialException(msg.errno, "could not open port {}: {}".format(self._port, msg))
+serial.serialutil.SerialException: [Errno 16] could not open port /dev/ttyS0: [Errno 16] Device or resource busy: '/dev/ttyS0'
+2019-04-04 23:11:21
+analog,15,power,9,points,5,dummies,3,interval_mm,200,574.20,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.95,56.45,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.70,43.59,28.70,43.59,28.72,43.59,28.72,43.59,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.62,42.01,29.62,42.01,29.62,42.06,29.62,42.06,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.02,53.70,25.02,53.70,25.02,53.71,25.02,53.71,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.01,48.45,27.01,48.45,27.00,48.45,27.00,48.45,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.99,45.67,27.99,45.67,27.99,45.71,27.99,45.71,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.39,45.44,28.39,45.44,28.40,45.39,28.40,45.39,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.28,45.74,28.28,45.74,28.29,45.77,28.29,45.77,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.13,45.46,28.13,45.46,28.16,45.49,28.16,45.49,
+uploaded
+2019-04-04 23:53:50
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.40,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.95,56.55,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.93,41.60,29.93,41.60,29.92,41.60,29.92,41.60,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.57,40.83,30.57,40.83,30.57,40.83,30.57,40.83,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.11,53.52,25.11,53.52,25.10,53.53,25.10,53.53,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.14,48.31,27.14,48.31,27.11,48.31,27.11,48.31,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.06,45.58,28.06,45.58,28.06,45.60,28.06,45.60,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.49,45.26,28.49,45.26,28.49,45.26,28.49,45.26,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.32,45.60,28.32,45.60,28.33,45.60,28.33,45.60,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.18,45.35,28.18,45.35,28.22,45.38,28.22,45.38,
+uploaded
+2019-04-05 00:22:57
+analog,15,power,9,points,5,dummies,3,interval_mm,200,575.40,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.80,57.10,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.00,41.83,30.00,41.83,29.99,41.81,29.99,41.81,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.65,40.97,30.65,40.97,30.63,40.96,30.63,40.96,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.00,54.27,25.00,54.27,24.97,54.26,24.97,54.26,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.97,49.15,26.97,49.15,26.97,49.12,26.97,49.12,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.87,46.34,27.87,46.34,27.89,46.29,27.89,46.29,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.32,46.01,28.32,46.01,28.32,45.98,28.32,45.98,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.16,46.32,28.16,46.32,28.19,46.33,28.19,46.33,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.08,45.97,28.08,45.97,28.05,45.97,28.05,45.97,
+uploaded
+2019-04-05 01:05:25
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.00,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.65,58.15,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.92,42.26,29.92,42.26,29.93,42.19,29.93,42.19,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.59,41.40,30.59,41.40,30.57,41.40,30.57,41.40,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.71,55.39,24.71,55.39,24.73,55.39,24.73,55.39,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.74,50.03,26.74,50.03,26.74,50.01,26.74,50.01,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.73,47.11,27.73,47.11,27.72,47.05,27.72,47.05,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.14,46.72,28.14,46.72,28.15,46.69,28.15,46.69,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.03,47.03,28.03,47.03,28.03,47.00,28.03,47.00,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.92,46.62,27.92,46.62,27.89,46.65,27.89,46.65,
+uploaded
+2019-04-05 01:47:54
+analog,15,power,9,points,5,dummies,3,interval_mm,200,575.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.10,59.55,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.46,43.53,29.46,43.53,29.48,43.53,29.48,43.53,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.12,42.65,30.12,42.65,30.14,42.61,30.14,42.61,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.12,57.57,24.12,57.57,24.12,57.58,24.12,57.58,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.11,52.31,26.11,52.31,26.05,52.34,26.05,52.34,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.17,48.78,27.17,48.78,27.15,48.74,27.15,48.74,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.62,48.50,27.62,48.50,27.60,48.52,27.60,48.52,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.50,48.85,27.50,48.85,27.52,48.90,27.52,48.90,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.41,48.26,27.41,48.26,27.44,48.22,27.44,48.22,
+uploaded
+2019-04-05 02:30:23
+analog,15,power,9,points,5,dummies,3,interval_mm,200,575.40,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.40,61.40,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.73,44.26,29.73,44.26,29.76,44.21,29.76,44.21,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.46,43.16,30.46,43.16,30.49,43.21,30.49,43.21,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.68,57.26,24.68,57.26,24.70,57.19,24.70,57.19,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.70,51.78,26.70,51.78,26.70,51.88,26.70,51.88,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.49,49.02,27.49,49.02,27.54,49.04,27.54,49.04,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.95,48.61,27.95,48.61,27.97,48.61,27.97,48.61,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.77,49.12,27.77,49.12,27.76,49.13,27.76,49.13,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.61,48.83,27.61,48.83,27.61,48.82,27.61,48.82,
+uploaded
+2019-04-05 03:12:51
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.60,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.80,63.40,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.35,45.26,29.35,45.26,29.37,45.27,29.37,45.27,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.11,44.12,30.11,44.12,30.12,44.12,30.12,44.12,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,23.64,60.87,23.64,60.87,23.66,60.91,23.66,60.91,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.59,55.19,25.59,55.19,nan,55.19,nan,55.19,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.89,51.05,26.89,51.05,26.89,51.10,26.89,51.10,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.33,50.69,27.33,50.69,27.33,50.72,27.33,50.72,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.32,50.87,27.32,50.87,27.29,50.94,27.29,50.94,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.24,50.19,27.24,50.19,27.24,50.20,27.24,50.20,
+uploaded
+2019-04-05 03:55:20
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.25,64.35,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.49,45.92,29.49,45.92,29.49,45.91,29.49,45.91,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.22,44.80,30.22,44.80,30.19,44.78,30.19,44.78,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.40,59.66,24.40,59.66,24.42,59.63,24.42,59.63,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,nan,53.89,nan,53.89,26.42,53.85,26.42,53.85,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.28,50.91,27.28,50.91,27.29,50.88,27.29,50.88,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.73,50.46,27.73,50.46,27.74,50.45,27.74,50.45,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.57,50.89,27.57,50.89,27.59,50.88,27.59,50.88,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.43,50.53,27.43,50.53,27.41,50.50,27.41,50.50,
+uploaded
+2019-04-05 04:37:49
+analog,15,power,9,points,5,dummies,3,interval_mm,200,579.00,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.35,70.20,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.77,49.18,28.77,49.18,28.76,49.17,28.76,49.17,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.52,47.98,29.52,47.98,29.50,48.02,29.50,48.02,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,23.17,66.05,23.17,66.05,23.15,66.02,23.15,66.02,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.09,60.03,25.09,60.03,25.10,nan,25.10,nan,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.39,55.51,26.39,55.51,26.39,55.51,26.39,55.51,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.80,54.98,26.80,54.98,26.82,55.03,26.82,55.03,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.77,55.13,26.77,55.13,26.77,55.15,26.77,55.15,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.72,54.29,26.72,54.29,26.72,54.29,26.72,54.29,
+uploaded
+2019-04-05 05:20:17
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.40,71.00,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.47,50.07,28.47,50.07,28.46,50.09,28.46,50.09,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.14,49.02,29.14,49.02,29.14,49.02,29.14,49.02,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,23.49,65.10,23.49,65.10,23.53,65.11,23.53,65.11,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.48,59.04,25.48,59.04,25.46,59.04,25.46,59.04,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.32,55.81,26.32,55.81,26.32,55.80,26.32,55.80,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.76,55.34,26.76,55.34,26.76,55.35,26.76,55.35,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.58,55.86,26.58,55.86,26.58,55.88,26.58,55.88,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.50,55.28,26.50,55.28,26.47,55.26,26.47,55.26,
+uploaded
+2019-04-05 06:02:46
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.30,73.50,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.50,51.33,28.50,51.33,28.49,51.29,28.49,51.29,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.05,50.54,29.05,50.54,29.05,50.50,29.05,50.50,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,23.58,66.37,23.58,66.37,23.58,66.33,23.58,66.33,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.45,60.40,25.45,60.40,25.46,60.38,25.46,60.38,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.27,57.23,26.27,57.23,26.24,57.25,26.24,57.25,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.70,56.62,26.70,56.62,26.71,56.63,26.71,56.63,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.48,57.34,26.48,57.34,26.46,57.41,26.46,57.41,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.26,57.01,26.26,57.01,26.23,56.98,26.23,56.98,
+uploaded
+2019-04-05 06:45:15
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.20,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.90,70.80,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.95,50.05,28.95,50.05,28.93,50.12,28.93,50.12,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.66,48.88,29.66,48.88,29.69,48.85,29.69,48.85,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.07,64.95,24.07,64.95,24.07,64.92,24.07,64.92,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.00,58.89,26.00,58.89,26.01,58.85,26.01,58.85,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.82,55.77,26.82,55.77,26.82,55.70,26.82,55.70,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.25,55.19,27.25,55.19,27.25,55.12,27.25,55.12,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.04,55.63,27.04,55.63,27.04,55.60,27.04,55.60,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.92,55.13,26.92,55.13,26.91,55.09,26.91,55.09,
+uploaded
+2019-04-05 07:27:44
+analog,15,power,9,points,5,dummies,3,interval_mm,200,578.00,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.90,69.35,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.94,48.98,28.94,48.98,28.94,49.00,28.94,49.00,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.73,47.62,29.73,47.62,29.77,47.61,29.77,47.61,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.04,63.47,24.04,63.47,24.01,63.45,24.01,63.45,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.88,57.87,25.88,57.87,25.88,57.85,25.88,57.85,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.85,54.38,26.85,54.38,26.83,54.39,26.83,54.39,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.26,53.95,27.26,53.95,27.28,53.91,27.28,53.91,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.14,54.23,27.14,54.23,27.14,54.19,27.14,54.19,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.07,53.64,27.07,53.64,27.05,53.60,27.05,53.60,
+uploaded
+2019-04-05 08:10:12
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.60,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,21.95,67.25,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.79,48.35,28.79,48.35,28.83,48.36,28.83,48.36,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.44,47.42,29.44,47.42,29.46,47.42,29.46,47.42,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,24.32,61.45,24.32,61.45,24.32,61.47,24.32,61.47,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.12,56.19,26.12,56.19,26.12,56.19,26.12,56.19,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.80,53.49,26.80,53.49,26.80,53.46,26.80,53.46,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.28,52.97,27.28,52.97,27.28,52.94,27.28,52.94,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.14,53.33,27.14,53.33,27.12,53.33,27.12,53.33,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.01,52.84,27.01,52.84,27.05,52.88,27.05,52.88,
+uploaded
+2019-04-05 08:52:41
+analog,15,power,9,points,5,dummies,3,interval_mm,200,578.40,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,22.80,61.60,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.41,45.86,29.41,45.86,29.42,45.84,29.42,45.84,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.87,45.40,29.87,45.40,29.87,45.35,29.87,45.35,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,25.39,56.79,25.39,56.79,25.36,56.80,25.36,56.80,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.15,52.07,27.15,52.07,27.15,52.08,27.15,52.08,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.54,50.20,27.54,50.20,27.54,50.15,27.54,50.15,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.04,49.63,28.04,49.63,28.05,49.64,28.05,49.64,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.83,50.09,27.83,50.09,27.83,50.03,27.83,50.03,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.71,49.65,27.71,49.65,27.72,49.63,27.72,49.63,
+uploaded
+2019-04-05 09:35:10
+analog,15,power,9,points,5,dummies,3,interval_mm,200,578.20,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,23.55,60.25,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.94,45.57,29.94,45.57,29.93,45.53,29.93,45.53,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.31,45.26,30.31,45.26,30.33,45.23,30.33,45.23,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.17,55.41,26.17,55.41,26.19,55.38,26.19,55.38,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.92,50.59,27.92,50.59,27.92,50.56,27.92,50.56,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.20,49.18,28.20,49.18,28.21,49.10,28.21,49.10,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.72,48.31,28.72,48.31,28.70,48.24,28.70,48.24,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.43,48.80,28.43,48.80,28.44,48.79,28.44,48.79,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.29,48.64,28.29,48.64,28.29,48.60,28.29,48.60,
+uploaded
+2019-04-05 10:17:38
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,24.15,55.05,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.51,41.70,30.51,41.70,30.51,41.75,30.51,41.75,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.78,41.65,30.78,41.65,30.78,41.67,30.78,41.67,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,26.57,51.48,26.57,51.48,26.59,51.53,26.59,51.53,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.32,47.35,28.32,47.35,28.32,47.42,28.32,47.42,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.68,45.84,28.68,45.84,28.71,45.84,28.71,45.84,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.22,45.39,29.22,45.39,29.24,45.38,29.24,45.38,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.06,45.83,29.06,45.83,29.05,45.80,29.05,45.80,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.90,45.48,28.90,45.48,28.88,45.46,28.88,45.46,
+uploaded
+2019-04-05 11:00:07
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.20,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,24.65,49.25,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.91,37.39,30.91,37.39,30.89,37.39,30.89,37.39,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,31.15,37.36,31.15,37.36,31.17,37.38,31.17,37.38,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.15,45.26,27.15,45.26,27.17,45.26,27.17,45.26,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.84,41.75,28.84,41.75,28.84,41.87,28.84,41.87,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.20,40.49,29.20,40.49,29.22,40.47,29.22,40.47,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.74,40.14,29.74,40.14,29.73,40.08,29.73,40.08,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.50,40.60,29.50,40.60,29.50,40.63,29.50,40.63,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.33,40.57,29.33,40.57,29.32,40.58,29.32,40.58,
+uploaded
+2019-04-05 11:42:36
+analog,15,power,9,points,5,dummies,3,interval_mm,200,575.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,25.05,45.95,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,31.27,35.02,31.27,35.02,31.27,34.95,31.27,34.95,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,31.52,34.97,31.52,34.97,31.49,34.93,31.49,34.93,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.50,41.64,27.50,41.64,27.49,41.62,27.49,41.62,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.19,38.39,29.19,38.39,29.17,38.38,29.17,38.38,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.55,37.30,29.55,37.30,29.55,37.36,29.55,37.36,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.08,37.09,30.08,37.09,30.08,37.14,30.08,37.14,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.88,37.57,29.88,37.57,29.87,37.61,29.87,37.61,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.68,37.74,29.68,37.74,29.70,37.76,29.70,37.76,
+uploaded
+2019-04-05 12:25:04
+analog,15,power,9,points,5,dummies,3,interval_mm,200,577.40,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,25.35,39.40,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,31.75,29.53,31.75,29.53,31.75,29.53,31.75,29.53,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,32.02,29.38,32.02,29.38,32.05,29.30,32.05,29.30,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,27.84,34.47,27.84,34.47,27.81,34.43,27.81,34.43,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.56,31.54,29.56,31.54,29.54,31.60,29.54,31.60,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.98,30.61,29.98,30.61,29.99,30.68,29.99,30.68,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.53,30.68,30.53,30.68,30.52,30.69,30.52,30.69,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.27,31.09,30.27,31.09,30.29,31.09,30.29,31.09,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.09,31.57,30.09,31.57,30.09,31.62,30.09,31.62,
+uploaded
+2019-04-05 13:07:33
+analog,15,power,9,points,5,dummies,3,interval_mm,200,576.20,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,25.65,45.35,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,32.09,34.20,32.09,34.20,32.09,34.33,32.09,34.33,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,32.46,34.05,32.46,34.05,32.46,34.05,32.46,34.05,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.03,41.77,28.03,41.77,28.03,41.71,28.03,41.71,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,29.78,38.47,29.78,38.47,29.75,38.44,29.75,38.44,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.29,36.95,30.29,36.95,30.31,36.96,30.31,36.96,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.80,36.70,30.80,36.70,30.83,36.66,30.83,36.66,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.59,36.96,30.59,36.96,30.61,36.95,30.61,36.95,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.45,36.80,30.45,36.80,30.45,36.75,30.45,36.75,
+uploaded
+2019-04-05 13:50:02
+analog,15,power,9,points,5,dummies,3,interval_mm,200,575.80,
+dht22,54,power,2,points,2,dummies,1,interval_mm,2000,25.85,42.95,
+9548,0,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,32.50,32.52,32.50,32.52,32.51,32.50,32.51,32.50,
+9548,1,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,32.87,32.33,32.87,32.33,32.82,32.32,32.82,32.32,
+relative humidity is lower than 80% in tankA
+9548,2,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,28.29,39.68,28.29,39.68,28.29,39.76,28.29,39.76,
+9548,3,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.05,36.89,30.05,36.89,30.05,36.96,30.05,36.96,
+9548,4,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.64,35.27,30.64,35.27,30.67,35.31,30.67,35.31,
+9548,5,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,31.14,35.01,31.14,35.01,31.14,35.01,31.14,35.01,
+9548,6,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.95,35.42,30.95,35.42,30.97,35.40,30.97,35.40,
+9548,7,power,28,points,1,dummies,1,interval_mm,1000,type,sht31,30.73,35.52,30.73,35.52,30.74,35.56,30.74,35.56,
+uploaded
+2019-04-05 14:32:30
+Traceback (most recent call last):
+  File "humidity_chamber.py", line 124, in <module>
+    ard=serial.Serial(port_sensor,timeout=60)
+  File "/usr/lib/python2.7/dist-packages/serial/serialutil.py", line 236, in __init__
+    self.open()
+  File "/usr/lib/python2.7/dist-packages/serial/serialposix.py", line 268, in open
+    raise SerialException(msg.errno, "could not open port {}: {}".format(self._port, msg))
+serial.serialutil.SerialException: [Errno 16] could not open port /dev/ttyS0: [Errno 16] Device or resource busy: '/dev/ttyS0'
