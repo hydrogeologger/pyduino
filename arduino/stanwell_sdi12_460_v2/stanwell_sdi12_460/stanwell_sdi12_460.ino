@@ -408,7 +408,7 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
         int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 1000, str_ay_size, str_ay);
         int power_sw_pin = hydrogeolog1.parse_argument("power", INVALID, str_ay_size, str_ay);
         //int digital_input = hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay);
-        digitalWrite(MULTIPLEXER_SW, HIGH);
+        digitalWrite(MULTIPLEXER_SW, LOW);
         if (debug_sw == 1)
         {
             hydrogeolog1.print_string_delimiter_value("9548", String(tca9548_channel));
@@ -429,7 +429,7 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
         if (power_sw_pin != INVALID)
             digitalWrite(power_sw_pin, LOW);
         Serial.println();
-        digitalWrite(MULTIPLEXER_SW, LOW);
+        digitalWrite(MULTIPLEXER_SW, HIGH);
     }
 }
 

@@ -114,7 +114,7 @@ void hydrogeolog::analog_read(int analog_idx, int number_of_dummies, int number_
 
     for (int j = 0; j < number_of_measurements; j++)
     {
-        results += analogRead(analog_idx);
+        results += (float)analogRead(analog_idx);
         delay(measure_time_interval);
     }
 
@@ -177,13 +177,13 @@ void hydrogeolog::dht22_read(int digi_idx, int number_of_dummies, int number_of_
         int chk1 = DHT.read22(digi_idx);
         delay(1000);
     }
-    float t_results = 0.;
-    float rh_results = 0.;
+    float t_results = 0.0;
+    float rh_results = 0.0;
     for (int j = 0; j < number_of_measurements; j++)
     {
         int chk1 = DHT.read22(DHT22_PIN);
-        t_results += DHT.temperature;
-        rh_results += DHT.humidity;
+        t_results += (float)DHT.temperature;
+        rh_results += (float)DHT.humidity;
         delay(measure_time_interval);
     }
 
