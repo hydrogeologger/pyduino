@@ -421,10 +421,10 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
         hydrogeolog1.tcaselect(tca9548_channel);
         delay(500);
         read_pressure_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
-        delay(500);
-        hydrogeolog1.tcaselect(tca9548_channel);
-        delay(500);
-        read_pressure_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+        //delay(500);
+        //hydrogeolog1.tcaselect(tca9548_channel);
+        //delay(500);
+        //read_pressure_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
         delay(500);
         if (power_sw_pin != INVALID)
             digitalWrite(power_sw_pin, LOW);
