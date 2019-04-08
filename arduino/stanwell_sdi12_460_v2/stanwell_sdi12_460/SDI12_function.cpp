@@ -3,11 +3,25 @@
 #include "SDI12_function.h"
 #include "timing.h"
 
+boolean sdi12_check_pin(int sdi12_data)
+{
+    for (int i = 0; i < SDI12_PIN_COUNT; i++)
+    {
+        if (sdi12_data == sdi12_pins[i])
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 /*
 initiate sdi12 on a pin
 */
 boolean sdi12_init(int sdi12_data)
 {
+    if (sdi12_check_pin(sdi12_data) == false)
+        return false;
     SDI12 mySDI12(sdi12_data);
 
     mySDI12.begin();
@@ -33,12 +47,13 @@ void sdi12_loop(int sdi12_data)
 {
     // scan address space 0-9
     for (char i = '0'; i <= '9'; i++)
+    {
         if (isTaken(i))
         {
             printInfo(i, sdi12_data);
             takeMeasurement_sdi12(i, sdi12_data);
         }
-    delay(10000); // wait ten seconds between measurement attempts.
+    }
 }
 
 void takeMeasurement_sdi12(char i, int sdi12_data)

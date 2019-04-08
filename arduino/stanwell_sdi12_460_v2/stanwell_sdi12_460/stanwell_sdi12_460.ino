@@ -106,12 +106,23 @@ void o2_array_analog_reading(int str_ay_size, int debug_sw, int o2_ana_array, in
         delay(1000);
         for (int i = 0; i < ANALOG_MOIS_COUNT; i++)
         {
-            hydrogeolog1.dht22_read(digi_dht_ay[i], number_of_dummies, number_of_measurements, measure_time_interval_ms);
             hydrogeolog1.analog_read(ana_o2_ay[i], number_of_dummies, number_of_measurements, measure_time_interval_ms);
         }
         digitalWrite(power_sw_pin, LOW);
         Serial.println();
     }
+}
+
+boolean is_pwm_pin(int pow_sw)
+{
+    for (int i = 0; i < PWM_PIN_COUNT; i++)
+    {
+        if (pow_sw == pwm_pins[i])
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void power_switch(int pow_sw, int pow_sw_status)
@@ -124,7 +135,14 @@ void power_switch(int pow_sw, int pow_sw_status)
     {
         hydrogeolog1.print_string_delimiter_value("power_switch", String(pow_sw));
         hydrogeolog1.print_string_delimiter_value("power_switch_status", String(pow_sw_status));
-        hydrogeolog1.switch_power(pow_sw, pow_sw_status);
+        if (is_pwm_pin(pow_sw))
+        {
+            hydrogeolog1.pwm_switch_power(pow_sw, pow_sw_status);
+        }
+        else
+        {
+            hydrogeolog1.switch_power(pow_sw, pow_sw_status);
+        }
         Serial.println();
     }
 }
@@ -294,7 +312,7 @@ void ds18b20_measurement(int str_ay_size, String thermal_suction_ds18b20, int th
     }
 }
 
-void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input, 
+void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
                           int power_heating_pin, int output_temp_interval_ms, int output_number_temp,
                           int power_sw_pin, String str_ay[])
 {
@@ -312,9 +330,7 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
     */
 
     String fredlund_suction_ds18b20 = hydrogeolog1.parse_argument_string("fred", "", str_ay_size, str_ay);
-    fredlund_suction_ds18b20 = fredlund_suction_ds18b20 == "" ? 
-        hydrogeolog1.parse_argument_string("fred9", "", str_ay_size, str_ay):
-        fredlund_suction_ds18b20;
+    fredlund_suction_ds18b20 = fredlund_suction_ds18b20 == "" ? hydrogeolog1.parse_argument_string("fred9", "", str_ay_size, str_ay) : fredlund_suction_ds18b20;
     if ((fredlund_suction_ds18b20 != "") && (power_sw_pin != INVALID))
     {
         hydrogeolog1.print_string_delimiter_value("fred_ds18", String(fredlund_suction_ds18b20));
@@ -394,7 +410,7 @@ void read_pressure_sensor(String type, int number_of_dummies, int number_of_meas
 }
 
 void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca9548_channel,
-                         int power_sw_pin, String str_ay[])
+                      int power_sw_pin, String str_ay[])
 {
     /*
     use tca9548 i2c multiplexer to obtain results from ms5803 pressure transducer 
@@ -453,7 +469,7 @@ void rc_swtich(int str_ay_size, int debug_sw, String sw_code, int rc_sw, String 
 }
 
 void sht75_measurement(int str_ay_size, int debug_sw, int sht75_data, int sht75_clk, int power_sw_pin,
-                        String str_ay[])
+                       String str_ay[])
 {
     /*
     use sht75 to measure temperature and humidity
@@ -499,12 +515,13 @@ void multiplexer_search(int search_9548)
     }
 }
 
-void check_serial(String content) {
+void check_serial(String content)
+{
     if (content == "abc")
     {
         Serial.println(content);
     }
-//    Serial.print("CMD: "); Serial.println(content);
+    //    Serial.print("CMD: "); Serial.println(content);
 }
 
 // the loop routine runs over and over again forever:
@@ -561,14 +578,14 @@ void loop()
                             hydrogeolog1.parse_argument("digital_input", INVALID, str_ay_size, str_ay),
                             power_sw_pin, str_ay);
 
-        fredlund_measurement(str_ay_size, debug_sw, 
-                             hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay), 
+        fredlund_measurement(str_ay_size, debug_sw,
+                             hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("htpw", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("itv", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("otno", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);
-        
+
         multiplexer_search(hydrogeolog1.parse_argument("9548_search", INVALID, str_ay_size, str_ay));
 
         multiplexer_read(str_ay_size, debug_sw,
@@ -576,7 +593,7 @@ void loop()
                          hydrogeolog1.parse_argument("9548", INVALID, str_ay_size, str_ay),
                          power_sw_pin, str_ay);
 
-        rc_swtich(str_ay_size, debug_sw, 
+        rc_swtich(str_ay_size, debug_sw,
                   hydrogeolog1.parse_argument_string("code", "", str_ay_size, str_ay),
                   hydrogeolog1.parse_argument("rc_sw", INVALID, str_ay_size, str_ay),
                   str_ay);
@@ -586,29 +603,33 @@ void loop()
                           hydrogeolog1.parse_argument("clk", INVALID, str_ay_size, str_ay),
                           power_sw_pin, str_ay);
 
-
         //TO-DO SDI 12 implementation need to be changed for v2 board
         //also try to remove the dead lock of while (true) if no sensor is found
         //X.lei J.tran
-        /*
-         int sdi12_data = hydrogeolog1.parse_argument("12",-1,str_ay_size,str_ay);
-         if  (sdi12_data!=-1) {
-            int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
-            if (debug_sw==1)
-            {            
-                hydrogeolog1.print_string_delimiter_value("12"  ,String(sdi12_data)  );
-                hydrogeolog1.print_string_delimiter_value("power",String(power_sw_pin)  );              
+
+        int sdi12_data = hydrogeolog1.parse_argument("SD12", -1, str_ay_size, str_ay);
+        if (sdi12_data != -1)
+        {
+            int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 2000, str_ay_size, str_ay);
+            if (debug_sw == 1)
+            {
+                hydrogeolog1.print_string_delimiter_value("SD12", String(sdi12_data));
+                print_debug(debug_sw, power_sw_pin, DEFAULT_POINTS, DEFAULT_DUMMIES, measure_time_interval_ms);
             }
-            if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
+            if (power_sw_pin != -1)
+                digitalWrite(power_sw_pin, HIGH);
             delay(1000);
-            Serial.println("HERE");   
-            sdi12_init(sdi12_data);
+            if (sdi12_init(sdi12_data) == false)
+            {
+                Serial.println("No SDI12 found!");
+                digitalWrite(power_sw_pin, LOW);
+                return;
+            }
             delay(2000);
             sdi12_loop(sdi12_data);
-            if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
+            digitalWrite(power_sw_pin, LOW);
             Serial.println();
-         }  //sht75
-        */
+        }
     }
 }
 /*===========================================================================*/

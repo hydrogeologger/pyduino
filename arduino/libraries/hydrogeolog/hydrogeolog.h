@@ -35,6 +35,7 @@ class hydrogeolog
     void print_str_ay(int number_opts, String str_ay2[20]);
     void analog_excite_read(int power_sw_idx, int analog_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval);
     void analog_read(int analog_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval);
+    void pwm_switch_power(int power_sw_idx, int status);
     void switch_power(int power_sw_idx, int status);
     void dht22_excite_read(int power_sw_idx, int digi_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval);
     void dht22_read(int digi_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval);

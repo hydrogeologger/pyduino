@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 extern volatile unsigned long timer0_millis;
-static unsigned char isComm;
+static volatile unsigned char isComm;
 #define TIMEOUT (unsigned long)(5ul * 60ul * 60ul * 1000ul)
 #define DOWN_TIME 3 * 1000 //seconds
 

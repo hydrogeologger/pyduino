@@ -125,17 +125,17 @@ void hydrogeolog::analog_read(int analog_idx, int number_of_dummies, int number_
 
 } // analog_read
 
+
+void hydrogeolog::pwm_switch_power(int power_sw_idx, int status)
+{
+    analogWrite(power_sw_idx, status);
+    Serial.print("PWM value ");
+    Serial.print(status);
+}
+
 //pwm function
 void hydrogeolog::switch_power(int power_sw_idx, int status)
 {
-    if (power_sw_idx == 10 || power_sw_idx == 11 || power_sw_idx == 12 || power_sw_idx == 13 ||
-        power_sw_idx == 9 || power_sw_idx == 8)
-    {
-        analogWrite(power_sw_idx, status);
-        Serial.print("PWM value ");
-        Serial.print(status);
-        return;
-    }
     if (status == 1)
     {
         digitalWrite(power_sw_idx, HIGH);
