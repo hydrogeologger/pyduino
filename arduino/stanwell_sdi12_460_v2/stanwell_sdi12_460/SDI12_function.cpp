@@ -48,7 +48,7 @@ void sdi12_loop(int sdi12_data)
     // scan address space 0-9
     for (char i = '0'; i <= '9'; i++)
     {
-        if (isTaken(i))
+        if (checkActive(i, sdi12_data))
         {
             printInfo(i, sdi12_data);
             takeMeasurement_sdi12(i, sdi12_data);
@@ -60,50 +60,73 @@ void takeMeasurement_sdi12(char i, int sdi12_data)
 {
     SDI12 mySDI12(sdi12_data);
     String command = "";
-    command += i;
-    command += "M!"; // SDI-12 measurement command format  [address]['M'][!]
-    mySDI12.sendCommand(command);
-    while (mySDI12.available() < 5)
-        ;
-    // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
-    delay(100);
-
-    mySDI12.read(); //consume address
-
-    // find out how long we have to wait (in seconds).
-    unsigned long wait = 0;
-    wait += 100 * mySDI12.read() - '0';
-    wait += 10 * mySDI12.read() - '0';
-    wait += 1 * mySDI12.read() - '0';
-
-    mySDI12.read(); // ignore # measurements, for this simple examlpe
-    mySDI12.read(); // ignore carriage return
-    mySDI12.read(); // ignore line feed
-    setMillis(0);
-    unsigned long timerStart = millis();
-    while ((millis() - timerStart) > (1000 * wait))
+  command += i;
+  command += "M!"; // SDI-12 measurement command format  [address]['M'][!]
+  mySDI12.sendCommand(command);
+  // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
+  
+    String sdiResponse = "";
+  delay(30);
+  while (mySDI12.available())  // build response string
+  {
+    char c = mySDI12.read();
+    if ((c != '\n') && (c != '\r'))
     {
-        if (mySDI12.available())
-            break; //sensor can interrupt us to let us know it is done early
+      sdiResponse += c;
+      delay(5);
     }
+  }
+  mySDI12.clearBuffer();
 
-    // in this example we will only take the 'DO' measurement
-    mySDI12.flush();
-    command = "";
-    command += i;
-    command += "D0!"; // SDI-12 command to get data [address][D][dataOption][!]
-    mySDI12.sendCommand(command);
-    while (mySDI12.available() < 1)
-        ;       // wait for acknowlegement
-    delay(300); // let the data transfer
-    printBufferToScreen(sdi12_data);
-    mySDI12.flush();
+  // find out how long we have to wait (in seconds).
+  unsigned int wait = 0;
+  wait = sdiResponse.substring(1,4).toInt();
+  
+  // Set up the number of results to expect
+
+  int numMeasurements =  sdiResponse.substring(4,5).toInt();
+  Serial.print("wait,"); Serial.print(wait); Serial.print(",");
+  Serial.print("points,"); Serial.print(numMeasurements); Serial.print(",");
+  
+  unsigned long timerStart = millis();
+  while((millis() - timerStart) < (1000 * wait)){
+    if(mySDI12.available())  // sensor can interrupt us to let us know it is done early
+    {
+      mySDI12.clearBuffer();
+      break;
+    }
+  }
+  // Wait for anything else and clear it out
+  delay(30);
+  mySDI12.clearBuffer();
+
+  // in this example we will only take the 'DO' measurement
+  command = "";
+  command += i;
+  command += "D0!"; // SDI-12 command to get data [address][D][dataOption][!]
+  mySDI12.sendCommand(command);
+  while(!mySDI12.available()>1); // wait for acknowlegement
+  delay(300); // let the data transfer
+  printBufferToScreen(sdi12_data);
+  mySDI12.flush();
+  mySDI12.clearBuffer();
+
+  command = "";
+  command += i;
+  command += "D1!"; // SDI-12 command to get data [address][D][dataOption][!]
+  mySDI12.sendCommand(command);
+  while(!mySDI12.available()>1); // wait for acknowlegement
+  delay(300); // let the data transfer
+  printBufferToScreen(sdi12_data);
+  mySDI12.flush();
+  mySDI12.clearBuffer();
 }
 
 void printBufferToScreen(int sdi12_data)
 {
     SDI12 mySDI12(sdi12_data);
     String buffer = "";
+    mySDI12.read(); // consume address
     mySDI12.read(); // consume address
     while (mySDI12.available())
     {
@@ -194,23 +217,20 @@ boolean isTaken(byte i)
 void printInfo(char i, int sdi12_data)
 {
     SDI12 mySDI12(sdi12_data);
-    int j;
+    //int j;
     String command = "";
     command += (char)i;
     command += "I!";
-    for (j = 0; j < 1; j++)
+    mySDI12.sendCommand(command);
+    delay(30);
+    if (mySDI12.available() > 1)
     {
-        mySDI12.sendCommand(command);
-        delay(30);
-        if (mySDI12.available() > 1)
-        {
-            Serial.write("SuTp");
-            Serial.print(DELIMITER);
-            break;
-        }
-        if (mySDI12.available())
-            mySDI12.read();
+        Serial.println();
+        Serial.print("Addr,"); Serial.print(i);
+        Serial.print(DELIMITER);
     }
+    if (mySDI12.available())
+        mySDI12.read();
     while (mySDI12.available())
     {
         char c = mySDI12.read();

@@ -57,7 +57,7 @@ while True:
         break
     except Exception, e:
         time.sleep(60)
-
+	break
 
 if save_to_file: fid= open(file_name,'a',0)
 
