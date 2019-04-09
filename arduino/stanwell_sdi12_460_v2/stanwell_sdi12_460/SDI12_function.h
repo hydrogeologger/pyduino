@@ -2,35 +2,23 @@
 #define _SDI12_FUNCTION_H_
 
 #include "Arduino.h"
+#include <SDI12.h>
 
-/*
-keeps track of active addresses
-each bit represents an address:
-1 is active (taken), 0 is inactive (available)
-setTaken('A') will set the proper bit for sensor 'A'
-set
-*/
+#define MAX_NUM_ADDR 62
+static volatile uint64_t addressSpace = (uint64_t)0x00;
 
-static volatile byte addressRegister[8] = {
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000,
-    0B00000000};
+static SDI12 mySDI12(0);
+static boolean isInit = false;
 
+boolean sdi12_check_pin(int sdi12_data);
 boolean sdi12_init(int sdi12_data);
-void sdi12_loop(int sdi12_data);
-void takeMeasurement_sdi12(char i, int sdi12_data);
-void printBufferToScreen(int sdi12_data);
-boolean checkActive(char i, int sdi12_data);
-boolean setTaken(byte i);
-boolean setVacant(byte i);
-boolean isTaken(byte i);
-void printInfo(char i, int sdi12_data);
-byte charToDec(char i);
-char decToChar(byte i);
-
+void sdi12_loop();
+void takeMeasurement_sdi12(char i);
+void printBufferToScreen();
+boolean checkActive(char i);
+uint8_t convert_char_to_bit_number(char c);
+char convert_bit_number_to_char(uint8_t bit);
+boolean setTaken(char c);
+boolean isTaken(char c);
+void printInfo(char i);
 #endif

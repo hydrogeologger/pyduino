@@ -607,26 +607,25 @@ void loop()
         //also try to remove the dead lock of while (true) if no sensor is found
         //X.lei J.tran
 
-        int sdi12_data = hydrogeolog1.parse_argument("SD12", -1, str_ay_size, str_ay);
+        int sdi12_data = hydrogeolog1.parse_argument("SDI-12", -1, str_ay_size, str_ay);
         if (sdi12_data != -1)
         {
-            int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 2000, str_ay_size, str_ay);
+            String cmd = hydrogeolog1.parse_argument_string("cmd", "", str_ay_size, str_ay);
             if (debug_sw == 1)
             {
-                hydrogeolog1.print_string_delimiter_value("SD12", String(sdi12_data));
-                print_debug(debug_sw, power_sw_pin, DEFAULT_POINTS, DEFAULT_DUMMIES, measure_time_interval_ms);
+                hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_data));
+                hydrogeolog1.print_string_delimiter_value("cmd", cmd);
+                hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
             }
             if (power_sw_pin != -1)
                 digitalWrite(power_sw_pin, HIGH);
-            delay(1000);
             if (sdi12_init(sdi12_data) == false)
             {
                 Serial.println("No SDI12 found!");
                 digitalWrite(power_sw_pin, LOW);
                 return;
             }
-            delay(2000);
-            sdi12_loop(sdi12_data);
+            sdi12_loop();
             digitalWrite(power_sw_pin, LOW);
             Serial.println();
         }
