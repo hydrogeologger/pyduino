@@ -610,22 +610,37 @@ void loop()
         int sdi12_data = hydrogeolog1.parse_argument("SDI-12", -1, str_ay_size, str_ay);
         if (sdi12_data != -1)
         {
-            String cmd = hydrogeolog1.parse_argument_string("cmd", "", str_ay_size, str_ay);
+            String default_cmd = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
+            String custom_cmd = hydrogeolog1.parse_argument_string("custom_cmd", "", str_ay_size, str_ay);
+            String new_addr = "";
+
+            if (default_cmd == "change")
+                new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
             if (debug_sw == 1)
             {
                 hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_data));
-                hydrogeolog1.print_string_delimiter_value("cmd", cmd);
+                if (default_cmd != "")
+                    hydrogeolog1.print_string_delimiter_value("default_cmd", default_cmd);
+                if (default_cmd == "change")
+                    Serial.print(new_addr); Serial.print(DELIMITER);
+                if (custom_cmd != "")
+                    hydrogeolog1.print_string_delimiter_value("custom_cmd", custom_cmd);
                 hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
             }
             if (power_sw_pin != -1)
                 digitalWrite(power_sw_pin, HIGH);
-            if (sdi12_init(sdi12_data) == false)
+            int num_sensors = 0;
+            if (sdi12_init(sdi12_data, &num_sensors) == false)
             {
                 Serial.println("No SDI12 found!");
                 digitalWrite(power_sw_pin, LOW);
                 return;
             }
-            sdi12_loop();
+            if (default_cmd != "" && custom_cmd == "")
+                process_command(default_cmd, num_sensors, new_addr, false);
+            if (custom_cmd != "" && default_cmd != "") {
+                process_command(custom_cmd, num_sensors, new_addr, true);
+            }
             digitalWrite(power_sw_pin, LOW);
             Serial.println();
         }

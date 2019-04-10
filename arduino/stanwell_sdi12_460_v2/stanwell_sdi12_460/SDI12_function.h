@@ -5,13 +5,16 @@
 #include <SDI12.h>
 
 #define MAX_NUM_ADDR 62
-static volatile uint64_t addressSpace = (uint64_t)0x00;
+
+static volatile uint32_t addressSpace[2] = {(uint32_t)0x00, (uint32_t)0x00};
 
 static SDI12 mySDI12(0);
-static boolean isInit = false;
+static volatile boolean isInit = false;
 
+
+void process_command(String cmd, int sensors, String new_addr, boolean isCustom);
 boolean sdi12_check_pin(int sdi12_data);
-boolean sdi12_init(int sdi12_data);
+boolean sdi12_init(int sdi12_data, int* sensors);
 void sdi12_loop();
 void takeMeasurement_sdi12(char i);
 void printBufferToScreen();
@@ -21,4 +24,6 @@ char convert_bit_number_to_char(uint8_t bit);
 boolean setTaken(char c);
 boolean isTaken(char c);
 void printInfo(char i);
+boolean sdi12_change(char new_addr);
+void sdi12_send_command(String cmd, boolean read);
 #endif

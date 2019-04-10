@@ -2,6 +2,53 @@
 #include "SDI12_function.h"
 #include "timing.h"
 
+
+boolean check_new_addr(String new_addr) {
+    if (new_addr.length() != 1)
+        return false;
+    char c = new_addr.charAt(0);
+    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+        return true;
+    return false;
+}
+
+void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
+{
+    if (isComm)
+    {
+        sdi12_send_command(cmd, true);
+        return;
+    }
+    Serial.print("no_sensors,");
+    Serial.print(sensors);
+    Serial.print(DELIMITER);
+    if (cmd == "read")
+    {
+        sdi12_loop();
+    }
+    else if (cmd == "change")
+    {
+        if (sensors != 1 || sensors < 1)
+        {
+            Serial.println("Expect only ONE sensor connected! => ABORT!");
+        }
+        else
+        {
+            if (check_new_addr(new_addr) == false)
+            {
+                Serial.println("Invalid new addr => ABORT!");
+            } else {
+                sdi12_change(new_addr.charAt(0)); 
+            }
+        }
+    }
+    else
+    {
+        Serial.println("\nINVALID CMD!");
+    }
+    mySDI12.end();
+}
+
 boolean sdi12_check_pin(int sdi12_data)
 {
     for (int i = 0; i < SDI12_PIN_COUNT; i++)
@@ -14,20 +61,7 @@ boolean sdi12_check_pin(int sdi12_data)
     return false;
 }
 
-/*
-initiate sdi12 on a pin
-*/
-boolean sdi12_init(int sdi12_data)
-{
-    if (sdi12_check_pin(sdi12_data) == false)
-        return false;
-    mySDI12 = SDI12(sdi12_data);
-    mySDI12.begin();
-    if (isInit)
-    {
-        return true;
-    }
-    delay(500); // allow things to settle
+boolean sdi12_scan(int* sensors) {
     boolean foundSensor = false;
     int count = 0;
     //scan the pin for all avaliable sensors
@@ -39,10 +73,76 @@ boolean sdi12_init(int sdi12_data)
             setTaken(c);
             foundSensor = true;
             count++;
+        } else {
+            
         }
     }
     isInit = true;
+    *sensors = count;
     return foundSensor;
+}
+
+/*
+initiate sdi12 on a pin
+*/
+boolean sdi12_init(int sdi12_data, int *sensors)
+{
+    if (sdi12_check_pin(sdi12_data) == false)
+        return false;
+    mySDI12 = SDI12(sdi12_data);
+    mySDI12.begin();
+    delay(500); // allow things to settle
+    return sdi12_scan(sensors);
+}
+
+boolean sdi12_change(char new_addr)
+{
+    // scan address space 0-9
+    for (uint8_t i = 0; i < MAX_NUM_ADDR; i++)
+    {
+        {
+            char c = convert_bit_number_to_char(i);
+            if (isTaken(c))
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    if (checkActive(c))
+                    {
+                        String cmd = "" + String(c) + "A" + String(new_addr) + "!";
+                        printInfo(c);
+                        Serial.print(DELIMITER);
+                        sdi12_send_command(cmd, false);
+                        int sensors = 0;
+                        addressSpace[LOW] = (uint32_t)0x00;
+                        addressSpace[HIGH] = (uint32_t)0x00;
+                        sdi12_scan(&sensors);
+                        printInfo(new_addr);
+                        Serial.print(DELIMITER);
+                        return true;
+                    }
+                    delay(100);
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void sdi12_send_command(String cmd, boolean read) {
+    mySDI12.sendCommand(cmd);
+    delay(1000);
+    if (mySDI12.available()) {
+        while (mySDI12.available())
+        {
+            char c = mySDI12.read();
+            if ((c != '\n') && (c != '\r') && read)
+            {
+                Serial.write(c); //print sensor info and type
+            }
+            delay(5);
+        }
+    }
+    Serial.println();
 }
 
 /*
@@ -62,6 +162,7 @@ void sdi12_loop()
                     if (checkActive(c))
                     {
                         printInfo(c);
+                        Serial.print(DELIMITER);
                         takeMeasurement_sdi12(c);
                         break;
                     }
@@ -70,7 +171,6 @@ void sdi12_loop()
             }
         }
     }
-    mySDI12.end();
 }
 
 void takeMeasurement_sdi12(char i)
@@ -101,12 +201,10 @@ void takeMeasurement_sdi12(char i)
     // Set up the number of results to expect
 
     int numMeasurements = sdiResponse.substring(4, 5).toInt();
-    Serial.print("wait,");
-    Serial.print(wait);
-    Serial.print(",");
+    Serial.print(DELIMITER);
     Serial.print("points,");
     Serial.print(numMeasurements);
-    Serial.print(",");
+    Serial.print(DELIMITER);
 
     unsigned long timerStart = millis();
     while ((millis() - timerStart) < (1000 * wait))
@@ -223,7 +321,7 @@ boolean setTaken(char c)
     //first convert the char c to bit number
     uint8_t bit = convert_char_to_bit_number(c);
     //check if this bit is set in the addressSpace
-    uint8_t bitInSpace = (uint8_t)((addressSpace & (uint64_t)(1 << bit)) >> bit);
+    uint8_t bitInSpace = addressSpace[bit < 32 ? LOW : HIGH] & ((uint32_t)1 << (bit < 32 ? bit : bit - 32) ) >> (bit < 32 ? bit : bit - 32);
     if (bitInSpace == 1)
     {
         return false; //already set
@@ -231,7 +329,7 @@ boolean setTaken(char c)
     else
     {
         //set the bit in the addressSpace
-        addressSpace |= (uint64_t)(1 << bit);
+        addressSpace[bit < 32 ? LOW : HIGH] |= ((uint32_t)1 << (uint32_t)(bit < 32 ? bit : bit - 32));
         return true;
     }
 }
@@ -240,7 +338,7 @@ boolean isTaken(char c)
 {
     uint8_t bit = convert_char_to_bit_number(c);
     //check if this bit is set in the addressSpace
-    uint8_t bitInSpace = (uint8_t)((addressSpace & (uint64_t)(1 << bit)) >> bit);
+    uint8_t bitInSpace = addressSpace[bit < 32 ? LOW : HIGH] >> (bit < 32 ? bit : bit - 32) & 0x01;
     return (bitInSpace == 1);
 }
 
@@ -260,18 +358,21 @@ void printInfo(char i)
         Serial.print(i);
         Serial.print(DELIMITER);
     }
+    else
+    {
+        printInfo(i);
+    }
     if (mySDI12.available())
         mySDI12.read();
     while (mySDI12.available())
     {
         char c = mySDI12.read();
-        if ((c != '\n') && (c != '\r'))
+        if ((c != '\n') && (c != '\r') && (c != ' '))
         {
             Serial.write(c); //print sensor info and type
         }
         delay(5);
     }
-    Serial.print(DELIMITER);
 }
 
 //SDI-12,50,power,49,debug,1
