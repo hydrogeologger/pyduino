@@ -607,27 +607,44 @@ void loop()
         //also try to remove the dead lock of while (true) if no sensor is found
         //X.lei J.tran
 
-        int sdi12_data = hydrogeolog1.parse_argument("SD12", -1, str_ay_size, str_ay);
+        int sdi12_data = hydrogeolog1.parse_argument("SDI-12", -1, str_ay_size, str_ay);
         if (sdi12_data != -1)
         {
-            int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 2000, str_ay_size, str_ay);
+            String default_cmd = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
+            String custom_cmd = hydrogeolog1.parse_argument_string("custom_cmd", "", str_ay_size, str_ay);
+            String new_addr = "";
+            int power_off = hydrogeolog1.parse_argument("power_off", 1, str_ay_size, str_ay);
+            if (default_cmd == "change")
+                new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
             if (debug_sw == 1)
             {
-                hydrogeolog1.print_string_delimiter_value("SD12", String(sdi12_data));
-                print_debug(debug_sw, power_sw_pin, DEFAULT_POINTS, DEFAULT_DUMMIES, measure_time_interval_ms);
+                hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_data));
+                if (default_cmd != "")
+                    hydrogeolog1.print_string_delimiter_value("default_cmd", default_cmd);
+                if (default_cmd == "change")
+                    Serial.print(new_addr); Serial.print(DELIMITER);
+                if (custom_cmd != "")
+                    hydrogeolog1.print_string_delimiter_value("custom_cmd", custom_cmd);
+                hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+                hydrogeolog1.print_string_delimiter_value("power_off", String(power_off));
             }
             if (power_sw_pin != -1)
                 digitalWrite(power_sw_pin, HIGH);
-            delay(1000);
-            if (sdi12_init(sdi12_data) == false)
+            int num_sensors = 0;
+            if (sdi12_init(sdi12_data, &num_sensors) == false)
             {
                 Serial.println("No SDI12 found!");
                 digitalWrite(power_sw_pin, LOW);
                 return;
             }
-            delay(2000);
-            sdi12_loop(sdi12_data);
-            digitalWrite(power_sw_pin, LOW);
+            if (default_cmd != "" && custom_cmd == "")
+                process_command(default_cmd, num_sensors, new_addr, false);
+            if (custom_cmd != "" && default_cmd == "") {
+                process_command(custom_cmd, num_sensors, new_addr, true);
+            }
+            
+            if (power_off)
+                digitalWrite(power_sw_pin, LOW);
             Serial.println();
         }
     }
