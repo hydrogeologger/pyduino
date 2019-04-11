@@ -14,7 +14,7 @@ boolean check_new_addr(String new_addr) {
 
 void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
 {
-    if (isComm)
+    if (isCustom)
     {
         sdi12_send_command(cmd, true);
         return;
@@ -130,8 +130,10 @@ boolean sdi12_change(char new_addr)
 
 void sdi12_send_command(String cmd, boolean read) {
     mySDI12.sendCommand(cmd);
-    delay(1000);
+    delay(30);
     if (mySDI12.available()) {
+        if (read)
+            Serial.print("response,");
         while (mySDI12.available())
         {
             char c = mySDI12.read();
@@ -141,8 +143,11 @@ void sdi12_send_command(String cmd, boolean read) {
             }
             delay(5);
         }
+        Serial.print(DELIMITER);
+    } else {
+        Serial.print("no_response,");
     }
-    Serial.println();
+    //Serial.println();
 }
 
 /*

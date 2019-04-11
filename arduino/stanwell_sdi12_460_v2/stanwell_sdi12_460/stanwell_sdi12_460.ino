@@ -613,7 +613,7 @@ void loop()
             String default_cmd = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
             String custom_cmd = hydrogeolog1.parse_argument_string("custom_cmd", "", str_ay_size, str_ay);
             String new_addr = "";
-
+            int power_off = hydrogeolog1.parse_argument("power_off", 1, str_ay_size, str_ay);
             if (default_cmd == "change")
                 new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
             if (debug_sw == 1)
@@ -626,6 +626,7 @@ void loop()
                 if (custom_cmd != "")
                     hydrogeolog1.print_string_delimiter_value("custom_cmd", custom_cmd);
                 hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+                hydrogeolog1.print_string_delimiter_value("power_off", String(power_off));
             }
             if (power_sw_pin != -1)
                 digitalWrite(power_sw_pin, HIGH);
@@ -638,10 +639,12 @@ void loop()
             }
             if (default_cmd != "" && custom_cmd == "")
                 process_command(default_cmd, num_sensors, new_addr, false);
-            if (custom_cmd != "" && default_cmd != "") {
+            if (custom_cmd != "" && default_cmd == "") {
                 process_command(custom_cmd, num_sensors, new_addr, true);
             }
-            digitalWrite(power_sw_pin, LOW);
+            
+            if (power_off)
+                digitalWrite(power_sw_pin, LOW);
             Serial.println();
         }
     }
