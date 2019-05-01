@@ -46,6 +46,10 @@ void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
     {
         Serial.println("\nINVALID CMD!");
     }
+    addressSpace[LOW] = (uint32_t)0x00;
+    addressSpace[HIGH] = (uint32_t)0x00;
+    mySDI12.flush();
+    mySDI12.clearBuffer();
     mySDI12.end();
 }
 
@@ -206,7 +210,7 @@ void takeMeasurement_sdi12(char i)
     // Set up the number of results to expect
 
     int numMeasurements = sdiResponse.substring(4, 5).toInt();
-    Serial.print(DELIMITER);
+    //Serial.print(DELIMITER);
     Serial.print("points,");
     Serial.print(numMeasurements);
     Serial.print(DELIMITER);
@@ -235,7 +239,9 @@ void takeMeasurement_sdi12(char i)
     printBufferToScreen();
     mySDI12.flush();
     mySDI12.clearBuffer();
+    //Serial.print(DELIMITER);
 }
+
 
 void printBufferToScreen()
 {
@@ -257,7 +263,7 @@ void printBufferToScreen()
         }
         delay(100);
     }
-    buffer.replace("\n", ""); // to remove the cartriage from the buffer
+    buffer.replace("\n", ","); // to remove the cartriage from the buffer
     buffer.replace("\r", ""); // added to make sure all cartriage is removed
     Serial.print(buffer);
 }
@@ -325,18 +331,9 @@ boolean setTaken(char c)
 {
     //first convert the char c to bit number
     uint8_t bit = convert_char_to_bit_number(c);
-    //check if this bit is set in the addressSpace
-    uint8_t bitInSpace = addressSpace[bit < 32 ? LOW : HIGH] & ((uint32_t)1 << (bit < 32 ? bit : bit - 32) ) >> (bit < 32 ? bit : bit - 32);
-    if (bitInSpace == 1)
-    {
-        return false; //already set
-    }
-    else
-    {
-        //set the bit in the addressSpace
-        addressSpace[bit < 32 ? LOW : HIGH] |= ((uint32_t)1 << (uint32_t)(bit < 32 ? bit : bit - 32));
-        return true;
-    }
+    //set the bit in the addressSpace
+    addressSpace[bit < 32 ? LOW : HIGH] |= ((uint32_t)1 << (uint32_t)(bit < 32 ? bit : bit - 32));
+    return true;
 }
 
 boolean isTaken(char c)

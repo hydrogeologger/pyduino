@@ -621,8 +621,9 @@ void loop()
                 hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_data));
                 if (default_cmd != "")
                     hydrogeolog1.print_string_delimiter_value("default_cmd", default_cmd);
-                if (default_cmd == "change")
+                if (default_cmd == "change") {
                     Serial.print(new_addr); Serial.print(DELIMITER);
+                }
                 if (custom_cmd != "")
                     hydrogeolog1.print_string_delimiter_value("custom_cmd", custom_cmd);
                 hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
@@ -637,8 +638,10 @@ void loop()
                 digitalWrite(power_sw_pin, LOW);
                 return;
             }
-            if (default_cmd != "" && custom_cmd == "")
+            if (default_cmd != "" && custom_cmd == "") {
+                //Serial.println("HERE");
                 process_command(default_cmd, num_sensors, new_addr, false);
+            }
             if (custom_cmd != "" && default_cmd == "") {
                 process_command(custom_cmd, num_sensors, new_addr, true);
             }
