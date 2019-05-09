@@ -42,7 +42,7 @@ void setup()
 void print_debug(int debug_sw, int pw_pin, int no_measures, int no_dum, int interval)
 {
     if (debug_sw)
-    {
+    { 
         hydrogeolog1.print_string_delimiter_value("power", String(pw_pin));
         hydrogeolog1.print_string_delimiter_value("points", String(no_measures));
         hydrogeolog1.print_string_delimiter_value("dummies", String(no_dum));
