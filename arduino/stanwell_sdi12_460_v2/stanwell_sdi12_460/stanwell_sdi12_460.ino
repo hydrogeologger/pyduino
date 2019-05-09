@@ -517,6 +517,10 @@ void multiplexer_search(int search_9548)
 }
 
 void check_serial(String content)
+    /*
+     if input abc in serial, arduino will return abc
+    */
+  
 {
     if (content == "abc")
     {

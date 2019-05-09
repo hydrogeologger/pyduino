@@ -6,7 +6,7 @@ set the new value for millis()
 */
 void setMillis(unsigned long new_millis)
 {
-    uint8_t oldSREG = SREG;
+    uint8_t oldSREG = SREG;   // what are these?
     cli();
     timer0_millis = new_millis;
     SREG = oldSREG;
@@ -26,10 +26,11 @@ void timeout_reset_pi() {
 }
 
 void command_reset_pi(String content) {
-    if (content == "RESET\n")
+    //if (content == "RESET\n")
+    if (content == "RESET") 
     {
         Serial.println("Reboot in 20 s....");
-        delay(20000);
+        delay(30000);  // usually it is safe to have 30 sec to allow rpi reboot
         setMillis(0);
         isComm = FALSE;
         digitalWrite(PI_SW, HIGH);
