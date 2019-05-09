@@ -300,7 +300,7 @@ void ds18b20_measurement(int str_ay_size, String thermal_suction_ds18b20, int th
         heat_suction_sensor_addr[1] = CardNumberByte[0];
         heat_suction_sensor_addr[2] = CardNumberByte[1];
         heat_suction_sensor_addr[3] = CardNumberByte[2];
-        heat_suction_sensor_addr[4] = 0x08;
+        heat_suction_sensor_addr[4] = 0x0A;
         heat_suction_sensor_addr[5] = 0x00;
         heat_suction_sensor_addr[6] = 0x00;
         heat_suction_sensor_addr[7] = CardNumberByte[3];
@@ -355,7 +355,8 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
         heat_suction_sensor_addr[1] = CardNumberByte[0];
         heat_suction_sensor_addr[2] = CardNumberByte[1];
         heat_suction_sensor_addr[3] = CardNumberByte[2];
-        heat_suction_sensor_addr[4] = fredlund_suction_ds18b20 == "fred" ? 0x08 : 0x09;
+        //heat_suction_sensor_addr[4] = fredlund_suction_ds18b20 == "fred" ? 0x08 : 0x09;
+        heat_suction_sensor_addr[4] = 0x0A;
         heat_suction_sensor_addr[5] = 0x00;
         heat_suction_sensor_addr[6] = 0x00;
         heat_suction_sensor_addr[7] = CardNumberByte[3];
