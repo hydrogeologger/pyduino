@@ -535,6 +535,7 @@ void loop()
     timeout_reset_pi();
     String content = get_cmd();
     command_reset_pi(content);
+    command_check_millis(content);
     if (content == "")
         timing_no_comm();
     else
@@ -654,9 +655,9 @@ void loop()
             if (power_off)
                 digitalWrite(power_sw_pin, LOW);
             Serial.println();
-        }
-    }
-}
+        }//sdi12
+    }//communication
+} //loop
 /*===========================================================================*/
 
 /*================================END OF FILE================================*/

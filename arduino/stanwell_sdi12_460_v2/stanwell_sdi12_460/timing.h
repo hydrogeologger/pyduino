@@ -11,6 +11,7 @@ static volatile unsigned char isComm;
 void setMillis(unsigned long new_millis);
 void timeout_reset_pi();
 void command_reset_pi(String content);
+void command_check_millis(String content);
 void timing_no_comm();
 void reset_timer();
 #endif
