@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# connect.sh
 
 # Set up device
 
