@@ -42,7 +42,7 @@ void setup()
 void print_debug(int debug_sw, int pw_pin, int no_measures, int no_dum, int interval)
 {
     if (debug_sw)
-    {
+    { 
         hydrogeolog1.print_string_delimiter_value("power", String(pw_pin));
         hydrogeolog1.print_string_delimiter_value("points", String(no_measures));
         hydrogeolog1.print_string_delimiter_value("dummies", String(no_dum));
@@ -517,6 +517,10 @@ void multiplexer_search(int search_9548)
 }
 
 void check_serial(String content)
+    /*
+     if input abc in serial, arduino will return abc
+    */
+  
 {
     if (content == "abc")
     {
@@ -531,6 +535,7 @@ void loop()
     timeout_reset_pi();
     String content = get_cmd();
     command_reset_pi(content);
+    command_check_millis(content);
     if (content == "")
         timing_no_comm();
     else
@@ -650,9 +655,9 @@ void loop()
             if (power_off)
                 digitalWrite(power_sw_pin, LOW);
             Serial.println();
-        }
-    }
-}
+        }//sdi12
+    }//communication
+} //loop
 /*===========================================================================*/
 
 /*================================END OF FILE================================*/
