@@ -26,7 +26,7 @@ void timeout_reset_pi() {
 }
 
 void command_reset_pi(String content) {
-    if (content == "RESET\n")
+    if (content == "RESET")
     {
         Serial.println("Reboot in 20 s....");
         delay(20000);
