@@ -29,7 +29,7 @@ trap "redirect;" DEBUG
 PROMPT_COMMAND='undirect;'
 
 echo "Starting serial communication with arduino\n"
-
+stty raw -echo < /dev/ttyS0
 stty -F /dev/ttyS0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts
 
 # Check if error ocurred
@@ -43,11 +43,7 @@ echo "Session begins, type 'exit' to stop"
 
 # Let cat read the device $1 in the background
 
-cat -vte </dev/ttyS0&
-
 # Capture PID of background process so it is possible to terminate it when done
-bgPid="$!"
-kill "$bgPid"
 
 cat </dev/ttyS0&
 bgPid="$!"
