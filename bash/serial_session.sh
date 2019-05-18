@@ -43,11 +43,14 @@ echo "Session begins, type 'exit' to stop"
 
 # Let cat read the device $1 in the background
 
-cat </dev/ttyS0&
+cat -vte </dev/ttyS0&
 
 # Capture PID of background process so it is possible to terminate it when done
 bgPid="$!"
+kill "$bgPid"
 
+cat </dev/ttyS0&
+bgPid="$!"
 
 printf "\n"
 # Read commands from user, send them to device $1
