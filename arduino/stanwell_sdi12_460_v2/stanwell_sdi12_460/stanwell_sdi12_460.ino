@@ -393,20 +393,26 @@ String get_cmd()
     return content;
 }
 
-void read_pressure_sensor(String type, int number_of_dummies, int number_of_measurements, int measure_time_interval_ms,
+void read_i2c_sensor(String type, int number_of_dummies, int number_of_measurements, int measure_time_interval_ms,
                           int debug_sw, int tca9548_channel)
 {
     if (type == "5803")
     {
         hydrogeolog1.ms5803(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
     }
-    if (type == "5803l")
+    else if (type == "5803l")
     {
         hydrogeolog1.ms5803l(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
     }
-    if (type == "sht31")
+    else if (type == "sht31")
     {
         hydrogeolog1.sht31(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+    }
+    else if (type == "si1145")
+    {
+        hydrogeolog1.si1145(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+    } else {
+        Serial.print("INVALID_TYPE");
     }
 }
 
@@ -432,15 +438,15 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
             print_debug(debug_sw, power_sw_pin, number_of_measurements, number_of_dummies, measure_time_interval_ms);
             hydrogeolog1.print_string_delimiter_value("type", i2c_type);
         }
-        if (power_sw_pin != INVALID)
+        if (power_sw_pin != INVALID) {
             digitalWrite(power_sw_pin, HIGH);
-        Wire.begin();
-        hydrogeolog1.tcaselect(tca9548_channel);
-        delay(500);
-        read_pressure_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
-        delay(500);
-        if (power_sw_pin != INVALID)
+            Wire.begin();
+            hydrogeolog1.tcaselect(tca9548_channel);
+            delay(500);
+            read_i2c_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+            delay(500);
             digitalWrite(power_sw_pin, LOW);
+        }
         Serial.println();
         digitalWrite(MULTIPLEXER_SW, HIGH);
     }
