@@ -21,15 +21,38 @@ def on_connect(client, userdata, rc, *extra_params):
 def on_message(client, userdata, msg):
     print('Topic: ' + msg.topic + '\nMessage: ' + str(msg.payload))
     data = json.loads(msg.payload)
-    if data['method'] is 'setValue':
+    if data['method'] == 'getData':
+	ard.write("dht22,54,power,2,points,2,dummies,1,interval_mm,2000,debug,1")
+	ard.flushInput()
+	msg=ard.readline()
+	print(msg)
+        current_read=msg.split(',')[0:-1]
+	rh = float(current_read[-1])
+	t = float(current_read[-2])
+	d = {'dht22_rh' : rh, 'dht22_t' : t}
+	client.publish('v1/devices/me/telemetry', json.dumps(d), 1)    
+    if data['method'] == 'getTermInfo':
+	print("term requested")
+	d = {
+            'ok': True,
+            'platform': os.platform(),
+            'type': os.type(),
+            'release': os.release()
+        }
+	print(d)
+	client.publish('v1/devices/me/telemetry', json.dumps(d), 1)
+    if data['method'] == 'setValue':
+	print(data['params'])
         if data['params'] is True:
-            ard.write("power_switch,10,power_switch_status,0")
+	    print("SWITCH ON")
+            ard.write("power_switch,10,power_switch_status,0,debug,1")
             ard.flushInput()
-            ard.readline()
+            #print(ard.readline())
         if data['params'] is False:
-            ard.write("power_switch,10,power_switch_status,255")
+	    print("SWITCH OFF")
+            ard.write("power_switch,10,power_switch_status,255,debug,1")
             ard.flushInput()
-            ard.readline()
+            #print(ard.readline())
 
 
 client = mqtt.Client()
