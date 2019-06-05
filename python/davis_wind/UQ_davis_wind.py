@@ -1,14 +1,14 @@
 from gpiozero import Button
 import time
 from time import sleep,localtime,strftime
-#import paho.mqtt.client as mqtt
-#import json
+import paho.mqtt.client as mqtt
+import json
 
-#with open('/home/pi/pyduino/credential/rain_gauge.json') as f:
-#        credential = json.load(f)
+with open('/home/pi/pyduino/credential/wwl1_weather.json') as f:
+        credential = json.load(f)
 
-#field_name=["rain_gauge4","rain_gauge5","rain_gauge6"]
-#rain_gauge=dict((el,0.0) for el in field_name)
+field_name=["wind","rainfall"]
+davis_weather=dict((el,0.0) for el in field_name)
 
 class UQ_RainFall:
     '''
@@ -42,20 +42,21 @@ class UQ_RainFall:
 
 while True:
     try:
-        #next_reading = time.time()
-        #client = mqtt.Client()
-        #client.username_pw_set(credential['access_token'])
-        #client.connect(credential['thingsboard_host'], 1883, 60)
-        #client.loop_start()
+        next_reading = time.time()
+        client = mqtt.Client()
+        client.username_pw_set(credential['access_token'])
+        client.connect(credential['thingsboard_host'], 1883, 60)
+        client.loop_start()
         break
     except Exception, e:
         time.sleep(60)
 
+
 delimiter=','
-#screen_display=True
-#save_to_file=True
-#file_name= 'rain_gauge_456'
-#if save_to_file: fid= open(file_name,'a',0)
+screen_display=True
+save_to_file=True
+file_name= 'davis_weather'
+if save_to_file: fid= open(file_name,'a',0)
 
 #==================================================#
 '''
@@ -73,20 +74,20 @@ test1 = UQ_RainFall(pin = 18, debounce = 0.001, name = "Bucket 1", debug=True)
 test1.config()
 #test2.config()
 #test3.config()
-print("Start observing")
+#print("Start observing")
 
 try:
 
     while True:
 
-        #if screen_display: print strftime("%Y-%m-%d %H:%M:%S", localtime())
-        #if save_to_file: fid.write(strftime("%Y-%m-%d %H:%M:%S", localtime())  )
+        if screen_display: print strftime("%Y-%m-%d %H:%M:%S", localtime())
+        if save_to_file: fid.write(strftime("%Y-%m-%d %H:%M:%S", localtime())  )
 
         #print("rainfall_1:")
-        #if screen_display: print "raingauge_4:"+str(test1.get_count())
-        #if save_to_file: fid.write("raingauge_4"+delimiter+str(test1.get_count()))
-        #current_read=int(test1.get_count())
-        #rain_gauge['rain_gauge4']=int(test1.get_count())
+        if screen_display: print "wind:"+str(test1.get_count())
+        if save_to_file: fid.write("wind"+delimiter+str(test1.get_count()))
+        current_read=int(test1.get_count())
+        davis_weather['wind']=int(test1.get_count())
 
         #print("rainfall_2:")
         #if screen_display: print "raingauge_5:"+str(test2.get_count())
@@ -104,15 +105,15 @@ try:
         #test2.reset()
         #test3.reset()
 
-        #client.publish('v1/devices/me/telemetry', json.dumps(rain_gauge), 1)
+        client.publish('v1/devices/me/telemetry', json.dumps(davis_weather), 1)
         sleep(600)
         continue
 
 except KeyboardInterrupt:
     pass
 
-#client.loop_stop()
-#client.disconnect()
+client.loop_stop()
+client.disconnect()
         
 #==================================================#
 
