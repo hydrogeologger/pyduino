@@ -41,7 +41,7 @@ void command_reset_pi(String content) {
 void command_check_millis(String content) {
     if (content == "check_millis") 
     {
-        Serial.print('The current mill is: ');
+        Serial.print("The current mill is: ");
         Serial.println(millis());
     }
 }

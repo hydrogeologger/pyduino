@@ -57,7 +57,7 @@ class hydrogeolog
     //void rcswitchCoff(int rc_switch, int pulselength);
     void rcswitch(int rc_switch, int pulselength, const char *sw_code);
     //above for rc_switch
-    void si1145(int power_sw, int number_readings_si1145, int sleep_interval_ms, int number_of_dummies);
+    void si1145(int number_of_dummies, int number_of_measurements, int measurement_time_interval, int debug_sw, int tca9548_channel);
     void search_9548_channels();
 
   private:

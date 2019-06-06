@@ -358,7 +358,7 @@ void printInfo(char i)
     {
         Serial.print("Addr,");
         Serial.print(i);
-        Serial.print(DELIMITER);
+        Serial.print("_");
     }
     else
     {
@@ -366,12 +366,14 @@ void printInfo(char i)
     }
     if (mySDI12.available())
         mySDI12.read();
+    int count = 0;
     while (mySDI12.available())
     {
         char c = mySDI12.read();
-        if ((c != '\n') && (c != '\r') && (c != ' '))
+        if ((c != '\n') && (c != '\r') && (c != ' ') && count < 3 && (c < '0' || c > '9'))
         {
             Serial.write(c); //print sensor info and type
+            count++;
         }
         delay(5);
     }

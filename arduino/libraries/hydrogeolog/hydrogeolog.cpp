@@ -686,21 +686,17 @@ void hydrogeolog::sht75(int dataPin, int clockPin, int number_of_dummies, int nu
 } //sht75
 
 // loop routine to obtain si1145 result
-void hydrogeolog::si1145(int power_sw, int number_readings_si1145, int measurement_time_interval, int number_of_dummies)
+void hydrogeolog::si1145(int number_of_dummies, int number_of_measurements, int measurement_time_interval, int debug_sw, int tca9548_channel)
 {
     //Adafruit_SI1145 uv = Adafruit_SI1145();
     float vis = 0.0;
     float ir = 0.0;
     float uvindex = 0.0;
-    digitalWrite(power_sw, HIGH);
-    delay(1000);
     Adafruit_SI1145 uv = Adafruit_SI1145();
     delay(1000);
     uv.begin();
-    //if (! uv.begin()) {
-    //  Serial.println("Didn't find Si1145");
-    //  while (1);
-    //}
+    tcaselect(tca9548_channel);
+    
     for (int j = 0; j < number_of_dummies; j++)
     {
         uv.readVisible();
@@ -710,7 +706,7 @@ void hydrogeolog::si1145(int power_sw, int number_readings_si1145, int measureme
         uv.readUV();
         delay(measurement_time_interval);
     }
-    for (int j = 0; j < number_readings_si1145; j++)
+    for (int j = 0; j < number_of_measurements; j++)
     {
         vis += uv.readVisible();
         delay(100);
@@ -719,9 +715,9 @@ void hydrogeolog::si1145(int power_sw, int number_readings_si1145, int measureme
         uvindex += uv.readUV();
         delay(measurement_time_interval);
     }
-    vis /= float(number_readings_si1145);
-    ir /= float(number_readings_si1145);
-    uvindex /= float(number_readings_si1145);
+    vis /= float(number_of_measurements);
+    ir /= float(number_of_measurements);
+    uvindex /= float(number_of_measurements);
     Serial.print("Vis");
     Serial.print(delimiter);
     Serial.print(vis);
@@ -742,9 +738,6 @@ void hydrogeolog::si1145(int power_sw, int number_readings_si1145, int measureme
     Serial.print(delimiter);
     Serial.print(uvindex);
     Serial.print(delimiter);
-    digitalWrite(power_sw, LOW);
-
-    delay(1000);
 }
 
 //  search 9548 sensors
