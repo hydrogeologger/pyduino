@@ -5,7 +5,7 @@
 
 extern volatile unsigned long timer0_millis;
 static volatile unsigned char isComm;
-#define TIMEOUT (unsigned long)(5ul * 60ul * 60ul * 1000ul)
+#define TIMEOUT (unsigned long)(12ul * 60ul * 60ul * 1000ul)
 #define DOWN_TIME 3 * 1000 //seconds
 
 void setMillis(unsigned long new_millis);

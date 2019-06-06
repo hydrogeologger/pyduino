@@ -1,16 +1,16 @@
 #include "timing.h"
 #include "common.h"
 #include "Arduino.h"
+void setMillis(unsigned long new_millis)
 /*
 set the new value for millis()
 */
-void setMillis(unsigned long new_millis)
 {
-    uint8_t oldSREG = SREG;   // what are these?
-    cli(); // what are these?
+    uint8_t oldSREG = SREG;   // save the current status of arduino 'register'
+    cli(); // stop interrupt "background service" service, which means freeze loop service.
     timer0_millis = new_millis;
-    SREG = oldSREG;// what are these?
-    sei();// what are these?
+    SREG = oldSREG;// remove 
+    sei();// resume the interrupt background service 
 }
 
 void timeout_reset_pi() {
@@ -26,7 +26,6 @@ void timeout_reset_pi() {
 }
 
 void command_reset_pi(String content) {
-    //if (content == "RESET\n")
     if (content == "RESET") 
     {
         Serial.println("Reboot in 30 s....");
