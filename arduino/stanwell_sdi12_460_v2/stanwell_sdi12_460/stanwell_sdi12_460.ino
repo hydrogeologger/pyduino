@@ -584,12 +584,12 @@ void loop()
 {
     timeout_reset_pi();
     String content = get_cmd();
-    command_reset_pi(content);
-    command_check_millis(content);
     if (content == "")
         timing_no_comm();
-    else
+    else // there is input from serial
     {
+        command_reset_pi(content);
+        command_check_millis(content);
         check_serial(content);
         reset_timer();
         String str_ay[20];
