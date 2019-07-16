@@ -38,6 +38,7 @@ def dv(tk):
    
 def rhovs(tk):
      ''' def y = rhovs(tk)
+      Saturated vapour density
       (S)aturated water (V)apor density (rho) at EM(5)0 channel (C) [rhovs]
       tk -- temperature in kelvin'''
      return  1e-3*np.exp(19.819-4976/tk)
