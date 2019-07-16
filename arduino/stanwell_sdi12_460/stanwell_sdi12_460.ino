@@ -425,9 +425,6 @@ void loop() {
          thermal_suction_ds18b20,A3CF969B,digital_input,13,power,42
          thermal_suction_ds18b20,464CBABE,digital_input,13,sensor_power,42,power_heating_pin,35,output_temp_interval,2000,output_number_temp,5
          fredlund_ds18b20,464CBABE,digital_input,13,sensor_power,42,heating_pin,35,interval,2000,output_number,5
-         fred,464CBABE,digi_inp,13,senpow,42,heatpow,35,itval,2000,opt_no,5
-         fred,DE9F96DC,digi_inp,13,senpow,42,heatpow,35,itval,2000,opt_no,5
-28 DE 9F 96 8 0 0 DC
          RESULT FROM 8
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,50,56,69,53,65,51,52,0,40,229,163,74,8,0,0,127
          RESULT FROM 2
@@ -445,8 +442,8 @@ void loop() {
 
          if ( (fredlund_suction_ds18b20!="") && (power_sw_pin!=-1))
              {
-              //hydrogeolog1.print_string_delimiter_value("input",content);
               hydrogeolog1.print_string_delimiter_value("fred_ds18",String(fredlund_suction_ds18b20));
+              
               if (debug_sw==1)
               {            
               
@@ -456,140 +453,115 @@ void loop() {
                   hydrogeolog1.print_string_delimiter_value("interval_ms"  ,String(output_temp_interval_ms)  );
                   hydrogeolog1.print_string_delimiter_value("output_number"  ,String(output_number_temp)  );
               }
-              
-              //the reason i did not wrap this in hydrogeolog is because function in c normally can not return an array
-              byte CardNumberByte[4];          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
-              const char * CardNumber = fredlund_suction_ds18b20.c_str();
-              unsigned long number = strtoul( CardNumber, nullptr, 16);
-              for(int i=3; i>=0; i--)    // start with lowest byte of number
-              {
-                //Serial.println(number,HEX);
-                //Serial.println(byte(number));
-                //Serial.println(byte(number),HEX);
-                  CardNumberByte[i] = byte( number);
-                  number >>= 8;            // get next byte into position
-              }   
-//                 
-//            for(int i=0; i<4; i++)
-//            {
-//              Serial.print("0x");
-//              Serial.print(CardNumberByte[i], HEX);
-//              Serial.print(delimiter);
-//            }
-            byte heat_suction_sensor_addr[8];
-            heat_suction_sensor_addr[0]=0x28;
-            heat_suction_sensor_addr[1]=CardNumberByte[0];
-            heat_suction_sensor_addr[2]=CardNumberByte[1];
-            heat_suction_sensor_addr[3]=CardNumberByte[2];
-            heat_suction_sensor_addr[4]=0x08;
-            heat_suction_sensor_addr[5]=0x00;
-            heat_suction_sensor_addr[6]=0x00;
-            heat_suction_sensor_addr[7]=CardNumberByte[3]; 
-                       
-            
-            digitalWrite(power_sw_pin,HIGH);
-            delay(1000);
-     
-            hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            digitalWrite(power_heating_pin,HIGH);
-            for(int i=0;i<output_number_temp;i++)
-            {
-                delay(output_temp_interval_ms);
-                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            }
-            digitalWrite(power_heating_pin,LOW);
-            for(int i=0;i<output_number_temp;i++)
-            {
-                delay(output_temp_interval_ms);
-                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            }
+              //              String fredlund_suction_ds18b20_section1=fredlund_suction_ds18b20.substring(0,8);
+              //              //the reason i did not wrap this in hydrogeolog is because function in c normally can not return an array
+              //              byte CardNumberByte[8];          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
+              //              //const char * CardNumber = fredlund_suction_ds18b20.c_str();
+              //              const char * CardNumber = fredlund_suction_ds18b20_section1.c_str();
+              //              /*TO191706 summary for paring 
+              //              
+              //              */
+              ////              Serial.print("the given Cardnumber is: ");
+              ////              Serial.println(CardNumber);
+              //              //char * CardNumber1;
+              //              //strncpy(CardNumber1,CardNumber,8);
+              //              //CardNumber1[8]=0;
+              //              //Serial.println(CardNumber1);
+              //              // this line converts a string into a decimal number, long has a length of 2^32 32 bits 4 bytes
+              //              //
+              //              unsigned long number = strtoul( CardNumber, nullptr, 16);
+              //              //long  number;
+              //              //number = strtoul( CardNumber1, nullptr, 16);
+              //              //unsigned long long number = strtoul( CardNumber, nullptr, 16);
+              ////              Serial.print("the given number is: ");
+              ////              Serial.println(number);
+              ////              Serial.print("the given number in hex format is: ");              
+              ////              Serial.println(number,HEX);
+              //              for(int i=3; i>=0; i--)    // start with lowest byte of number
+              //              {
+              ////                Serial.println(number,HEX);
+              ////                Serial.println(byte(number));
+              ////                Serial.println(byte(number),HEX);
+              //                  CardNumberByte[i] = byte( number);
+              //                  number >>= 8;            // get next byte into position
+              //              }   
+              ////                 
+              ////            for(int i=0; i<7; i++)
+              ////            {
+              ////              Serial.print("0x");
+              ////              Serial.print(CardNumberByte[i], HEX);
+              ////              Serial.print(delimiter);
+              ////            }
+              ////            
+              ////            Serial.println();
+              //            byte heat_suction_sensor_addr[8];
+              //            heat_suction_sensor_addr[0]=CardNumberByte[0];
+              //            heat_suction_sensor_addr[1]=CardNumberByte[1];
+              //            heat_suction_sensor_addr[2]=CardNumberByte[2];
+              //            heat_suction_sensor_addr[3]=CardNumberByte[3];
+              //
+              //            fredlund_suction_ds18b20_section1=fredlund_suction_ds18b20.substring(8,16);
+              //            CardNumber = fredlund_suction_ds18b20_section1.c_str();
+              //            number = strtoul( CardNumber, nullptr, 16);
+              //            for(int i=3; i>=0; i--)    // start with lowest byte of number
+              //              {
+              ////                Serial.println(number,HEX);
+              ////                Serial.println(byte(number));
+              ////                Serial.println(byte(number),HEX);
+              //                  CardNumberByte[i] = byte( number);
+              //                  number >>= 8;            // get next byte into position
+              //              } 
+              //            heat_suction_sensor_addr[4]=CardNumberByte[0];
+              //            heat_suction_sensor_addr[5]=CardNumberByte[1];
+              //            heat_suction_sensor_addr[6]=CardNumberByte[2];
+              //            heat_suction_sensor_addr[7]=CardNumberByte[3]; 
+              //            
+              ////            for(int i=0; i<=7; i++)
+              ////            {
+              ////              Serial.print("0x");
+              ////              Serial.print(heat_suction_sensor_addr[i], HEX);
+              ////              Serial.print(delimiter);
+              ////            }                       
+            /* TO190716 this historical problem is resolved. the method used below parse only two strings every single time
+            Which avoids the shift of digital issues.*/
+            if (fredlund_suction_ds18b20.length() != 16) 
+                {
+                Serial.println("Input length of sensor address is not 16");
+                }
+            else
+                {
+                byte heat_suction_sensor_addr[8];
+                for(int i=0; i<8; i++)
+                    {
+                    String fredlund_suction_ds18b20_section1=fredlund_suction_ds18b20.substring(i*2,(i+1)*2);
+                    const char * CardNumber = fredlund_suction_ds18b20_section1.c_str();
+                    unsigned long number = strtoul( CardNumber, nullptr, 16);
+                    byte CardNumberByte = byte( number);
+                    heat_suction_sensor_addr[i]=CardNumberByte;
+                    Serial.print(CardNumberByte,HEX);
+                    }
+                    digitalWrite(power_sw_pin,HIGH);
+                    delay(1000);
+                    hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+                    digitalWrite(power_heating_pin,HIGH);
+                    for(int i=0;i<output_number_temp;i++)
+                    {
+                        delay(output_temp_interval_ms);
+                        hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+                    }
+                    digitalWrite(power_heating_pin,LOW);
+                    for(int i=0;i<output_number_temp;i++)
+                    {
+                        delay(output_temp_interval_ms);
+                        hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+                    }
 
-            //hydrogeolog1.search_ds18b20(ds18b20_search_pin,power_sw_pin);
 
-            Serial.println();
-            digitalWrite(power_sw_pin,LOW);               
-        //          thermal_suction_sensor[0]=char(thermal_suction_ds18b20);
-        //          thermal_suction_ds18b20.getBytes(thermal_suction_sensor, numbersd) ;
+                    Serial.println();
+                    digitalWrite(power_sw_pin,LOW); 
                     
+                 }
          }  // fred temperature by search.
-
-
-
-
-
-
-         String fredlund_suction_ds18b209=hydrogeolog1.parse_argument_string("fred9","",str_ay_size,str_ay);
-        
-         
-         if ( (fredlund_suction_ds18b209!="") && (power_sw_pin!=-1))
-             {
-              hydrogeolog1.print_string_delimiter_value("fred_ds18",String(fredlund_suction_ds18b209));
-              if (debug_sw==1)
-              {            
-              
-                  hydrogeolog1.print_string_delimiter_value("sensor_power"  ,String(power_sw_pin)  );
-                  hydrogeolog1.print_string_delimiter_value("digital_input"  ,String(digital_input)  );
-                  hydrogeolog1.print_string_delimiter_value("power_heating_pin"  ,String(power_heating_pin)  );
-                  hydrogeolog1.print_string_delimiter_value("interval_ms"  ,String(output_temp_interval_ms)  );
-                  hydrogeolog1.print_string_delimiter_value("output_number"  ,String(output_number_temp)  );
-              }
-              
-              //the reason i did not wrap this in hydrogeolog is because function in c normally can not return an array
-              byte CardNumberByte[4];          // https://stackoverflow.com/questions/347949/how-to-convert-a-stdstring-to-const-char-or-char
-              const char * CardNumber = fredlund_suction_ds18b209.c_str();
-              unsigned long number = strtoul( CardNumber, nullptr, 16);
-              for(int i=3; i>=0; i--)    // start with lowest byte of number
-              {
-                //Serial.println(number,HEX);
-               //Serial.println(byte(number));
-                //Serial.println(byte(number),HEX);
-                  CardNumberByte[i] = byte( number);
-                  number >>= 8;            // get next byte into position
-              }   
-//                 
-//            for(int i=0; i<4; i++)
-//            {
-//              Serial.print("0x");
-//              Serial.print(CardNumberByte[i], HEX);
-//              Serial.print(delimiter);
-//            }
-            byte heat_suction_sensor_addr[8];
-            heat_suction_sensor_addr[0]=0x28;
-            heat_suction_sensor_addr[1]=CardNumberByte[0];
-            heat_suction_sensor_addr[2]=CardNumberByte[1];
-            heat_suction_sensor_addr[3]=CardNumberByte[2];
-            heat_suction_sensor_addr[4]=0x09;
-            heat_suction_sensor_addr[5]=0x00;
-            heat_suction_sensor_addr[6]=0x00;
-            heat_suction_sensor_addr[7]=CardNumberByte[3]; 
-                       
-            
-            digitalWrite(power_sw_pin,HIGH);
-            delay(1000);
-     
-            hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            digitalWrite(power_heating_pin,HIGH);
-            for(int i=0;i<output_number_temp;i++)
-            {
-                delay(output_temp_interval_ms);
-                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            }
-            digitalWrite(power_heating_pin,LOW);
-            for(int i=0;i<output_number_temp;i++)
-            {
-                delay(output_temp_interval_ms);
-                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            }
-
-
-            Serial.println();
-            digitalWrite(power_sw_pin,LOW);               
-                    
-         }  // ds18b209
-
-
-
-
 
 
          /*
