@@ -196,10 +196,10 @@ void dhto2_measurement(int str_ay_size, int debug_sw, int dhto2_in_pin, int anai
 
 void luminox_reading(int str_ay_size, String lumino2, int serial_pin, int power_sw_pin, String str_ay[])
 {
-    /*luminox sensor
-    lumino2,M 2,power,42,serial,2
-    */
-    if ((lumino2 != "") && (power_sw_pin != INVALID) && (serial_pin >= 1) && (serial_pin <= 3))
+    //luminox sensor
+    //lumino2,M 2,power,42,serial,2
+    
+    /*if ((lumino2 != "") && (power_sw_pin != INVALID) && (serial_pin >= 1) && (serial_pin <= 3))
     {
         int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 1000, str_ay_size, str_ay);
         String input_linebreak = hydrogeolog1.parse_argument_string("inp_linebreak", "\r\n", str_ay_size, str_ay);
@@ -244,7 +244,7 @@ void luminox_reading(int str_ay_size, String lumino2, int serial_pin, int power_
         aa = mySerial.readStringUntil('\n');
         Serial.println(aa);
         digitalWrite(power_sw_pin, LOW);
-    }
+    } */
 }
 
 void ds18b20_search(int ds18b20_search_pin, int power_sw_pin)
@@ -317,16 +317,8 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
                           int power_sw_pin, String str_ay[])
 {
     /*
-    fredlund_ds18b20,464CBABE,digital_input,13,sensor_power,42,heating_pin,35,interval,2000,output_number,5
     fred,464CBABE,digi_inp,13,senpow,42,heatpow,35,itval,2000,opt_no,5
     fred,DE9F96DC,digi_inp,13,senpow,42,heatpow,35,itval,2000,opt_no,5
-    28 DE 9F 96 8 0 0 DC
-    RESULT FROM 8
-    thermal_suction_ds18b20,28E5A34A0800007F,power,4,50,56,69,53,65,51,52,0,40,229,163,74,8,0,0,127
-    RESULT FROM 2
-    thermal_suction_ds18b20,28E5A34A0800007F,power,4,50,0,5,74,5,0,0,3,40,229,163,74,8,0,0,127
-    thermal_suction_ds18b20,28E5A34A,power,4,numbersd,1
-    28 A3 CF 96 8 0 0 9B
     */
 
     String fredlund_suction_ds18b20 = hydrogeolog1.parse_argument_string("fred", "", str_ay_size, str_ay);
@@ -336,49 +328,49 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
         hydrogeolog1.print_string_delimiter_value("fred_ds18", String(fredlund_suction_ds18b20));
         if (debug_sw == 1)
         {
-            hydrogeolog1.print_string_delimiter_value("sensor_power", String(power_sw_pin));
-            hydrogeolog1.print_string_delimiter_value("digital_input", String(digital_input));
-            hydrogeolog1.print_string_delimiter_value("power_heating_pin", String(power_heating_pin));
-            hydrogeolog1.print_string_delimiter_value("interval_ms", String(output_temp_interval_ms));
-            hydrogeolog1.print_string_delimiter_value("output_number", String(output_number_temp));
+            hydrogeolog1.print_string_delimiter_value("sensor_power", String(power_sw_pin));              // "snpw"
+            hydrogeolog1.print_string_delimiter_value("digital_input", String(digital_input));            // "dgin"
+            hydrogeolog1.print_string_delimiter_value("power_heating_pin", String(power_heating_pin));    // "htpw"
+            hydrogeolog1.print_string_delimiter_value("interval_ms", String(output_temp_interval_ms));    // "itv"
+            hydrogeolog1.print_string_delimiter_value("output_number", String(output_number_temp));       // "otno"
         }
-        byte CardNumberByte[4];
-        const char *CardNumber = fredlund_suction_ds18b20.c_str();
-        unsigned long number = strtoul(CardNumber, nullptr, 16);
-        for (int i = 3; i >= 0; i--)
-        {
-            CardNumberByte[i] = byte(number);
-            number >>= 8;
-        }
-        byte heat_suction_sensor_addr[8];
-        heat_suction_sensor_addr[0] = 0x28;
-        heat_suction_sensor_addr[1] = CardNumberByte[0];
-        heat_suction_sensor_addr[2] = CardNumberByte[1];
-        heat_suction_sensor_addr[3] = CardNumberByte[2];
-        //heat_suction_sensor_addr[4] = fredlund_suction_ds18b20 == "fred" ? 0x08 : 0x09;
-        heat_suction_sensor_addr[4] = 0x0A;
-        heat_suction_sensor_addr[5] = 0x00;
-        heat_suction_sensor_addr[6] = 0x00;
-        heat_suction_sensor_addr[7] = CardNumberByte[3];
-        digitalWrite(power_sw_pin, HIGH);
-        delay(1000);
-        hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr, digital_input);
-        digitalWrite(power_heating_pin, HIGH);
-        for (int i = 0; i < output_number_temp; i++)
-        {
-            delay(output_temp_interval_ms);
-            hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr, digital_input);
-        }
-        digitalWrite(power_heating_pin, LOW);
-        for (int i = 0; i < output_number_temp; i++)
-        {
-            delay(output_temp_interval_ms);
-            hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr, digital_input);
-        }
-        Serial.println();
-        digitalWrite(power_sw_pin, LOW);
-    }
-}
+       if (fredlund_suction_ds18b20.length() != 16) 
+           {
+           Serial.println("Input length of sensor address is not 16");
+           }
+       else
+           {
+           byte heat_suction_sensor_addr[8];
+           for(int i=0; i<8; i++)
+               {
+               String fredlund_suction_ds18b20_section1=fredlund_suction_ds18b20.substring(i*2,(i+1)*2);
+               const char * CardNumber = fredlund_suction_ds18b20_section1.c_str();
+               unsigned long number = strtoul( CardNumber, nullptr, 16);
+               byte CardNumberByte = byte( number);
+               heat_suction_sensor_addr[i]=CardNumberByte;
+               Serial.print(CardNumberByte,HEX);
+               }
+               digitalWrite(power_sw_pin,HIGH);
+               delay(1000);
+               hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+               digitalWrite(power_heating_pin,HIGH);
+               for(int i=0;i<output_number_temp;i++)
+               {
+                   delay(output_temp_interval_ms);
+                   hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+               }
+               digitalWrite(power_heating_pin,LOW);
+               for(int i=0;i<output_number_temp;i++)
+               {
+                   delay(output_temp_interval_ms);
+                   hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+               }
+               Serial.println();
+               digitalWrite(power_sw_pin,LOW); 
+               
+            }  //fredlund_suction_ds18b20.length else 
+    }  //((fredlund_suction_ds18b20 != "") && (power_sw_pin != INVALID))
+} // fredlund_measurement
 
 String get_cmd()
 {
@@ -637,7 +629,7 @@ void loop()
         fredlund_measurement(str_ay_size, debug_sw,
                              hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("htpw", INVALID, str_ay_size, str_ay),
-                             hydrogeolog1.parse_argument("itv", INVALID, str_ay_size, str_ay),
+                             hydrogeolog1.parse_argument("itv" , INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("otno", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);

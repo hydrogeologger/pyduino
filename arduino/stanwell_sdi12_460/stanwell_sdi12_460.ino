@@ -423,7 +423,6 @@ void loop() {
          /*
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,numbersd,1
          thermal_suction_ds18b20,A3CF969B,digital_input,13,power,42
-         thermal_suction_ds18b20,464CBABE,digital_input,13,sensor_power,42,power_heating_pin,35,output_temp_interval,2000,output_number_temp,5
          fredlund_ds18b20,464CBABE,digital_input,13,sensor_power,42,heating_pin,35,interval,2000,output_number,5
          RESULT FROM 8
          thermal_suction_ds18b20,28E5A34A0800007F,power,4,50,56,69,53,65,51,52,0,40,229,163,74,8,0,0,127
