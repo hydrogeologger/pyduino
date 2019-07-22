@@ -173,6 +173,109 @@ class pandas_scale:
 
 
     
+class concat_data_tb():
+#"""
+#this is to creat new data series that are ready to be interpolated
+#"""
+    import pandas as pd
+    #def __init__(self,start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
+    #def __init__(self,start_time=inp_start_time,end_time=inp_end_time,dt_s=inp_dt_s):
+    def __init__(self,start_time,end_time,dt_s):
+    #def __init__(self): #start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
+	import pdb
+        import csv
+	import numpy as np
+        import pandas as pd
+        self.dt_s=dt_s
+        #pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),period=pd.Timedelta(600,unit='s' ) )
+        # frequency is actually the duration between the neighbouring point not period
+        #date_time=pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),freq=pd.Timedelta(600,unit='s' ) )
+
+        #pdb.set_trace()
+        date_time=pd.date_range(start=start_time,end=end_time,freq=pd.Timedelta(dt_s,unit='s' ) )
+        self.df = pd.DataFrame({ 'date_time' : date_time})
+        self.df['time_days']=(self.df['date_time']-self.df['date_time'][0]).astype('timedelta64[s]')/86400.0
+        self.df.set_index('date_time',inplace=True,drop=True)
+    
+
+    def get_derivative(self,**kwargs ):
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        #var_in= [a.df,['scale']]  
+        arg_defaults = {'plot':    False,
+                    'key': ['cum_evap'],
+                    'deri_key':['evap']
+                       }
+        arg=arg_defaults
+        for d in kwargs:
+            arg[d]= kwargs.get(d)
+        self.df[arg['deri_key']]=np.append(np.diff(self.df[arg['key']] ),np.nan)/self.dt_s
+
+    def merge_data_from_tb(self,**kwargs ):
+        '''
+        import matplotlib.pyplot as plt
+        #    properties:
+        #      rm_nan --  whether delete the nan data
+        #      keys   --  the property that needs to be interpolated
+        #      df     --  the panel data that gets the source data
+         
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        import pdb
+        import pandas as pd
+        import wafo.interpolate as wf
+
+        # below is optional
+        arg_defaults = {'plot':    False,
+                    'keys': ['scale'],
+                    'newkeys':None ,
+                    'coef': 1e-14,
+                    'rm_nan':True,
+                    'key_name':None,
+                    'mask':None,
+                    'time_index':'date_time',
+                    'input_time_series':None,
+                    'input_data_series':None,
+                    'output_time_series':None,
+        }
+        arg=arg_defaults
+        for d in kwargs:
+            arg[d]= kwargs.get(d)
+
+        
+        #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
+        input_time_ay_s=((arg['input_time_series']-arg['input_time_series'][0])/np.timedelta64(1,'s')).values
+
+        # TO181023 making sure that we can name a new string
+        # https://stackoverflow.com/questions/522563/accessing-the-index-in-for-loops
+        if arg['rm_nan']==True:
+            mask_idx          =  arg['input_data_series'].isnull()
+            input_time_ay_no_nan =  input_time_ay_s[~mask_idx]
+            input_data_ay_no_nan  =  arg['input_data_series'][~mask_idx]
+            interp_method     =  wf.SmoothSpline(input_time_ay_no_nan,input_data_ay_no_nan,p=arg['coef'])
+        else:
+            interp_method=wf.SmoothSpline(input_time_ay_s,arg['input_data_series'],p=arg['coef'])
+        # warning, it is found that the Smoothspline is dependent on the x axis!!!
+        output_time_ay_sec=((arg['output_time_series'] - arg['input_time_series'][0]  )/np.timedelta64(1,'s')).values
+
+        self.df[arg['key_name']]=interp_method(output_time_ay_sec)
+        pdb.set_trace()
+        #if arg['mask'] == None:
+        #    self.df[arg['key_name']]=interp_method(output_time_ay_sec)
+        #else:
+        #    self.df[arg['key_name']][arg['mask']]=interp_method(output_time_ay_sec)
+        
+        if arg['plot']==True:
+            import matplotlib.pyplot as plt 
+            fig = plt.figure() 
+            fig.subplots_adjust(bottom=0.2)
+            fig.canvas.set_window_title('interpolate ')
+            plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+')
+            plt.plot(arg['output_time_series'],self.df[  arg['key_name']  ],'ro')
+            plt.title('interpolated '+' result, coef='+str(arg['coef']))
+            plt.xticks(rotation=45)
+            plt.show(block=False)
+
+
 class concat_data_roof():
 #"""
 #this is to creat new data series that are ready to be interpolated
@@ -195,8 +298,6 @@ class concat_data_roof():
         date_time=pd.date_range(start=start_time,end=end_time,freq=pd.Timedelta(dt_s,unit='s' ) )
         self.df = pd.DataFrame({ 'date_time' : date_time})
         self.df['time_days']=(self.df['date_time']-self.df['date_time'][0]).astype('timedelta64[s]')/86400.0
-
-
 
 
     
@@ -299,7 +400,6 @@ class concat_data_roof():
         #      df     --  the panel data that gets the source data
         # start_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
         #   end_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
-
          
         the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
         import pdb
@@ -405,4 +505,3 @@ class concat_data_roof():
         for d in kwargs:
             arg[d]= kwargs.get(d)
         self.df[arg['deri_key']]=np.append(np.diff(self.df[arg['key']] ),np.nan)/self.dt_s
-

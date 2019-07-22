@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import time
 import matplotlib.pyplot as plt
+import datetime
 
 
 
@@ -42,7 +43,7 @@ class tingsboard_to_pandas:
     
     
     def get_keys(self):
-        url = self.input_json['thingsboard_address']+'/api/plugins/telemetry/DEVICE/78144710-a847-11e9-a0ab-e56f74380227/keys/timeseries'
+        url = self.input_json['thingsboard_address']+'/api/plugins/telemetry/DEVICE/' + self.input_json['device_id']+  '/keys/timeseries'
         headers = {'Content-Type': 'application/json','X-Authorization':'bearer '+self.input_json['tb_token']}
         self.input_json["key_list"] = requests.get(url, headers=headers).json()
     
@@ -56,12 +57,32 @@ class tingsboard_to_pandas:
         headers = {'Content-Type': 'application/json','X-Authorization':'bearer '+self.input_json['tb_token']}
         self.result_json = requests.get(url, headers=headers).json()
 
-    def convert_data_to_pd(self):
-        self.result_pd={   }
+    def convert_data_to_df(self):
+        self.result_df={   }
         for i in list(self.result_json):
-            self.result_pd[i]=pd.DataFrame(self.result_json[i])
-            self.result_pd[i]['ts']=pd.to_datetime(self.result_pd[i]['ts'],unit='ms')
+            print i
+            self.result_df[i]=pd.DataFrame(self.result_json[i])
+            self.result_df[i]['ts']=pd.to_datetime(self.result_df[i]['ts'],unit='ms') +datetime.timedelta(hours=10)
             #https://stackoverflow.com/questions/42196337/dataframe-set-index-not-setting/42196399
-            self.result_pd[i].set_index('ts',inplace=True,drop=True)
+            self.result_df[i].set_index('ts',inplace=True,drop=True)
+            self.result_df[i].sort_index(inplace=True)
+            #self.result_df[i].to_numeric('value',inplace=True)
+            #df['b'] = pd.to_numeric(df['b'], errors='coerce'
+            self.result_df[i]['value']=pd.to_numeric(self.result_df[i]['value'],errors='coerce')
+
+     
 
 
+    def plot_df(self,plot_input):
+        fig = plt.figure(figsize=(16,10))
+        ax = [[] for i in range(30)]
+        ax[0  ] = plt.subplot2grid((1, 1), (0, 0), colspan=1)
+        #ax[1  ] = plt.subplot2grid((3, 1), (1, 0), colspan=1)
+        for i in plot_input:
+            print i
+            ax[0].plot(self.result_df[i]['value'])
+        #im1 = ax[0 ].plt(scale_1_df.index,scale_1_df['value'])
+        #ax[0]=plt.plot(scale_1_df.index,scale_1_df['value'])
+        #ax[0].plot(scale_1_df['value'])
+        #ax[1].plot(scale_2_df['value'])
+        plt.show(block=False)
