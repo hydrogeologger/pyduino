@@ -67,7 +67,7 @@ the minimum value.
 #print("Testing")
 
 test1 = UQ_RainFall(pin = 18, debounce = 0.001, name = "Bucket 1", debug=True)
-#test2 = UQ_RainFall(pin = 16, debounce = 0.01, name = "Bucket 2", debug=False)
+#test2 = UQ_RainFall(pin = 8, debounce = 0.01, name = "Bucket 2", debug=True)
 #test3 = UQ_RainFall(pin = 21, debounce = 0.01, name = "Bucket 3", debug=False)
 #Once config, the tipping is count automatically as an hardware event
 #and immune to sleep in the main thread
@@ -88,6 +88,8 @@ try:
         if save_to_file: fid.write("wind"+delimiter+str(test1.get_count()))
         current_read=int(test1.get_count())
         davis_weather['wind']=int(test1.get_count())
+        #current_read=int(test1.get_count())
+        #davis_weather['wind']=int(test1.get_count())
 
         #print("rainfall_2:")
         #if screen_display: print "raingauge_5:"+str(test2.get_count())

@@ -101,7 +101,7 @@ try:
         #rain_gauge['rain_gauge6']=int(test3.get_count())
 
         test1.reset()
-        #test2.reset()
+        test2.reset()
         #test3.reset()
 
         #client.publish('v1/devices/me/telemetry', json.dumps(rain_gauge), 1)
