@@ -147,29 +147,6 @@ try:
         wwl2['dht22_rh']=float(current_read[-1])
         wwl2['dht22_t']=float(current_read[-2])
 
-#------UV sensors------------------
-        msg=ard.write("9548,0,type,si1145,power,8,debug,1")
-        msg=ard.flushInput()
-        msg=ard.readline()
-
-        if screen_display: print msg.rstrip()
-        if save_to_file: fid.write(delimiter+msg)
-        current_read=msg.split(',')[0:-1]
-        wwl2['uv_1']=float(current_read[-1])
-        wwl2['ir_1']=float(current_read[-3])
-        wwl2['vis_1']=float(current_read[-5])
-
-        msg=ard.write("9548,1,type,si1145,power,8,debug,1")
-        msg=ard.flushInput()
-        msg=ard.readline()
-
-        if screen_display: print msg.rstrip()
-        if save_to_file: fid.write(delimiter+msg)
-        current_read=msg.split(',')[0:-1]
-        wwl2['uv_2']=float(current_read[-1])
-        wwl2['ir_2']=float(current_read[-3])
-        wwl2['vis_2']=float(current_read[-5])
-
 #------Temperature and humidity------
 
         msg=ard.write("9548,2,type,sht31,power,8,debug,1")
@@ -190,6 +167,28 @@ try:
         wwl2['sht33_temp_2']=float(current_read[-2])
         wwl2['sht33_humidity_2']=float(current_read[-1])
 
+#------UV sensors------------------
+        msg=ard.write("9548,1,type,si1145,power,8,debug,1")
+        msg=ard.flushInput()
+        msg=ard.readline()
+        if screen_display: print msg.rstrip()
+        if save_to_file: fid.write(delimiter+msg)
+        current_read=msg.split(',')[0:-1]
+        wwl2['uv_2']=float(current_read[-1])
+        wwl2['ir_2']=float(current_read[-3])
+        wwl2['vis_2']=float(current_read[-5])
+
+
+        msg=ard.write("9548,0,type,si1145,power,8,debug,1")
+        msg=ard.flushInput()
+        msg=ard.readline()
+
+        if screen_display: print msg.rstrip()
+        if save_to_file: fid.write(delimiter+msg)
+        current_read=msg.split(',')[0:-1]
+        wwl2['uv_1']=float(current_read[-1])
+        wwl2['ir_1']=float(current_read[-3])
+        wwl2['vis_1']=float(current_read[-5])
 
 
 #fred,5A22A047,dgin,18,snpw,26,htpw,23,itv,1000,otno,5  #working

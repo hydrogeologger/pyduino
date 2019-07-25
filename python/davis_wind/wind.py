@@ -66,7 +66,7 @@ the minimum value.
 #print("Testing")
 
 test1 = UQ_RainFall(pin = 8, debounce = 0.001, name = "Bucket", debug=True, volume = 0.2)
-test2 = UQ_RainFall(pin = 18, debounce = 0.001, name = "Wind", debug=True, volume = 0.2)
+test2 = UQ_RainFall(pin = 18, debounce = 0.001, name = "Wind", debug=True)
 #test3 = UQ_RainFall(pin = 21, debounce = 0.01, name = "Bucket 3", debug=False)
 #Once config, the tipping is count automatically as an hardware event
 #and immune to sleep in the main thread

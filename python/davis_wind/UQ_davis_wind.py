@@ -28,7 +28,7 @@ class UQ_RainFall:
     def update(self):
         self.count = self.count + 1
         if self.debug is True:
-            print(self.name + " tipped, new count = " + str(self.count))
+            print(self.name + " ,count = " + str(self.count))
 
     def config(self):
         #assign the event when_pressed to function update
@@ -66,13 +66,13 @@ the minimum value.
 '''
 #print("Testing")
 
-test1 = UQ_RainFall(pin = 18, debounce = 0.001, name = "Bucket 1", debug=True)
-#test2 = UQ_RainFall(pin = 8, debounce = 0.01, name = "Bucket 2", debug=True)
+test1 = UQ_RainFall(pin = 8, debounce = 0.001, name = "Bucket", debug=False)
+test2 = UQ_RainFall(pin = 18, debounce = 0.001, name = "Wind", debug=False)
 #test3 = UQ_RainFall(pin = 21, debounce = 0.01, name = "Bucket 3", debug=False)
 #Once config, the tipping is count automatically as an hardware event
 #and immune to sleep in the main thread
 test1.config()
-#test2.config()
+test2.config()
 #test3.config()
 #print("Start observing")
 
@@ -87,9 +87,9 @@ try:
         if screen_display: print "wind:"+str(test1.get_count())
         if save_to_file: fid.write("wind"+delimiter+str(test1.get_count()))
         current_read=int(test1.get_count())
-        davis_weather['wind']=int(test1.get_count())
-        #current_read=int(test1.get_count())
-        #davis_weather['wind']=int(test1.get_count())
+        davis_weather['rainfall']=int(test1.get_count())
+        current_read=int(test2.get_count())
+        davis_weather['wind']=int(test2.get_count())
 
         #print("rainfall_2:")
         #if screen_display: print "raingauge_5:"+str(test2.get_count())
@@ -104,7 +104,7 @@ try:
         #rain_gauge['rain_gauge6']=int(test3.get_count())
 
         test1.reset()
-        #test2.reset()
+        test2.reset()
         #test3.reset()
 
         client.publish('v1/devices/me/telemetry', json.dumps(davis_weather), 1)
