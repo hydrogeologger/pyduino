@@ -27,6 +27,7 @@ msPmmday=3600.*24*1000
 psychrometric_paPK=66.0
 mPkm=1000
 kmPm=0.001
+minutePday=60.*24
 
 #class constitutive_relation:
 

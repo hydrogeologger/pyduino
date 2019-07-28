@@ -258,7 +258,7 @@ class concat_data_tb():
         output_time_ay_sec=((arg['output_time_series'] - arg['input_time_series'][0]  )/np.timedelta64(1,'s')).values
 
         self.df[arg['key_name']]=interp_method(output_time_ay_sec)
-        pdb.set_trace()
+        #pdb.set_trace()
         #if arg['mask'] == None:
         #    self.df[arg['key_name']]=interp_method(output_time_ay_sec)
         #else:
@@ -271,7 +271,7 @@ class concat_data_tb():
             fig.canvas.set_window_title('interpolate ')
             plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+')
             plt.plot(arg['output_time_series'],self.df[  arg['key_name']  ],'ro')
-            plt.title('interpolated '+' result, coef='+str(arg['coef']))
+            plt.title('interpolated '+arg['key_name']+' result, coef='+str(arg['coef']))
             plt.xticks(rotation=45)
             plt.show(block=False)
 
