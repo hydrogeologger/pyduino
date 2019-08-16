@@ -539,27 +539,28 @@ void loop() {
                     heat_suction_sensor_addr[i]=CardNumberByte;
                     Serial.print(CardNumberByte,HEX);
                     }
-                    digitalWrite(power_sw_pin,HIGH);
-                    delay(1000);
+                Serial.print(delimiter);
+                digitalWrite(power_sw_pin,HIGH);
+                delay(1000);
+                hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+                digitalWrite(power_heating_pin,HIGH);
+                for(int i=0;i<output_number_temp;i++)
+                {
+                    delay(output_temp_interval_ms);
                     hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-                    digitalWrite(power_heating_pin,HIGH);
-                    for(int i=0;i<output_number_temp;i++)
-                    {
-                        delay(output_temp_interval_ms);
-                        hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-                    }
-                    digitalWrite(power_heating_pin,LOW);
-                    for(int i=0;i<output_number_temp;i++)
-                    {
-                        delay(output_temp_interval_ms);
-                        hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-                    }
+                }
+                digitalWrite(power_heating_pin,LOW);
+                for(int i=0;i<output_number_temp;i++)
+                {
+                    delay(output_temp_interval_ms);
+                    hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
+                }
 
 
-                    Serial.println();
-                    digitalWrite(power_sw_pin,LOW); 
+                Serial.println();
+                digitalWrite(power_sw_pin,LOW); 
                     
-                 }
+                }
          }  // fred temperature by search.
 
 
@@ -973,10 +974,3 @@ char decToChar(byte i){
   if((i >= 10) && (i <= 36)) return i + 'a' - 10;
   if((i >= 37) && (i <= 62)) return i + 'A' - 37;
 }
-
-
-
-
-
-
-
