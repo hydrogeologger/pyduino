@@ -4,11 +4,12 @@ import sys
 import json
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
-
+import matplotlib.pyplot as plt
+plt.ioff()  # disable poping out figure automatically
 # recompile post_processing in case update are required
 pyduino_path = os.environ['pyduino']
 print(os.environ['pyduino'])
@@ -90,15 +91,6 @@ fig = plt.figure(figsize=(16,10))
 ax = [[] for i in range(30)]
 ax[0  ] = plt.subplot2grid((2, 1), (0, 0), colspan=1)
 ax[1  ] = plt.subplot2grid((2, 1), (1, 0), colspan=1, sharex = ax[0])
-
-
-#ax[0].plot(sp_sch.df['time_days']*constants.minutePday,sp_sch.df['temp_6'])
-#ax[0].plot(sp_sch.df['time_days']*constants.minutePday,sp_sch.df['temp_4'])
-#ax[0].plot(sp_sch.df['time_days']*constants.minutePday,sp_sch.df['temp_3'])
-#ax[0].plot(sp_sch.df['time_days']*constants.minutePday,sp_sch.df['temp_2'])
-#
-#ax[1].plot(sp_sch.df['time_days']*constants.minutePday,sp_sch.df['scale1'][0]-sp_sch.df['scale1'])
-#ax[1].plot(sp_sch.df['time_days']*constants.minutePday,sp_sch.df['scale2'][0]-sp_sch.df['scale2'])
 
 ax[0].plot(sp_sch.df.index,sp_sch.df['temp_6'])
 ax[0].plot(sp_sch.df.index,sp_sch.df['temp_4'])

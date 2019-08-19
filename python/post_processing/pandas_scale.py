@@ -271,7 +271,7 @@ class concat_data_tb():
             fig = plt.figure() 
             fig.subplots_adjust(bottom=0.2)
             fig.canvas.set_window_title('interpolate ')
-            plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+')
+            plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+', markersize=15)
             plt.plot(arg['output_time_series'],self.df[  arg['key_name']  ],'ro')
             plt.title('interpolated '+arg['key_name']+' result, coef='+str(arg['coef']))
             plt.xticks(rotation=45)
