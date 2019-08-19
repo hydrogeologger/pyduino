@@ -28,7 +28,7 @@ tb_pandas.get_token()    # get the token associated with the account
 tb_pandas.get_keys()     # list of keys in the device
 tb_pandas.get_data()     # obtain data from thingsboard stored at tb_pandas['results']
 tb_pandas.convert_data_to_df()  # convert each datasets to pandas dataframe
-#tb_pandas.plot_df(['scale1','scale2'])
+tb_pandas.plot_df(['scale1','scale2'])
 
 # small optation to the failed measurement
 
@@ -107,6 +107,6 @@ ax[0].plot(sp_sch.df.index,sp_sch.df['temp_2'])
 ax[1].plot(sp_sch.df.index,sp_sch.df['scale1'][0]-sp_sch.df['scale1'])
 ax[1].plot(sp_sch.df.index,sp_sch.df['scale2'][0]-sp_sch.df['scale2'])
 
-plt.show()
+#plt.show()
 sp_sch.df.to_csv('result.csv')
 #plt.close()
