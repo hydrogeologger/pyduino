@@ -59,17 +59,26 @@ class tingsboard_to_pandas:
         if self.input_json['startTs'].lower()=='':
            self.input_json['startTs_str']='0'
         else:
+            #date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
+            # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+            #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
             date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
             # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
-            self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
-
+            # below is found not compatible with spyder somehow
+            #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+            self.input_json['startTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
 
         if self.input_json['endTs'].lower()=='':
            self.input_json['endTs_str']=str(int(time.time()*constants.msecPsec))
         else:
            date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
-           self.input_json['endTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
-
+           #self.input_json['endTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+           #date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
+           # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+           # below is found not compatible with spyder somehow
+           #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+           #self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1969,12,31,14)).total_seconds()*constants.msecPsec ))
+           self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
         if self.input_json['limit']=='':
            self.input_json['limit'] = '100000'
            
