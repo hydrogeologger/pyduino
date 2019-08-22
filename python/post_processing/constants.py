@@ -28,6 +28,8 @@ psychrometric_paPK=66.0
 mPkm=1000
 kmPm=0.001
 minutePday=60.*24
+secPmsec=1e-3 # convert milli second to second
+msecPsec=1000 # convert second to milli second
 
 #class constitutive_relation:
 

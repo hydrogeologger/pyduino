@@ -5,6 +5,8 @@ import pandas as pd
 import time
 import matplotlib.pyplot as plt
 import datetime
+import constants
+import pdb
 
 
 
@@ -53,16 +55,47 @@ class tingsboard_to_pandas:
             self.key_string=','.join(self.input_json['key_list'])
         else:
             self.key_string=self.input_json['keys']
-        url= self.input_json['thingsboard_address'] + '/api/plugins/telemetry/DEVICE/'+ self.input_json['device_id']+ '/values/timeseries?keys=' +self.key_string + '&startTs=0&endTs=1563496646595&limit=1000'
+
+        if self.input_json['startTs'].lower()=='':
+           self.input_json['startTs_str']='0'
+        else:
+            #date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
+            # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+            #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+            date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
+            # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+            # below is found not compatible with spyder somehow
+            #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+            self.input_json['startTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
+
+        if self.input_json['endTs'].lower()=='':
+           self.input_json['endTs_str']=str(int(time.time()*constants.msecPsec))
+        else:
+           date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
+           #self.input_json['endTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+           #date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
+           # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+           # below is found not compatible with spyder somehow
+           #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+           #self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1969,12,31,14)).total_seconds()*constants.msecPsec ))
+           self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
+        if self.input_json['limit']=='':
+           self.input_json['limit'] = '100000'
+           
+        #url= self.input_json['thingsboard_address'] + '/api/plugins/telemetry/DEVICE/'+ self.input_json['device_id']+ '/values/timeseries?keys=' +self.key_string + '&startTs=0&endTs=1563496646595&limit=' + self.input_json['limit']
+        #pdb.set_trace()
+        self.input_json['url_data']= self.input_json['thingsboard_address'] + '/api/plugins/telemetry/DEVICE/'+ self.input_json['device_id']+ '/values/timeseries?keys=' +self.key_string + '&startTs='+ self.input_json['startTs_str'] +  '&endTs='+ self.input_json['endTs_str']+ '&limit=' + self.input_json['limit']
+        
         headers = {'Content-Type': 'application/json','X-Authorization':'bearer '+self.input_json['tb_token']}
-        self.result_json = requests.get(url, headers=headers).json()
+        self.result_json = requests.get(self.input_json['url_data'], headers=headers).json()
 
     def convert_data_to_df(self):
         self.result_df={   }
         for i in list(self.result_json):
-            print i
+            #pdb.set_trace()
+            print 'converting key '+ i
             self.result_df[i]=pd.DataFrame(self.result_json[i])
-            self.result_df[i]['ts']=pd.to_datetime(self.result_df[i]['ts'],unit='ms') +datetime.timedelta(hours=10)
+            self.result_df[i]['ts']=pd.to_datetime(self.result_df[i]['ts'],unit='ms') +datetime.timedelta(hours=10) # due to UTC time
             #https://stackoverflow.com/questions/42196337/dataframe-set-index-not-setting/42196399
             self.result_df[i].set_index('ts',inplace=True,drop=True)
             self.result_df[i].sort_index(inplace=True)
