@@ -222,7 +222,9 @@ class concat_data_tb():
         the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
         import pdb
         import pandas as pd
-        import wafo.interpolate as wf
+        import polynomial
+        import interpolate as wf
+        #import wafo.interpolate as wf
 
         # below is optional
         arg_defaults = {'plot':    False,
@@ -269,7 +271,7 @@ class concat_data_tb():
             fig = plt.figure() 
             fig.subplots_adjust(bottom=0.2)
             fig.canvas.set_window_title('interpolate ')
-            plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+')
+            plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+', markersize=15)
             plt.plot(arg['output_time_series'],self.df[  arg['key_name']  ],'ro')
             plt.title('interpolated '+arg['key_name']+' result, coef='+str(arg['coef']))
             plt.xticks(rotation=45)
@@ -314,7 +316,9 @@ class concat_data_roof():
         the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
         import pdb
         import pandas as pd
-        import wafo.interpolate as wf
+        import polynomial
+        import interpolate as wf
+        #import wafo.interpolate as wf
 
         # below is optional
         arg_defaults = {'plot':    False,
@@ -404,7 +408,10 @@ class concat_data_roof():
         the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
         import pdb
         import pandas as pd
-        import wafo.interpolate as wf
+        #import wafo.interpolate as wf
+        import polynomial
+        import interpolate as wf
+
         arg_defaults = {'plot':    False,
                     'keys': ['scale'],
                     'newkeys':None ,
