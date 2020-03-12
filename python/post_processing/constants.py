@@ -205,7 +205,8 @@ def swcc_reverse_fredlund_xing_1994(**kwargs):
                 'hr'  :223873.8,
                 'por':0.54,
                 'vwc':0.1,
-                'psi_0':1e-9
+                'psi_0':1e-1,
+                'psi_1':0.02  
                 }
 
     arg=arg_defaults
@@ -216,9 +217,10 @@ def swcc_reverse_fredlund_xing_1994(**kwargs):
 
     for i,k in enumerate(np.atleast_1d(arg['vwc'])) :
         #import pdb
-        #psi_1=0.02  # after a testing, the starting point would be good to be near the saturation level
-        psi_1=arg['af']  #2017-07-08 16:27 turns out the air entry pressure is the best start guessing point 
-        psi_0=0.
+#        psi_1=0.02  # after a testing, the starting point would be good to be near the saturation level
+        psi_1=arg['psi_1'] #2020-01-03 
+#        psi_1=arg['af']  #2017-07-08 16:27 turns out the air entry pressure is the best start guessing point 
+        psi_0=arg['psi_0'] #2020-01-03
         
         #pdb.set_trace()
         if k>=arg['por']:
