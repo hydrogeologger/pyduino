@@ -312,8 +312,10 @@ class concat_data_roof():
         #      rm_nan --  whether delete the nan data
         #      keys   --  the property that needs to be interpolated
         #      df     --  the panel data that gets the source data
-         
-        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        in case the error is TypeError: descriptor '__sub__' requires a 'datetime.datetime' object but received a 'float'
+        the problem could be that the datetime axis has NaN or NaT inside. TO200501
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] 
+        '''
         import pdb
         import pandas as pd
         import polynomial
@@ -321,13 +323,13 @@ class concat_data_roof():
         #import wafo.interpolate as wf
 
         # below is optional
-        arg_defaults = {'plot':    False,
-                    'keys': ['scale'],
-                    'newkeys':None ,
-                    'coef': 1e-14,
-                    'rm_nan':True,
-                    'new_keys':None,
-                    'mask':None}
+        arg_defaults = {'plot' : False,
+                    'keys'     : ['scale'],
+                    'newkeys'  : None ,
+                    'coef'     : 1e-14,
+                    'rm_nan'   : True,
+                    'new_keys' : None,
+                    'mask'     : None}
         arg=arg_defaults
         for d in kwargs:
             arg[d]= kwargs.get(d)
@@ -404,21 +406,25 @@ class concat_data_roof():
         #      df     --  the panel data that gets the source data
         # start_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
         #   end_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
+        in case the error is TypeError: descriptor '__sub__' requires a 'datetime.datetime' object but received a 'float'
+        the problem could be that the datetime axis has NaN or NaT inside. TO200501
+        particularly be aware of NaT because null can not filter this out.
          
-        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] 
+        '''
         import pdb
         import pandas as pd
         #import wafo.interpolate as wf
         import polynomial
         import interpolate as wf
 
-        arg_defaults = {'plot':    False,
-                    'keys': ['scale'],
-                    'newkeys':None ,
-                    'coef': 1e-14,
-                    'rm_nan':True,
-                    'start_time': None,
-                    'end_time': None}
+        arg_defaults = {'plot'   : False,
+                    'keys'       : ['scale'],
+                    'newkeys'    : None ,
+                    'coef'       : 1e-14,
+                    'rm_nan'     : True,
+                    'start_time' : None,
+                    'end_time'   : None}
         arg=arg_defaults
         for d in kwargs:
             arg[d]= kwargs.get(d)
