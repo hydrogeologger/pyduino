@@ -337,6 +337,27 @@ class concat_data_roof():
         # below is essential
         source_df=arg['df']
         source_keys=arg['keys']
+
+        #if arg['plot']==True:
+        #    pdb.set_trace()
+        # check if source_df has NaT TO200501
+        nat_bool=np.isnat(source_df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the time array as merge source df='
+                    +'row number'+str(location_nat[0][0]) + 'to'+ str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
+
+        nat_bool=np.isnat(self.df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the base time array'
+                    +'row number'+str(location_nat[0][0]) + 'to' + str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
         
         if arg['new_keys']==None:
             arg['new_keys']=source_keys
@@ -446,6 +467,31 @@ class concat_data_roof():
         #mask_source_df=
         #source_df=source_df0[mask_source_df]
         source_df=arg['df']
+
+
+
+
+        #if arg['plot']==True:
+        #    pdb.set_trace()
+        # check if source_df has NaT TO200501
+        nat_bool=np.isnat(source_df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the time array as merge source df='
+                    +'row number'+str(location_nat[0][0]) + 'to'+ str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
+
+        nat_bool=np.isnat(self.df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the base time array'
+                    +'row number'+str(location_nat[0][0]) + 'to' + str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
+
 
 
         #pdb.set_trace()
