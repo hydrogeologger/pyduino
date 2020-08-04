@@ -26,7 +26,7 @@ SERIAL_PORT='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.3:1.0' # datalogg
 
 file_name= 'amrit_amphirol_enclosure_2.csv'
 fid= open(file_name,'a',0)
-fid.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+'\n')
+fid.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
           
 #---------------------------- Initiation --------------------------------------
 
@@ -104,7 +104,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a1']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a1 reading failed')
@@ -116,7 +116,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a2']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a2 reading failed')
@@ -128,7 +128,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a3']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a3 reading failed')
@@ -140,7 +140,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a4']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a4 reading failed')
@@ -152,7 +152,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a5']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a5 reading failed')
@@ -164,7 +164,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a6']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a6 reading failed')
@@ -176,7 +176,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a7']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a7 reading failed')
@@ -188,7 +188,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a8']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a8 reading failed')
@@ -200,7 +200,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a9']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a9 reading failed')
@@ -212,7 +212,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a10']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a10 reading failed')
@@ -224,7 +224,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a11']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a11 reading failed')
@@ -236,7 +236,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_a12']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_a12 reading failed')
@@ -248,7 +248,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b1']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b1 reading failed')
@@ -260,7 +260,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b2']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b2 reading failed')
@@ -272,7 +272,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b3']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b3 reading failed')
@@ -284,7 +284,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b4']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b4 reading failed')
@@ -296,7 +296,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b5']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b5 reading failed')
@@ -308,7 +308,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b6']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b6 reading failed')
@@ -320,7 +320,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b7']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b7 reading failed')
@@ -332,7 +332,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b8']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b8 reading failed')
@@ -344,7 +344,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b9']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b9 reading failed')
@@ -356,7 +356,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b10']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b10 reading failed')
@@ -368,7 +368,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b11']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b11 reading failed')
@@ -380,7 +380,7 @@ try:
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_2['mo_b12']=float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('mo_b12 reading failed')

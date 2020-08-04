@@ -26,7 +26,7 @@ SERIAL_PORT='/dev/serial/by-path/platform-3f980000.usb-usb-0:1.2:1.0' # datalogg
 
 file_name= 'amrit_amphirol_enclosure_1.csv'
 fid= open(file_name,'a',0)
-fid.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+'\n')
+fid.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
           
 #---------------------------- Initiation --------------------------------------
 
@@ -35,6 +35,8 @@ with open('/home/pi/pyduino/credential/amrit_amphirol_enclosure_1.json') as f:
 
 field_name=['lc_a1','lc_a2','lc_a3','lc_a4','lc_a5','lc_a6','lc_a7','lc_a8','lc_a9','lc_a10',
 	    'lc_b1','lc_b2','lc_b3','lc_b4','lc_b5','lc_b6','lc_b7','lc_b8','lc_b9','lc_b10',
+	    'total_a','total_b',
+            'average_a','average_b',
 	    'ec1','ec2','ec3','ec4','ec5','ec6',
             'raw1','raw2','raw3','raw4','raw5','raw6']
 
@@ -64,7 +66,7 @@ try:
             amrit_amphirol_enclosure_1['ec1']=float(current_read.split(',')[-2])
             amrit_amphirol_enclosure_1['raw1']=float(current_read.split(',')[-4])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read.split(',')[-2]+DELIMITER+current_read.split(',')[-4])
             time.sleep(5)
         except Exception:
             if SCREEN_DISPLAY:
@@ -78,7 +80,7 @@ try:
             amrit_amphirol_enclosure_1['ec2']=float(current_read.split(',')[-2])
             amrit_amphirol_enclosure_1['raw2']=float(current_read.split(',')[-4])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read.split(',')[-2]+DELIMITER+current_read.split(',')[-4])
             time.sleep(5)
         except Exception:
             if SCREEN_DISPLAY:
@@ -92,7 +94,7 @@ try:
             amrit_amphirol_enclosure_1['ec3']=float(current_read.split(',')[-2])
             amrit_amphirol_enclosure_1['raw3']=float(current_read.split(',')[-4])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read.split(',')[-2]+DELIMITER+current_read.split(',')[-4])
             time.sleep(5)
         except Exception:
             if SCREEN_DISPLAY:
@@ -106,7 +108,7 @@ try:
             amrit_amphirol_enclosure_1['ec4']=float(current_read.split(',')[-2])
             amrit_amphirol_enclosure_1['raw4']=float(current_read.split(',')[-4])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read.split(',')[-2]+DELIMITER+current_read.split(',')[-4])
             time.sleep(5)
         except Exception:
             if SCREEN_DISPLAY:
@@ -120,7 +122,7 @@ try:
             amrit_amphirol_enclosure_1['ec5']=float(current_read.split(',')[-2])
             amrit_amphirol_enclosure_1['raw5']=float(current_read.split(',')[-4])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read.split(',')[-2]+DELIMITER+current_read.split(',')[-4])
             time.sleep(5)
         except Exception:
             if SCREEN_DISPLAY:
@@ -134,7 +136,7 @@ try:
             amrit_amphirol_enclosure_1['ec6']=float(current_read.split(',')[-2])
             amrit_amphirol_enclosure_1['raw6']=float(current_read.split(',')[-4])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read.split(',')[-2]+DELIMITER+current_read.split(',')[-4])
             time.sleep(5)
         except Exception:
             if SCREEN_DISPLAY:
@@ -142,14 +144,16 @@ try:
 
 #---------------------------------load cells---------------------------------------
 #---------------------------------load cell a1---------------------------
-        try:
+        current_total_a = 0
+	try:
             ard.write("analog,8,power,44,point,3,interval_mm,200,debug,0")
             ard.flushInput()
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a1']=float(current_read[2])
+	    current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a1 reading failed')
@@ -160,8 +164,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a2']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a2 reading failed')
@@ -172,8 +177,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a3']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a3 reading failed')
@@ -184,8 +190,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a4']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a4 reading failed')
@@ -196,8 +203,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a5']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a5 reading failed')
@@ -208,8 +216,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a6']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a6 reading failed')
@@ -220,8 +229,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a7']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a7 reading failed')
@@ -232,8 +242,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a8']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a8 reading failed')
@@ -244,8 +255,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a9']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a9 reading failed')
@@ -256,20 +268,32 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_a10']=float(current_read[2])
+            current_total_a += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell a10 reading failed')
+#------------total and average of the load cells for tank A--------------
+ 	try:
+	    amrit_amphirol_enclosure_1['total_a']=current_total_a
+            amrit_amphirol_enclosure_1['average_a']=current_total_a/10	
+	    if SCREEN_DISPLAY: print('total is '+str(current_total_a)+' average is '+str(current_total_a/10))
+            if SAVE_TO_FILE: fid.write(DELIMITER+str(current_total_a)+DELIMITER+str(current_total_a/10))
+	except Exception:
+	    if SCREEN_DISPLAY:
+  		print('fail to calculate total and average values for tank A')
 #---------------------------------load cell b1---------------------------
+        current_total_b = 0
         try:
             ard.write("analog,14,power,40,point,3,interval_mm,200,debug,0")
             ard.flushInput()
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b1']=float(current_read[2])
-            if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            current_total_b += float(current_read[2])
+	    if SCREEN_DISPLAY: print(msg.rstrip())
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b1 reading failed')
@@ -280,8 +304,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b2']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b2 reading failed')
@@ -292,8 +317,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b3']=float(current_read[2])
+	    current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b3 reading failed')
@@ -304,8 +330,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b4']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b4 reading failed')
@@ -316,8 +343,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b5']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b5 reading failed')
@@ -328,8 +356,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b6']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b6 reading failed')
@@ -340,8 +369,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b7']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b7 reading failed')
@@ -352,8 +382,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b8']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b8 reading failed')
@@ -364,8 +395,9 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b9']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b9 reading failed')
@@ -376,11 +408,21 @@ try:
             msg=ard.readline()
             current_read=msg.split(',')[0:-1]
             amrit_amphirol_enclosure_1['lc_b10']=float(current_read[2])
+            current_total_b += float(current_read[2])
             if SCREEN_DISPLAY: print(msg.rstrip())
-            if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+            if SAVE_TO_FILE: fid.write(DELIMITER+current_read[2])
         except Exception:
             if SCREEN_DISPLAY:
                 print('load cell b10 reading failed') 
+#------------total and average of the load cells for tank B--------------
+        try:
+            amrit_amphirol_enclosure_1['total_b']=current_total_b
+            amrit_amphirol_enclosure_1['average_b']=current_total_b/10
+            if SCREEN_DISPLAY: print('total is '+str(current_total_b)+' average is '+str(current_total_b/10))
+            if SAVE_TO_FILE: fid.write(DELIMITER+str(current_total_b)+DELIMITER+str(current_total_b/10))
+        except Exception:
+            if SCREEN_DISPLAY:
+                print('fail to calculate total and average values for tank B')
 #----------------------------Upload data -----------------------------------    
     
         ard.close()
