@@ -133,7 +133,12 @@ try:
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
-        wwl2['volt']=float(current_read[-1])
+        try:
+
+            wwl2['volt']=float(current_read[-1])
+
+	except Exception, e:
+            if screen_display: print 'voltmeter does not get results'
         #sleep(2)
 
 #------enclosure------------------
@@ -149,23 +154,35 @@ try:
 
 #------Temperature and humidity------
 
-        msg=ard.write("9548,2,type,sht31,power,8,debug,1")
-        msg=ard.flushInput()
-        msg=ard.readline()
-        if screen_display: print msg.rstrip()
-        if save_to_file: fid.write(delimiter+msg)
-        current_read=msg.split(',')[0:-1]
-        wwl2['sht33_temp_1']=float(current_read[-2])
-        wwl2['sht33_humidity_1']=float(current_read[-1])
-
+#        msg=ard.write("9548,2,type,sht31,power,8,debug,1")
+#        msg=ard.flushInput()
+#        msg=ard.readline()
+#        if screen_display: print msg.rstrip()
+#        if save_to_file: fid.write(delimiter+msg)
+#        current_read=msg.split(',')[0:-1]
+#
+#	try:
+#
+#            wwl2['sht33_temp_1']=float(current_read[-2])
+#            wwl2['sht33_humidity_1']=float(current_read[-1])
+#
+#	except Exception, e:
+#            if screen_display: print 'sht31_1,does not get results'
+#
         msg=ard.write("9548,3,type,sht31,power,8,debug,1")
         msg=ard.flushInput()
         msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg)
         current_read=msg.split(',')[0:-1]
-        wwl2['sht33_temp_2']=float(current_read[-2])
-        wwl2['sht33_humidity_2']=float(current_read[-1])
+
+	try:
+
+            wwl2['sht33_temp_2']=float(current_read[-2])
+            wwl2['sht33_humidity_2']=float(current_read[-1])
+
+	except Exception, e:
+            if screen_display: print 'sht31_2,does not get results'
 
 #------UV sensors------------------
         msg=ard.write("9548,1,type,si1145,power,8,debug,1")
@@ -191,7 +208,6 @@ try:
         wwl2['vis_1']=float(current_read[-5])
 
 
-#fred,5A22A047,dgin,18,snpw,26,htpw,23,itv,1000,otno,5  #working
 #fred,B01BA159,dgin,18,snpw,26,htpw,24,itv,1000,otno,5  #working
 
         msg=ard.write("fred,5A22A047,dgin,18,snpw,26,htpw,23,itv,6000,otno,5")
