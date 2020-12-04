@@ -368,8 +368,8 @@ class concat_data_roof():
         
         #pdb.set_trace()
         #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
-        #source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
-        source_sec=(source_df.index-source_df.index[0])/np.timedelta64(1,'s')
+        source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
+        #source_sec=(source_df.index-source_df.index[0])/np.timedelta64(1,'s')
         #pdb.set_trace()
 
         # TO181023 making sure that we can name a new string
@@ -386,8 +386,8 @@ class concat_data_roof():
                 interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
             #interp_method=wf.SmoothSpline(source_sec,source_df[ i   ],p=arg['coef'])
             # warning, it is found that the Smoothspline is dependent on the x axis!!!
-            ##sp_sec=(self.df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
-            sp_sec=(self.df.index-source_df.index[0])/np.timedelta64(1,'s')
+            sp_sec=(self.df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
+            #sp_sec=(self.df.index-source_df.index[0])/np.timedelta64(1,'s')
             #self.df[i]=interp_method(sp_sec)
             if arg['mask'] == None:
                 self.df[ arg['new_keys'][idx] ]=interp_method(sp_sec)
@@ -401,8 +401,8 @@ class concat_data_roof():
                 fig.subplots_adjust(bottom=0.2)
                 fig.canvas.set_window_title('interpolate '+ i)
                 plt.plot(source_df['date_time'],source_df [i]  ,'b+')
-                ##plt.plot(self.df['date_time'],self.df[  arg['new_keys'][idx]  ],'ro')
-                plt.plot(self.df.index,self.df[  arg['new_keys'][idx]  ],'ro')
+                plt.plot(self.df['date_time'],self.df[  arg['new_keys'][idx]  ],'ro')
+                #plt.plot(self.df.index,self.df[  arg['new_keys'][idx]  ],'ro')
                 plt.title('interpolated '+i+' result, coef='+str(arg['coef']))
                 plt.xticks(rotation=45)
                 plt.show(block=False)
