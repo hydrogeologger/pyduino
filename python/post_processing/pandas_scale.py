@@ -367,6 +367,7 @@ class concat_data_roof():
         
         #pdb.set_trace()
         #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
+        source_df.drop_duplicates(subset='date_time', keep='first',inplace=True)
         source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
         #pdb.set_trace()
 
