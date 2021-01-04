@@ -28,8 +28,16 @@ void timeout_reset_pi() {
 void command_reset_pi(String content) {
     if (content == "RESET") 
     {
-        Serial.println("Reboot in 30 s....");
-        delay(30000);  // usually it is safe to have 30 sec to allow rpi reboot
+        Serial.println("Reboot in 5 s....");
+        delay(1000);  // usually it is safe to have 30 sec to allow rpi reboot
+		Serial.println("Reboot in 4 s....");
+		delay(1000);  // usually it is safe to have 30 sec to allow rpi reboot
+		Serial.println("Reboot in 3 s....");
+		delay(1000);  // usually it is safe to have 30 sec to allow rpi reboot
+		Serial.println("Reboot in 2 s....");
+		delay(1000);  // usually it is safe to have 30 sec to allow rpi reboot
+		Serial.println("Reboot in 1 s....");
+		delay(1000);  // usually it is safe to have 30 sec to allow rpi reboot
         setMillis(0);
         isComm = FALSE;
         digitalWrite(PI_SW, HIGH);

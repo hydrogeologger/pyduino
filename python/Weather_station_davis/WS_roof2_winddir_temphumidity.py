@@ -24,7 +24,7 @@ fid= open(file_name,'a',0)
 with open('/home/pi/pyduino/credential/weather_station_roof2.json') as f:
     credential = json.load(f)
 
-field_name=['wind_direction','sht31_temp_1','sht31_humidity_1','sht31_temp_2','sht31_humidity_2','uv','ir','vis','tmp1','tmp2']
+field_name=['volt','wind_direction','sht31_temp_1','sht31_humidity_1','sht31_temp_2','sht31_humidity_2','uv','ir','vis','tmp1','tmp2']
 weather_roof2=dict((el,0.0) for el in field_name)
 
 try:
@@ -38,7 +38,9 @@ except Exception:
 
 davisWindPowerSwitch = 45 #Arduino Switch Power
 #davisWindSpeedPin = 8 #RPI GPIO
-davidWindDirPin = 8 #Arduino Analog Pin
+davisWindDirPin = 8 #Arduino Analog Pin
+systemVoltPin = 15 #Aruino Analog Pin
+ststemVoltPowerSwitch = 9 #Arduino Switch Power
 #davisRainPin = 11 #RPI GPIO
 
 #ard = serial.Serial(SERIAL_PORT, timeout = 20)
@@ -152,8 +154,9 @@ try:
         #except Exception:
         #    if SCREEN_DISPLAY: 
         #        print('Wind speed reading failed')
-
-        msg1 = ard.write("analog," + str(davidWindDirPin) + ",power," + str(davisWindPowerSwitch) + ",point,3,interval_mm,200,debug,0")
+        
+        #-----------------Wind direction---------------------------
+        msg1 = ard.write("analog," + str(davisWindDirPin) + ",power," + str(davisWindPowerSwitch) + ",point,3,interval_mm,200,debug,0")
         msg1 = ard.flushInput()
         msg1 = ard.readline()
 
@@ -168,6 +171,24 @@ try:
             if SCREEN_DISPLAY: 
                 print('Wind direction reading failed')
 
+        #----------------System voltage-----------------------------
+        msg2 = ard.write("analog," + str(systemVoltPin) + ",power," + str(ststemVoltPowerSwitch) + ",point,3,interval_mm,200,debug,0")
+        msg2 = ard.flushInput()
+        msg2 = ard.readline()
+
+        try:
+            current_read = float(msg2.split(',')[-2])
+            weather_roof2['volt'] = int(current_read)
+            if SCREEN_DISPLAY:
+                print ('raw System Voltage: ' + str(weather_roof2['volt']))
+            if SAVE_TO_FILE:
+                fid.write(DELIMITER + str(weather_roof2['volt']) + '\n')
+        except Exception:
+            if SCREEN_DISPLAY:
+                print('System voltage reading failed')
+
+
+        #-----------------Temperature, humidity and UV sensor--------------------
         msg=ard.write("power_switch,23,power_switch_status,1")
         msg=ard.flushInput()
 
@@ -181,19 +202,19 @@ try:
 
         time.sleep(5) #It is VERY IMPORTANT to set a time delay after switching on power channels for I2C because humiditity sensors would not get reading successfully if the measurement is conducted immediately.
 
-        msg2 = ard.write("9548,0,type,sht31,power,28,debug,1")
-        msg2 = ard.flushInput()
-        msg2 = ard.readline()
+        msg3 = ard.write("9548,0,type,sht31,power,28,debug,1")
+        msg3 = ard.flushInput()
+        msg3 = ard.readline()
 
         #msg4 = ard.write("9548,1,type,sht31,power,28,debug,1")
         #msg4 = ard.flushInput()
         #msg4 = ard.readline()
         time.sleep(5)
 
-        msg3 = ard.write("9548,3,type,si1145,power,28,debug,1")
-        #msg3 = ard.write("9548,3,type,si1145,dummies,1,power,28,debug,1,points,1,timeout,5")
-        msg3 = ard.flushInput()
-        msg3 = ard.readline()
+        msg5 = ard.write("9548,3,type,si1145,power,28,debug,1")
+        #msg5 = ard.write("9548,3,type,si1145,dummies,1,power,28,debug,1,points,1,timeout,5")
+        msg5 = ard.flushInput()
+        msg5 = ard.readline()
 
         time.sleep(5)
 
@@ -209,15 +230,13 @@ try:
         #time.sleep(5)
         
         try:
-            current_read = msg2.split(',')[0:-1]
+            current_read = msg3.split(',')[0:-1]
             weather_roof2['sht31_temp_1'] = float(current_read[-2])
             weather_roof2['sht31_humidity_1'] = float(current_read[-1])
             if SCREEN_DISPLAY:
-                print('Temperature: ' + str(weather_roof2['sht31_temp_1']) + u"\u2103"  + DELIMITER + 'Relative humidity: ' + str(weather_roof2['sht31_humidity_1']) + '%')  #u"\u2103" is the unicode for celsius degree
+                print ('Temperature: ' + str(weather_roof2['sht31_temp_1']) + u"\u2103"  + DELIMITER + 'Relative humidity: ' + str(weather_roof2['sht31_humidity_1']) + '%')  #u"\u2103" is the unicode for celsius degree
             if SAVE_TO_FILE:
                 fid.write(DELIMITER + str(weather_roof2['sht31_temp_1']) + DELIMITER + str(weather_roof2['sht31_humidity_1']) + '\n')
-            #if SCREEN_DISPLAY: print(msg.rstrip())
-            #if SAVE_TO_FILE: fid.write(DELIMITER+msg)
         except Exception:
             if SCREEN_DISPLAY:
                 print('humidity sensor No.1 reading failed')
@@ -238,31 +257,18 @@ try:
         #        print('humidity sensor No.2 reading failed')
 
         try:
-            current_read=msg3.split(',')[0:-1]
+            current_read=msg5.split(',')[0:-1]
             weather_roof2['uv']=float(current_read[-1]) #ultraviolet index
             weather_roof2['ir']=float(current_read[-3]) #Infrared light, unit in lm
             weather_roof2['vis']=float(current_read[-5]) #visible light, unit in lm            
             if SCREEN_DISPLAY:
-                print('uv: ' + str(weather_roof2['uv']) + DELIMITER + 'ir: ' + str(weather_roof2['ir']) + DELIMITER + 'vis: ' + str(weather_roof2['vis']))  #u"\u2103" is the unicode for celsius degree
+                print ('uv: ' + str(weather_roof2['uv']) + DELIMITER + 'ir: ' + str(weather_roof2['ir']) + DELIMITER + 'vis: ' + str(weather_roof2['vis']))  #u"\u2103" is the unicode for celsius degree
             if SAVE_TO_FILE:
-                fid.write(DELIMITER+str(weather_roof2['uv']) + DELIMITER + str(weather_roof2['ir']) + DELIMITER + str(weather_roof2['vis']) + '\n')
+                fid.write(DELIMITER + str(weather_roof2['uv']) + DELIMITER + str(weather_roof2['ir']) + DELIMITER + str(weather_roof2['vis']) + '\n')
         except Exception:
             if SCREEN_DISPLAY:
                 print('UV sensor reading failed')
 
-        #msg=ard.write("power_switch,23,power_switch_status,0")
-        #msg=ard.flushInput()
-
-        #msg=ard.write("power_switch,23,power_switch_status,0")
-        #msg=ard.flushInput()
-
-        #msg=ard.write("power_switch,25,power_switch_status,0")
-        #msg=ard.flushInput()
-
-
-        #test1.reset()
-        #test2.reset()
-        #t0 = time.time()
 
 #----------------------------Upload data -----------------------------------
         ard.close()
