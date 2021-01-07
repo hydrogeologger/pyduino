@@ -173,6 +173,111 @@ class pandas_scale:
 
 
     
+class concat_data_tb():
+#"""
+#this is to creat new data series that are ready to be interpolated
+#"""
+    import pandas as pd
+    #def __init__(self,start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
+    #def __init__(self,start_time=inp_start_time,end_time=inp_end_time,dt_s=inp_dt_s):
+    def __init__(self,start_time,end_time,dt_s):
+    #def __init__(self): #start_time=pd.Timestamp('2016-06-25 08:46:30'),end_time=pd.Timestamp('2016-07-11 01:00:56'),dt_s=600):
+	import pdb
+        import csv
+	import numpy as np
+        import pandas as pd
+        self.dt_s=dt_s
+        #pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),period=pd.Timedelta(600,unit='s' ) )
+        # frequency is actually the duration between the neighbouring point not period
+        #date_time=pd.date_range(start=pd.Timestamp('2016-06-25 08:46:30'),end=pd.Timestamp('2016-07-11 01:00:56'),freq=pd.Timedelta(600,unit='s' ) )
+
+        #pdb.set_trace()
+        date_time=pd.date_range(start=start_time,end=end_time,freq=pd.Timedelta(dt_s,unit='s' ) )
+        self.df = pd.DataFrame({ 'date_time' : date_time})
+        self.df['time_days']=(self.df['date_time']-self.df['date_time'][0]).astype('timedelta64[s]')/86400.0
+        self.df.set_index('date_time',inplace=True,drop=True)
+    
+
+    def get_derivative(self,**kwargs ):
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        #var_in= [a.df,['scale']]  
+        arg_defaults = {'plot':    False,
+                    'key': ['cum_evap'],
+                    'deri_key':['evap']
+                       }
+        arg=arg_defaults
+        for d in kwargs:
+            arg[d]= kwargs.get(d)
+        self.df[arg['deri_key']]=np.append(np.diff(self.df[arg['key']] ),np.nan)/self.dt_s
+
+    def merge_data_from_tb(self,**kwargs ):
+        '''
+        import matplotlib.pyplot as plt
+        #    properties:
+        #      rm_nan --  whether delete the nan data
+        #      keys   --  the property that needs to be interpolated
+        #      df     --  the panel data that gets the source data
+         
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        import pdb
+        import pandas as pd
+        import polynomial
+        import interpolate as wf
+        #import wafo.interpolate as wf
+
+        # below is optional
+        arg_defaults = {'plot':    False,
+                    'keys': ['scale'],
+                    'newkeys':None ,
+                    'coef': 1e-14,
+                    'rm_nan':True,
+                    'key_name':None,
+                    'mask':None,
+                    'time_index':'date_time',
+                    'input_time_series':None,
+                    'input_data_series':None,
+                    'output_time_series':None,
+        }
+        arg=arg_defaults
+        for d in kwargs:
+            arg[d]= kwargs.get(d)
+
+        
+        #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
+        input_time_ay_s=((arg['input_time_series']-arg['input_time_series'][0])/np.timedelta64(1,'s')).values
+
+        # TO181023 making sure that we can name a new string
+        # https://stackoverflow.com/questions/522563/accessing-the-index-in-for-loops
+        if arg['rm_nan']==True:
+            mask_idx          =  arg['input_data_series'].isnull()
+            input_time_ay_no_nan =  input_time_ay_s[~mask_idx]
+            input_data_ay_no_nan  =  arg['input_data_series'][~mask_idx]
+            interp_method     =  wf.SmoothSpline(input_time_ay_no_nan,input_data_ay_no_nan,p=arg['coef'])
+        else:
+            interp_method=wf.SmoothSpline(input_time_ay_s,arg['input_data_series'],p=arg['coef'])
+        # warning, it is found that the Smoothspline is dependent on the x axis!!!
+        output_time_ay_sec=((arg['output_time_series'] - arg['input_time_series'][0]  )/np.timedelta64(1,'s')).values
+
+        self.df[arg['key_name']]=interp_method(output_time_ay_sec)
+        #pdb.set_trace()
+        #if arg['mask'] == None:
+        #    self.df[arg['key_name']]=interp_method(output_time_ay_sec)
+        #else:
+        #    self.df[arg['key_name']][arg['mask']]=interp_method(output_time_ay_sec)
+        
+        if arg['plot']==True:
+            import matplotlib.pyplot as plt 
+            fig = plt.figure() 
+            fig.subplots_adjust(bottom=0.2)
+            fig.canvas.set_window_title('interpolate ')
+            plt.plot(arg['input_time_series'], arg['input_data_series']  ,'b+', markersize=15)
+            plt.plot(arg['output_time_series'],self.df[  arg['key_name']  ],'ro')
+            plt.title('interpolated '+arg['key_name']+' result, coef='+str(arg['coef']))
+            plt.xticks(rotation=45)
+            plt.show(block=False)
+
+
 class concat_data_roof():
 #"""
 #this is to creat new data series that are ready to be interpolated
@@ -197,8 +302,6 @@ class concat_data_roof():
         self.df['time_days']=(self.df['date_time']-self.df['date_time'][0]).astype('timedelta64[s]')/86400.0
 
 
-
-
     
     
 #    def merge_data(self,var_in=a ): this is not good because if a is not defined, this is not going to be useful
@@ -209,20 +312,24 @@ class concat_data_roof():
         #      rm_nan --  whether delete the nan data
         #      keys   --  the property that needs to be interpolated
         #      df     --  the panel data that gets the source data
-         
-        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        in case the error is TypeError: descriptor '__sub__' requires a 'datetime.datetime' object but received a 'float'
+        the problem could be that the datetime axis has NaN or NaT inside. TO200501
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] 
+        '''
         import pdb
         import pandas as pd
-        import wafo.interpolate as wf
+        import polynomial
+        import interpolate as wf
+        #import wafo.interpolate as wf
 
         # below is optional
-        arg_defaults = {'plot':    False,
-                    'keys': ['scale'],
-                    'newkeys':None ,
-                    'coef': 1e-14,
-                    'rm_nan':True,
-                    'new_keys':None,
-                    'mask':None}
+        arg_defaults = {'plot' : False,
+                    'keys'     : ['scale'],
+                    'newkeys'  : None ,
+                    'coef'     : 1e-14,
+                    'rm_nan'   : True,
+                    'new_keys' : None,
+                    'mask'     : None}
         arg=arg_defaults
         for d in kwargs:
             arg[d]= kwargs.get(d)
@@ -230,6 +337,27 @@ class concat_data_roof():
         # below is essential
         source_df=arg['df']
         source_keys=arg['keys']
+
+        #if arg['plot']==True:
+        #    pdb.set_trace()
+        # check if source_df has NaT TO200501
+        nat_bool=np.isnat(source_df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the time array as merge source df='
+                    +'row number'+str(location_nat[0][0]) + 'to'+ str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
+
+        nat_bool=np.isnat(self.df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the base time array'
+                    +'row number'+str(location_nat[0][0]) + 'to' + str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
         
         if arg['new_keys']==None:
             arg['new_keys']=source_keys
@@ -239,6 +367,7 @@ class concat_data_roof():
         
         #pdb.set_trace()
         #http://stackoverflow.com/questions/14920903/time-difference-in-seconds-from-numpy-timedelta64
+        source_df.drop_duplicates(subset='date_time', keep='first',inplace=True)
         source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
         #pdb.set_trace()
 
@@ -299,19 +428,25 @@ class concat_data_roof():
         #      df     --  the panel data that gets the source data
         # start_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
         #   end_time  --  the start time that slice works example starttime=np.datetime64('2018-04-11T10:00')
-
+        in case the error is TypeError: descriptor '__sub__' requires a 'datetime.datetime' object but received a 'float'
+        the problem could be that the datetime axis has NaN or NaT inside. TO200501
+        particularly be aware of NaT because null can not filter this out.
          
-        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] '''
+        the var_in needs to be in the format like [pd['time'],['scale1', 'scale2']  ] 
+        '''
         import pdb
         import pandas as pd
-        import wafo.interpolate as wf
-        arg_defaults = {'plot':    False,
-                    'keys': ['scale'],
-                    'newkeys':None ,
-                    'coef': 1e-14,
-                    'rm_nan':True,
-                    'start_time': None,
-                    'end_time': None}
+        #import wafo.interpolate as wf
+        import polynomial
+        import interpolate as wf
+
+        arg_defaults = {'plot'   : False,
+                    'keys'       : ['scale'],
+                    'newkeys'    : None ,
+                    'coef'       : 1e-14,
+                    'rm_nan'     : True,
+                    'start_time' : None,
+                    'end_time'   : None}
         arg=arg_defaults
         for d in kwargs:
             arg[d]= kwargs.get(d)
@@ -333,6 +468,31 @@ class concat_data_roof():
         #mask_source_df=
         #source_df=source_df0[mask_source_df]
         source_df=arg['df']
+
+
+
+
+        #if arg['plot']==True:
+        #    pdb.set_trace()
+        # check if source_df has NaT TO200501
+        nat_bool=np.isnat(source_df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the time array as merge source df='
+                    +'row number'+str(location_nat[0][0]) + 'to'+ str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
+
+        nat_bool=np.isnat(self.df.index)
+        total_number_of_nat=np.sum(nat_bool)
+        location_nat=np.where(nat_bool)
+        if total_number_of_nat!=0:
+            print(str(total_number_of_nat)+ 'of  NaT exists in the base time array'
+                    +'row number'+str(location_nat[0][0]) + 'to' + str(location_nat[0][-1]) +'\n'   )
+                    #+source_df.index.loc[location_nat])
+            return
+
 
 
         #pdb.set_trace()
@@ -405,4 +565,3 @@ class concat_data_roof():
         for d in kwargs:
             arg[d]= kwargs.get(d)
         self.df[arg['deri_key']]=np.append(np.diff(self.df[arg['key']] ),np.nan)/self.dt_s
-

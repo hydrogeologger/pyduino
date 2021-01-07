@@ -108,19 +108,8 @@ float hydrogeolog::analog_excite_read(int power_sw_idx,int analog_idx,int number
 
 
 void hydrogeolog::switch_power(int power_sw_idx,int status)
-    {
-    if (status==1)
-    {
-        digitalWrite(power_sw_idx,HIGH);
-    }
-    else
-    {
-        digitalWrite(power_sw_idx,LOW);
-    }
-
-
-    } // switch_power
-
+    anaLogWrite(power_sw_idx, status);
+}
 
 void hydrogeolog::dht22_excite_read(int power_sw_idx,int digi_idx,int number_of_dummies,int number_of_measurements,int measure_time_interval)
     {
