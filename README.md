@@ -1,7 +1,10 @@
 
 in serial connection:
 
-RESET  -- will reset raspberry pi in 21 seconds
+```
+RESET
+```
+-- will reset raspberry pi in 21 seconds
 
 
 
