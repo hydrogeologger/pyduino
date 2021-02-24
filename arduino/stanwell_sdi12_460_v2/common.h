@@ -22,9 +22,9 @@ volatile static const uint8_t analog_pins[] = {A0, A1, A2, A3, A4,
                                       A5, A6, A7, A8, A9,
                                       A10, A11, A12, A13, A14,
                                       A15};
-volatile static const uint8_t sdi12_pins[] = {50, 51, 52, 53};
+volatile static const uint8_t sdi12_pins[] = {50, 51, 52, 53, A8, A9, A10, A11, A12, A13, A14};
 volatile static const uint8_t pwm_pins[] = {3, 4, 5, 8, 9, 10, 11, 12, 13};
-#define SDI12_PIN_COUNT 4
+#define SDI12_PIN_COUNT 11
 #define PWM_PIN_COUNT 9
 #define ANALOG_PIN_COUNT 16;
 #define MULTIPLEXER_SW 7
