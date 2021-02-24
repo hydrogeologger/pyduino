@@ -125,25 +125,72 @@ boolean is_pwm_pin(int pow_sw)
     return false;
 }
 
-void power_switch(int pow_sw, int pow_sw_status)
+boolean is_digi_out_pin(int pinName)
+{
+    for (int i = 0; i < DIGITAL_PIN_COUNT; i++)
+    {
+        if (pinName == digi_out_pins[i])
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void power_switch(int pow_sw, int pow_sw_status, int pwmValue)
 {
     /*
+    Toggles power pin or initiate PWM for compatible pins.
+
+    power_status of 255 will be treated as power_status = 1 for backwards compatibility
+
+    LOGIC: PWM refers to any pwm value between 0 and 255 non inclusive
+    power_status | PWM  | pin state
+    1 or 255     |  0   | HIGH
+    1 or 255     | 255  | HIGH
+    0            | 255  | HIGH
+    0            |  0   | LOW
+    1 or 255     | PWM  | PWM for PWM pins
+    0            | PWM  | PWM for PWM pins
+
+    Will print invalid status if incorrect configuration
+    Prints "Invalid" to serial if incorrect power pin selected
+
     E.g:
     power_switch,46,power_switch_status,1
+
+    power_switch,10,pwm_status,50
     */
-    if ((pow_sw != INVALID))
+    if (pow_sw != INVALID)
     {
-        hydrogeolog1.print_string_delimiter_value("power_switch", String(pow_sw));
-        hydrogeolog1.print_string_delimiter_value("power_switch_status", String(pow_sw_status));
-        if (is_pwm_pin(pow_sw))
-        {
-            hydrogeolog1.pwm_switch_power(pow_sw, pow_sw_status);
+        if (is_pwm_pin(pow_sw) || is_digi_out_pin(pow_sw)) {      
+            // pwm value protection as max is 255 for arduino
+            if (pwmValue >= 255) {
+                pwmValue = 255;
+            }
+            
+            // For backward compatibility
+            if (pow_sw_status == 255 || (pow_sw_status == LOW && pwmValue == 255)) {
+                pow_sw_status = HIGH;
+            }
+
+            hydrogeolog1.print_string_delimiter_value("power_switch", String(pow_sw));
+
+            if (is_pwm_pin(pow_sw) && pwmValue > 0 && pwmValue < 255) {
+                hydrogeolog1.pwm_switch_power(pow_sw, pwmValue);
+            } else if ((pwmValue == 0 || pwmValue == 255) && (pow_sw_status == LOW || pow_sw_status == HIGH)) {
+                // Treat pin as normal digital pin if pwm is 0 or 255
+                hydrogeolog1.print_string_delimiter_value("power_switch_status", String(pow_sw_status));
+                hydrogeolog1.switch_power(pow_sw, pow_sw_status);
+            } else {
+                Serial.print("Invalid status");
+            }
+            Serial.println();
+
+        } else {
+            // if not valid power pin or pwm pin
+            Serial.println("Invalid");
         }
-        else
-        {
-            hydrogeolog1.switch_power(pow_sw, pow_sw_status);
-        }
-        Serial.println();
     }
 }
 
@@ -602,7 +649,8 @@ void loop()
                                 power_sw_pin, str_ay);
 
         power_switch(hydrogeolog1.parse_argument("power_switch", INVALID, str_ay_size, str_ay),
-                     hydrogeolog1.parse_argument("power_switch_status", 0, str_ay_size, str_ay));
+                     hydrogeolog1.parse_argument("power_switch_status", 0, str_ay_size, str_ay),
+                     hydrogeolog1.parse_argument("pwm_status", 0, str_ay_size, str_ay));
 
         dht22_measurement(str_ay_size, debug_sw,
                           hydrogeolog1.parse_argument("dht22", INVALID, str_ay_size, str_ay),
