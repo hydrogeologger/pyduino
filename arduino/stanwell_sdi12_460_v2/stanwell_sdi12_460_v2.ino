@@ -523,11 +523,9 @@ void multiplexer_search(int search_9548)
     */
     if (search_9548 != INVALID)
     {
-        // digitalWrite(MULTIPLEXER_SW, HIGH);
         hydrogeolog1.print_string_delimiter_value("9548_search", String(search_9548));
         hydrogeolog1.search_9548_channels();
         Serial.println();
-        // digitalWrite(MULTIPLEXER_SW, LOW);
     }
 }
 
@@ -541,29 +539,40 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
     */
     if ((tca9548_channel != INVALID) && (i2c_type != ""))
     {
+        // Initialize TWI if has been disabled
+        if ((TWCR & _BV(TWEN)) == 0) {
+            Wire.begin();
+        }
+
         int number_of_measurements = hydrogeolog1.parse_argument("points", 3, str_ay_size, str_ay);
         int number_of_dummies = hydrogeolog1.parse_argument("dummies", 3, str_ay_size, str_ay);
         int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 1000, str_ay_size, str_ay);
         int power_sw_pin = hydrogeolog1.parse_argument("power", INVALID, str_ay_size, str_ay);
-        //int digital_input = hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay);
-        // digitalWrite(MULTIPLEXER_SW, LOW);
+
         if (debug_sw == 1)
         {
             hydrogeolog1.print_string_delimiter_value("9548", String(tca9548_channel));
             print_debug(debug_sw, power_sw_pin, number_of_measurements, number_of_dummies, measure_time_interval_ms);
             hydrogeolog1.print_string_delimiter_value("type", i2c_type);
         }
+
+        // Turn on power switch
         if (power_sw_pin != INVALID) {
             digitalWrite(power_sw_pin, HIGH);
-            Wire.begin();
-            hydrogeolog1.tcaselect(tca9548_channel);
-            delay(500);
-            read_i2c_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
-            delay(500);
+        }
+
+        // Select multiplexer channel and read from sensor
+        hydrogeolog1.tcaselect(tca9548_channel);
+        delay(500);
+        read_i2c_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+        delay(500);
+
+        // Turn power switch off
+        if (power_sw_pin != INVALID) {
             digitalWrite(power_sw_pin, LOW);
         }
-        Serial.println();
-        // digitalWrite(MULTIPLEXER_SW, HIGH);
+
+        Serial.println();   // Terminate serial message with new line
     }
 }
 
