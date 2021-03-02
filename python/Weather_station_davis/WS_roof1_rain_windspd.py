@@ -177,7 +177,7 @@ try:
         client.publish('v1/devices/me/telemetry', json.dumps(weather_roof), 1)
         print('data successfully uploaded')
         if SAVE_TO_FILE: fid.write("\n\r")
-        time.sleep(300)#SLEEP_TIME_SECONDS) # sleep to the next loop
+        time.sleep(500)#SLEEP_TIME_SECONDS) # sleep to the next loop
 except KeyboardInterrupt:
     pass
 

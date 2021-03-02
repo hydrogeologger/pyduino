@@ -260,7 +260,7 @@ try:
 
         try:
             current_read=msg5.split(',')[0:-1]
-            weather_roof2['uv']=float(current_read[-1]) #ultraviolet index
+            weather_roof2['uv']=float(current_read[-1])  #This is the raw UV (ultraviolet index) data,and it should be divided by 100 to get real UV index based on the si1145 adafruit reading.
             weather_roof2['ir']=float(current_read[-3]) #Infrared light, unit in lm
             weather_roof2['vis']=float(current_read[-5]) #visible light, unit in lm            
             if SCREEN_DISPLAY:
@@ -278,7 +278,7 @@ try:
         client.publish('v1/devices/me/telemetry', json.dumps(weather_roof2), 1)
         print('data successfully uploaded')
         if SAVE_TO_FILE: fid.write("\n\r")
-        time.sleep(600)#SLEEP_TIME_SECONDS) # sleep to the next loop
+        time.sleep(500)#SLEEP_TIME_SECONDS) # sleep to the next loop
 except KeyboardInterrupt:
     pass
 
