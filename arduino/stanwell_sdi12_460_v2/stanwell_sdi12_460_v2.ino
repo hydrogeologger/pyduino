@@ -8,6 +8,7 @@ place new libraries in this location and include as
 
 #include <SDI12.h>
 #include <hydrogeolog.h>
+#include <Wire.h>
 #include "timing.h"
 #include "common.h"
 #include "SDI12_function.h"
@@ -137,30 +138,36 @@ boolean is_digi_out_pin(int pinName)
     return false;
 }
 
+
+/* 
+ * Function power_switch
+ * Desc     Sets power pin or initiate PWM for compatible pins.
+ * 
+ * Note     Power_status of 255 will be treated as power_status = 1 for
+ *          backwards compatibilityfor backwards compatibility
+ * 
+ * Input    pow_sw: power switch pin number
+ *          pow_sw_status: digital state of power switch pin
+ *          pwmValue: PWM value between 0 - 255
+ * Output   none
+ * 
+ * Logic    PWM refers to any pwm value between 0 and 255 non inclusive
+ *          power_status | PWM  | pin state
+ *          1 or 255     |  0   | HIGH
+ *          1 or 255     | 255  | HIGH
+ *          0            | 255  | HIGH
+ *          0            |  0   | LOW
+ *          1 or 255     | PWM  | PWM for PWM pins
+ *          0            | PWM  | PWM for PWM pins
+ * 
+ * Usage    power_switch,46,power_switch_status,1
+ *          power_switch,10,pwm_status,50
+ * 
+ * Prints   Prints "Invalid" to serial if incorrect power pin selected
+ *          Will print invalid status if incorrect configuration
+ */
 void power_switch(int pow_sw, int pow_sw_status, int pwmValue)
 {
-    /*
-    Toggles power pin or initiate PWM for compatible pins.
-
-    power_status of 255 will be treated as power_status = 1 for backwards compatibility
-
-    LOGIC: PWM refers to any pwm value between 0 and 255 non inclusive
-    power_status | PWM  | pin state
-    1 or 255     |  0   | HIGH
-    1 or 255     | 255  | HIGH
-    0            | 255  | HIGH
-    0            |  0   | LOW
-    1 or 255     | PWM  | PWM for PWM pins
-    0            | PWM  | PWM for PWM pins
-
-    Will print invalid status if incorrect configuration
-    Prints "Invalid" to serial if incorrect power pin selected
-
-    E.g:
-    power_switch,46,power_switch_status,1
-
-    power_switch,10,pwm_status,50
-    */
     if (pow_sw != INVALID)
     {
         if (is_pwm_pin(pow_sw) || is_digi_out_pin(pow_sw)) {      
@@ -455,6 +462,73 @@ void read_i2c_sensor(String type, int number_of_dummies, int number_of_measureme
     }
 }
 
+
+
+/* 
+ * Function MultiplexerReset
+ * Desc     Resets 9548 i2c multiplexer by disable twi and toggle multiplexer power
+ * 
+ * Input    Time interval for power off in milliseconds
+ * Output   none
+ * 
+ * Usage    9548_reset
+ *          9548_reset,400
+ * 
+ * Prints   Time duration for power off in milliseconds
+ */
+void multiplexer_i2c_reset(int delayMillisValue) {
+    if (delayMillisValue > INVALID) {
+        // Require a minimum of 400ms delay to hold MULTIPLEXER_SW
+        if (delayMillisValue < 400) {
+            delayMillisValue = 400;
+        }
+
+        // provide serial feedback of power toggle duration
+        hydrogeolog1.print_string_delimiter_value("9548_reset", String(delayMillisValue));
+        Serial.println();
+
+        // Disable Atmel 2-wire interface, to enable direct control of SDA & SCL pins
+        // TWCR &= ~(_BV(TWEN));
+        // disable twi module, acks, and twi interrupt
+        TWCR &= ~(_BV(TWEN) | _BV(TWIE) | _BV(TWEA));
+
+        // deactivate internal pullups for twi.
+        digitalWrite(SDA, 0);
+        digitalWrite(SCL, 0);
+
+        // Force SDA & SCL line to low
+        pinMode(SDA, OUTPUT);
+        pinMode(SCL, OUTPUT);
+        digitalWrite(SDA, 0);
+        digitalWrite(SCL, 0);
+
+        digitalWrite(MULTIPLEXER_SW, HIGH); // Power down
+        delay(delayMillisValue);    // Power down time
+
+        // Return pins to INPUT
+        pinMode(SDA, INPUT);
+        pinMode(SCL, INPUT);
+        digitalWrite(MULTIPLEXER_SW, LOW); // Power up
+
+        // Reinitialize Atmel 2-Wire interface
+        Wire.begin();
+    }
+}
+
+void multiplexer_search(int search_9548)
+{
+    /*
+    search channels for 9548 i2c multiplexer
+    9548_search
+    */
+    if (search_9548 != INVALID)
+    {
+        hydrogeolog1.print_string_delimiter_value("9548_search", String(search_9548));
+        hydrogeolog1.search_9548_channels();
+        Serial.println();
+    }
+}
+
 void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca9548_channel,
                       int power_sw_pin, String str_ay[])
 {
@@ -465,31 +539,43 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
     */
     if ((tca9548_channel != INVALID) && (i2c_type != ""))
     {
+        // Initialize TWI if has been disabled
+        if ((TWCR & _BV(TWEN)) == 0) {
+            Wire.begin();
+        }
+
         int number_of_measurements = hydrogeolog1.parse_argument("points", 3, str_ay_size, str_ay);
         int number_of_dummies = hydrogeolog1.parse_argument("dummies", 3, str_ay_size, str_ay);
         int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 1000, str_ay_size, str_ay);
         int power_sw_pin = hydrogeolog1.parse_argument("power", INVALID, str_ay_size, str_ay);
-        //int digital_input = hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay);
-        digitalWrite(MULTIPLEXER_SW, LOW);
+
         if (debug_sw == 1)
         {
             hydrogeolog1.print_string_delimiter_value("9548", String(tca9548_channel));
             print_debug(debug_sw, power_sw_pin, number_of_measurements, number_of_dummies, measure_time_interval_ms);
             hydrogeolog1.print_string_delimiter_value("type", i2c_type);
         }
+
+        // Turn on power switch
         if (power_sw_pin != INVALID) {
             digitalWrite(power_sw_pin, HIGH);
-            Wire.begin();
-            hydrogeolog1.tcaselect(tca9548_channel);
-            delay(500);
-            read_i2c_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
-            delay(500);
+        }
+
+        // Select multiplexer channel and read from sensor
+        hydrogeolog1.tcaselect(tca9548_channel);
+        delay(500);
+        read_i2c_sensor(i2c_type, number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+        delay(500);
+
+        // Turn power switch off
+        if (power_sw_pin != INVALID) {
             digitalWrite(power_sw_pin, LOW);
         }
-        Serial.println();
-        digitalWrite(MULTIPLEXER_SW, HIGH);
+
+        Serial.println();   // Terminate serial message with new line
     }
 }
+
 
 void rc_swtich(int str_ay_size, int debug_sw, String sw_code, int rc_sw, String str_ay[])
 {
@@ -538,22 +624,6 @@ void sht75_measurement(int str_ay_size, int debug_sw, int sht75_data, int sht75_
         if (power_sw_pin != INVALID)
             digitalWrite(power_sw_pin, LOW);
         Serial.println();
-    }
-}
-
-void multiplexer_search(int search_9548)
-{
-    /*
-    search channels for 9548 i2c multiplexer
-    9548_search
-    */
-    if (search_9548 != INVALID)
-    {
-        digitalWrite(MULTIPLEXER_SW, HIGH);
-        hydrogeolog1.print_string_delimiter_value("9548_search", String(search_9548));
-        hydrogeolog1.search_9548_channels();
-        Serial.println();
-        digitalWrite(MULTIPLEXER_SW, LOW);
     }
 }
 
@@ -681,6 +751,8 @@ void loop()
                              hydrogeolog1.parse_argument("otno", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);
+
+        multiplexer_i2c_reset(hydrogeolog1.parse_argument("9548_reset", INVALID, str_ay_size, str_ay));
 
         multiplexer_search(hydrogeolog1.parse_argument("9548_search", INVALID, str_ay_size, str_ay));
 
