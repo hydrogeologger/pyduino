@@ -58,8 +58,8 @@ try:
             ard.flushInput()
             msg=ard.readline()
 	    current_read=msg.split(',')[0:-1]
-            ewatering_sa2_sensor['sa2_rh_logger']=float(current_read[-2])
-            ewatering_sa2_sensor['sa2_temp_logger']=float(current_read[-3])
+            ewatering_sa2_sensor['sa2_rh_logger']=float(current_read[-1])
+            ewatering_sa2_sensor['sa2_temp_logger']=float(current_read[-2])
             if SCREEN_DISPLAY: print (msg.rstrip())
             if SAVE_TO_FILE: fid.write(DELIMITER+msg)
         except Exception as e:
@@ -174,8 +174,8 @@ try:
             if SAVE_TO_FILE: fid.write(DELIMITER+msg)
             if SCREEN_DISPLAY: print msg.rstrip()
             current_read=msg.split(',')    
-            ewatering_sa2_sensor['p1_cs451']=float(current_read[-2])
-            ewatering_sa2_sensor['t1_cs451']=float(current_read[-3])
+            ewatering_sa2_sensor['p1_cs451']=float(current_read[-3])
+            ewatering_sa2_sensor['t1_cs451']=float(current_read[-2])
             time.sleep(5)
         except Exception as e:
             if SCREEN_DISPLAY:
@@ -189,8 +189,8 @@ try:
             if SAVE_TO_FILE: fid.write(DELIMITER+msg)
             if SCREEN_DISPLAY: print msg.rstrip()
             current_read=msg.split(',')    
-            ewatering_sa2_sensor['p2_cs451']=float(current_read[-2])
-            ewatering_sa2_sensor['t2_cs451']=float(current_read[-3])
+            ewatering_sa2_sensor['p2_cs451']=float(current_read[-3])
+            ewatering_sa2_sensor['t2_cs451']=float(current_read[-2])
             time.sleep(5)
         except Exception as e:
             if SCREEN_DISPLAY:
@@ -204,8 +204,8 @@ try:
             if SAVE_TO_FILE: fid.write(DELIMITER+msg)
             if SCREEN_DISPLAY: print msg.rstrip()
             current_read=msg.split(',')    
-            ewatering_sa2_sensor['p3_cs451']=float(current_read[-2])
-            ewatering_sa2_sensor['t3_cs451']=float(current_read[-3])
+            ewatering_sa2_sensor['p3_cs451']=float(current_read[-3])
+            ewatering_sa2_sensor['t3_cs451']=float(current_read[-2])
             time.sleep(5)
         except Exception as e:
             if SCREEN_DISPLAY:
@@ -251,7 +251,7 @@ try:
             if SCREEN_DISPLAY: print msg_5803_channel0.rstrip()
             current_read=msg_5803_channel0.split(',')
             ewatering_sa2_sensor['sa2_p_5803']=(float(current_read[-2])+float(current_read[-4])+float(current_read[-5])+float(current_read[-6]))/4.
-            ewatering_sa2_sensor['sa2_t_5803']=float(current_read[3])
+            ewatering_sa2_sensor['sa2_t_5803']=float(current_read[-3])
 
             ard.write("9548,1,type,si1145,debug,1")
             ard.flushInput()
