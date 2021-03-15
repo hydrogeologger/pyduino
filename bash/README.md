@@ -37,6 +37,8 @@ vnc_ssh_forward_port=1985
 vnc_forward_port=1986
 
 
+ssh_scp_photo_address=username@servername:/address/to/server/name/
+local_photo_address=/home/pi/
 
 ```
 

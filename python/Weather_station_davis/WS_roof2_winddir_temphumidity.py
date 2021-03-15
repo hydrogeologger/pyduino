@@ -24,7 +24,7 @@ fid= open(file_name,'a',0)
 with open('/home/pi/pyduino/credential/weather_station_roof2.json') as f:
     credential = json.load(f)
 
-field_name=['volt','wind_direction','sht31_temp_1','sht31_humidity_1','sht31_temp_2','sht31_humidity_2','uv','ir','vis','tmp1','tmp2']
+field_name=['volt','wind_direction','sht31_temp_1','sht31_humidity_1','sht31_temp_2','sht31_humidity_2','uv','ir','vis','tmp1','tmp2','dht22_rh','dht22_t']
 weather_roof2=dict((el,0.0) for el in field_name)
 
 try:
@@ -187,7 +187,24 @@ try:
             if SCREEN_DISPLAY:
                 print('System voltage reading failed')
 
+        #----------------Temperature & humidity on the datalogger (DHT22)-----------------------------
+             
+        try:
+            ard.write("dht22,54,power,2,points,2,dummies,1,interval_mm,2000,debug,1")
+            ard.flushInput()
+            msg = ard.readline()
+            current_read=msg.split(',')[0:-1]
+            weather_roof2['dht22_rh']=float(current_read[-1])
+            weather_roof2['dht22_t']=float(current_read[-2])
+            if SCREEN_DISPLAY:
+                print ('Temperature on board: ' + str(weather_roof2['dht22_t']) + DELIMITER + 'Relative humidity: ' + str(weather_roof2['dht22_rh']) + '%')
+            if SAVE_TO_FILE:
+                fid.write(DELIMITER + str(weather_roof2['dht22_t']) + DELIMITER + str(weather_roof2['dht22_rh']) + '\n')
+        except Exception:
+            if SCREEN_DISPLAY:
+                print('DHT22 sensor reading failed')
 
+        time.sleep(2)
         #-----------------Temperature, humidity and UV sensor--------------------
         msg=ard.write("power_switch,23,power_switch_status,1")
         msg=ard.flushInput()
@@ -202,8 +219,8 @@ try:
 
         time.sleep(5) #It is VERY IMPORTANT to set a time delay after switching on power channels for I2C because humiditity sensors would not get reading successfully if the measurement is conducted immediately.
 
-        msg4 = ard.write("9548,0,type,sht31,power,28,debug,1")
-        msg4 = ard.flushInput()
+        ard.write("9548,0,type,sht31,power,28,debug,1")
+        ard.flushInput()
         msg4 = ard.readline()
 
         #msg4 = ard.write("9548,1,type,sht31,power,28,debug,1")
@@ -211,23 +228,13 @@ try:
         #msg4 = ard.readline()
         time.sleep(5)
 
-        msg5 = ard.write("9548,3,type,si1145,power,28,debug,1")
+        ard.write("9548,3,type,si1145,power,28,debug,1")
         #msg5 = ard.write("9548,3,type,si1145,dummies,1,power,28,debug,1,points,1,timeout,5")
-        msg5 = ard.flushInput()
+        ard.flushInput()
         msg5 = ard.readline()
 
         time.sleep(5)
 
-        msg=ard.write("power_switch,23,power_switch_status,0")
-        msg=ard.flushInput()
-
-        #msg=ard.write("power_switch,23,power_switch_status,0")
-        #msg=ard.flushInput()
-
-        msg=ard.write("power_switch,25,power_switch_status,0")
-        msg=ard.flushInput()
- 
-        #time.sleep(5)
         
         try:
             current_read = msg4.split(',')[0:-1]
@@ -272,13 +279,25 @@ try:
                 print('UV sensor reading failed')
 
 
+        msg=ard.write("power_switch,23,power_switch_status,0")
+        msg=ard.flushInput()
+
+        #msg=ard.write("power_switch,23,power_switch_status,0")
+        #msg=ard.flushInput()
+
+        msg=ard.write("power_switch,25,power_switch_status,0")
+        msg=ard.flushInput()
+ 
+        time.sleep(2)
+
+
 #----------------------------Upload data -----------------------------------
         ard.close()
 
         client.publish('v1/devices/me/telemetry', json.dumps(weather_roof2), 1)
         print('data successfully uploaded')
         if SAVE_TO_FILE: fid.write("\n\r")
-        time.sleep(500)#SLEEP_TIME_SECONDS) # sleep to the next loop
+        time.sleep(600)#SLEEP_TIME_SECONDS) # sleep to the next loop
 except KeyboardInterrupt:
     pass
 
