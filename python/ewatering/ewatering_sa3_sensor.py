@@ -1,22 +1,30 @@
-import time
 import json
 import serial
 import paho.mqtt.client as mqtt
 from time import sleep,localtime,strftime
 import RPi.GPIO as GPIO
 import sys, os, re, time, fcntl
+from datetime import datetime   #required by is_time_between
+from datetime import time as time2
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
 def reset():
-  pin = 27
-  GPIO.setup(pin, GPIO.OUT)
-  #GPIO.output(pin, GPIO.HIGH)
-  #time.sleep(0.32)
-  GPIO.output(pin, GPIO.LOW)
-  time.sleep(5)
+    pin = 27
+    GPIO.setup(pin, GPIO.OUT)
+    #GPIO.output(pin, GPIO.HIGH)
+    #time.sleep(0.32)
+    GPIO.output(pin, GPIO.LOW)
+    time.sleep(5)
 
+def is_time_between(begin_time, end_time, check_time=None):
+    # If check time is not given, default to current UTC time
+    check_time = datetime.now().time()
+    if begin_time < end_time:
+        return check_time >= begin_time and check_time <= end_time
+    else: # crosses midnight
+        return check_time >= begin_time or check_time <= end_time
 
 #---------------------- Define constants --------------------------------------
 SCREEN_DISPLAY=True
@@ -32,7 +40,6 @@ fid.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+'\n')
 with open('/home/pi/pyduino/credential/ewatering.json') as f:
     credential = json.load(f)
 
-field_name = ['sa3_rh_logger','sa3_temp_logger','sa3_volt','sa3_uv','sa3_ir','sa3_vis','sa3_mo1','sa3_mo2','sa3_mo3','sa3_mo4','sa3_mo5','sa3_p_piezo','sa3_t_piezo','sa3_ec_piezo',]
 
 print("RESET Arduino")
 reset()
@@ -50,6 +57,7 @@ except Exception:
     print("Failed to connect to thingsboard")
     time.sleep(30)
 
+camera_switch_status=False
 #----------------------Display current time and start Arduino ----------------------
 while True:
 
@@ -59,6 +67,39 @@ while True:
     ard = serial.Serial(SERIAL_PORT,timeout=20) 
     time.sleep(5)
 
+
+    
+
+#--------------------------- camera switch-------------------------------
+    whether_time_for_camera_on=is_time_between(time2(7,30), time2(16,30))   #brisbane time
+    if whether_time_for_camera_on and camera_switch_status ==False:
+        if SCREEN_DISPLAY: print("time for powering camera")
+        if SAVE_TO_FILE: fid.write("time for powering camera")
+        ard.write("power_switch,8,power_switch_status,1")
+        ard.flushInput()
+        msg=ard.readline()
+        if SCREEN_DISPLAY: print (msg.rstrip())
+        if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+        camera_switch_status =1
+        time.sleep(120)
+    elif whether_time_for_camera_on and camera_switch_status:
+        if SCREEN_DISPLAY: print("camera keeps on")
+        if SAVE_TO_FILE: fid.write("camera keeps on ")
+    elif whether_time_for_camera_on==False and camera_switch_status:
+        if SCREEN_DISPLAY: print("time for shut down camera")
+        if SAVE_TO_FILE: fid.write("time for shut down camera")
+        ard.write("power_switch,8,power_switch_status,0")
+        ard.flushInput()
+        msg=ard.readline()
+        if SCREEN_DISPLAY: print (msg.rstrip())
+        if SAVE_TO_FILE: fid.write(DELIMITER+msg)
+        camera_switch_status =0
+        time.sleep(180)
+    elif whether_time_for_camera_on==False and camera_switch_status==False:
+        if SCREEN_DISPLAY: print("camera keeps off")
+        if SAVE_TO_FILE: fid.write("camera keeps off ")
+
+    time.sleep(5)
 #--------------------------- on board humidity sensor -------------------------------
     try:
         ard.write("dht22,54,power,2,points,2,dummies,1,interval_mm,200,debug,1")
