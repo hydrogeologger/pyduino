@@ -463,7 +463,6 @@ def vsense_adc_check():
     print(message_received.rstrip())
     if (r1 > 0):
         array_received = message_received.split(',')[0:-1]
-        print(array_received[-1])
         voltage_value = float(array_received[-1]) * float(((r1 + r2)/r2)) * float((vref/1024))
         print("Battery Voltage: {0} (V)".format(str(voltage_value)))
 
