@@ -411,8 +411,7 @@ def arduino_analog_test():
             else:
                 continue
             
-            # message_out = "power,{0},analog,9,point,3,interval_mm,200,debug,1".format(power_pin)
-            message_out = "analog,{0},power,{1},point,3,interval_mm,200,debug,1".format(analog_pin, power_pin)
+            message_out = "analog,{0},power,{1},points,3,dummies,1,interval_mm,200,debug,1".format(analog_pin, power_pin)
             if DEBUG: print("DEBUG: " + message_out)
             arduino_serial.write(message_out)
             arduino_serial.flushInput()
@@ -428,6 +427,33 @@ def arduino_analog_test():
 
 
 def vsense_adc_check():
+    vref = 5.1
+    r1 = 0.0 #defined later
+    r2 = 680.0
+
+    while True:
+        try:
+            print("    1:   V2")
+            print("    2:   V3")
+            logger_version = input("Select logger version, 'x' to escape: ")
+            if (is_escape(logger_version)):
+                return
+            elif (logger_version == ""):
+                break
+            elif (logger_version.isalpha()):
+                continue
+            elif (logger_version == '1'): # datalogger V2
+                r1 = 2200
+                break
+            elif (logger_version == '2'): # datalogger V3.x
+                r1 = 2000
+                break
+                
+        except (ValueError):
+            # Prompt for logger version again if incorrect input
+            print("Vsense Test, logger version ValueError")
+            break
+    
     message_out = "analog,15,power,9,point,3,interval_mm,200,debug,1"
     if DEBUG: print("DEBUG: " + message_out)
     arduino_serial.write(message_out)
@@ -435,6 +461,13 @@ def vsense_adc_check():
     time.sleep(1)
     message_received = arduino_serial.readline()
     print(message_received.rstrip())
+    if (r1 > 0):
+        array_received = message_received.split(',')[0:-1]
+        print(array_received[-1])
+        voltage_value = float(array_received[-1]) * float(((r1 + r2)/r2)) * float((vref/1024))
+        print("Battery Voltage: {0} (V)".format(str(voltage_value)))
+
+
 
 def check_arduino_runtime_since_last_comm():
     message_out = "check_millis"
