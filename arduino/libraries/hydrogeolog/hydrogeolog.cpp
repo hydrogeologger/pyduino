@@ -95,10 +95,15 @@ char hydrogeolog::parse_argument_char(String str_source, char default_values, in
 
 void hydrogeolog::analog_excite_read(int power_sw_idx, int analog_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval)
 {
-    digitalWrite(power_sw_idx, HIGH);
-    delay(1000);
+    if (power_sw_idx > 0) {
+        digitalWrite(power_sw_idx, HIGH);
+        delay(1000);
+    }
     analog_read(analog_idx, number_of_dummies, number_of_measurements, measure_time_interval);
-    digitalWrite(power_sw_idx, LOW);
+
+    if (power_sw_idx > 0) {
+        digitalWrite(power_sw_idx, LOW);
+    }
 
 } // analog_excite_read
 
