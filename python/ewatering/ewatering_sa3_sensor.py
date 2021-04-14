@@ -30,7 +30,7 @@ def is_time_between(begin_time, end_time, check_time=None):
 SCREEN_DISPLAY=True
 SAVE_TO_FILE=True
 DELIMITER=','
-SLEEP_TIME_SECONDS=60  *30# s
+SLEEP_TIME_SECONDS=60  *20# s
 SERIAL_PORT='/dev/ttyS0'
 #---------------------- Create csv file to store data -------------------------
 file_name= 'ewatering_sa3_sensor.csv'

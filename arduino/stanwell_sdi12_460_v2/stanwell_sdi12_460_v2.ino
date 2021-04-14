@@ -54,7 +54,7 @@ void print_debug(int debug_sw, int pw_pin, int no_measures, int no_dum, int inte
 void analog_reading(int str_ay_size, int debug_sw, int analog_in_pin, int power_sw_pin, String str_ay[])
 {
     //E.g: power,43,analog,15,point,3,interval_mm,200,debug,1  -> checking voltage
-    if ((analog_in_pin != INVALID) && (power_sw_pin != INVALID))
+    if (analog_in_pin != INVALID)
     {
         int number_of_measurements = hydrogeolog1.parse_argument("points", DEFAULT_POINTS, str_ay_size, str_ay);
         int number_of_dummies = hydrogeolog1.parse_argument("dummies", DEFAULT_DUMMIES, str_ay_size, str_ay);
