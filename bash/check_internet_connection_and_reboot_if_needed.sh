@@ -45,7 +45,16 @@ echo_outcome=$?
 sleep 1
 if [ $curl_outcome -eq 0 ]  &&  [ $wget_outcome -eq 0 ]  &&  [ $echo_outcome -eq 0 ]  ; then
     echo "${date} ${curl_outcome}  ${wget_outcome}  ${echo_outcome}  Online 2"  >> $log_file
+elif [ $curl_outcome -ne 0 ]  &&  [ $wget_outcome -ne 0 ]  &&  [ $echo_outcome -ne 0 ]  ; then
+    echo "${date} ${curl_outcome}  ${wget_outcome}  ${echo_outcome}  completely offline, start reboot"  >> $log_file
+    pkill -f python
+    sleep 10
+    echo -n "abc" > /dev/ttyS0
+    sleep 1
+    echo -n "RESET" > /dev/ttyS0
+    sleep 1
+    sudo /sbin/shutdown -h now
 else
-    echo "${date} ${curl_outcome}  ${wget_outcome}  ${echo_outcome}  offline 2"  >> $log_file
+    echo "${date} ${curl_outcome}  ${wget_outcome}  ${echo_outcome}  partially offline 2"  >> $log_file
 fi
 

@@ -17,7 +17,4 @@ source /home/pi/pyduino/credential/tb.sh
 #access_token=$(cat /home/pi/pyduino/credential/access_token)
 
 curl -v -d "{$(cat /etc/hostname): \"$ip_address\"}" $TB_DOMAIN/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
-#curl -v -X POST -d "{$(cat /etc/hostname): $ip_address}" $TB_DOMAIN/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
 
-#curl "http://144.6.225.24:8080/input/$sparkfun_public_key?private_key=$sparkfun_private_key&ip=$ip_address&name=$machine_name&volume=$ip_address"
-#curl "http://144.6.225.24:8080/input/$sparkfun_public_key?private_key=$sparkfun_private_key&ip=$ip_address&name=$machine_name"

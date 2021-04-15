@@ -122,7 +122,7 @@ try:
             print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         if SAVE_TO_FILE:
             fid.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())  )
-        ard = serial.Serial(SERIAL_PORT, timeout = 20)
+        #ard = serial.Serial(SERIAL_PORT, timeout = 20)
 
         try:  
             cum_count_rain = int(test1.get_count())
@@ -172,7 +172,7 @@ try:
         t0 = time.time()
 
 #----------------------------Upload data -----------------------------------
-        ard.close()
+        #ard.close()
 
         client.publish('v1/devices/me/telemetry', json.dumps(weather_roof), 1)
         print('data successfully uploaded')
