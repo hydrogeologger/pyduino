@@ -658,6 +658,10 @@ void loop() {
                  {
                  }  // 5803
              delay(500);
+              if (i2c_type == "si1145") {
+                hydrogeolog1.si1145(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+              }
+              delay(500);
 
              if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
              Serial.println();
@@ -702,7 +706,7 @@ void loop() {
          int sdi12_data = hydrogeolog1.parse_argument("12",-1,str_ay_size,str_ay);
 
  
-         if  (sdi12_data!=-1) {
+          if  (sdi12_data!=-1) {
             String custom_cmd = hydrogeolog1.parse_argument_string("custom_cmd", "", str_ay_size, str_ay);
             int measure_time_interval_ms=hydrogeolog1.parse_argument("interval_mm",2000,str_ay_size,str_ay);
             
@@ -713,19 +717,20 @@ void loop() {
                               
             }
 
-             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
-             if (custom_cmd == "") {
-                sdi12_init(sdi12_data);
-             }
-             delay(2000);
-             if (custom_cmd != "") {
-               sdi12_custom(sdi12_data, debug_sw, str_ay_size, str_ay);
-             } else {
+            boolean sdi_init = false;
+            if (power_sw_pin!=-1) digitalWrite(power_sw_pin,HIGH);
+            if (custom_cmd == "") {
+              sdi_init = sdi12_init(sdi12_data);
+            }
+            delay(2000);
+            if (custom_cmd != "") {
+              sdi12_custom(sdi12_data, debug_sw, str_ay_size, str_ay);
+            } else if (sdi_init) {
               sdi12_loop(sdi12_data);
-             }
-             if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
-             Serial.println();
-         }  //sht75
+            }
+            if (power_sw_pin!=-1) digitalWrite(power_sw_pin,LOW);
+            Serial.println();
+          }  //SDI-12
 
 
           /*
@@ -808,7 +813,7 @@ void sdi12_custom(int sdi12_data, int debug, int number_opts, String str_ay2[20]
 
 
 
-void sdi12_init(int sdi12_data) {
+boolean sdi12_init(int sdi12_data) {
   #define DATAPIN sdi12_data         // change to the proper pin,pwm pins are needed, see tutorial, only limited pins are able to get this
   SDI12 mySDI12(DATAPIN); 
   
@@ -836,10 +841,15 @@ void sdi12_init(int sdi12_data) {
   }
 
   if(!found) {
-    Serial.println("No sensors found, please check connections and restart the Arduino."); 
-    while(true);
+    mySDI12.clearBuffer();
+    mySDI12.end();
+    Serial.println("No sensors found, SDI12 did not initialize.");
+    return false;
+    // Serial.println("No sensors found, please check connections and restart the Arduino."); 
+    // while(true);
   } // stop here
   
+  return true;
 }
 
 
@@ -1051,10 +1061,3 @@ char decToChar(byte i){
   if((i >= 10) && (i <= 36)) return i + 'a' - 10;
   if((i >= 37) && (i <= 62)) return i + 'A' - 37;
 }
-
-
-
-
-
-
-
