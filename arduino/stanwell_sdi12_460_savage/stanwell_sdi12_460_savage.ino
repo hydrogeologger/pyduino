@@ -638,27 +638,11 @@ void loop() {
              
              hydrogeolog1.tcaselect(tca9548_channel);             
              delay(500);
-             if (i2c_type=="5803")
-                 {
+             if (i2c_type=="5803") { // 5803
                   hydrogeolog1.ms5803(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
-                 }  // 5803
-             delay(500);
-             if (i2c_type=="5803l")
-                 {
+             } else if (i2c_type=="5803l") { // 58031
                   hydrogeolog1.ms5803l(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
-                  delay(500);
-                  hydrogeolog1.tcaselect(tca9548_channel);             
-                  delay(500);
-                  hydrogeolog1.ms5803l(number_of_dummies,number_of_measurements,measure_time_interval_ms,debug_sw,tca9548_channel);
-                 }  // 5803
-             delay(500);
-             
-             delay(500);
-             if (i2c_type=="5803l")
-                 {
-                 }  // 5803
-             delay(500);
-              if (i2c_type == "si1145") {
+             } else if (i2c_type == "si1145") { //si1145
                 hydrogeolog1.si1145(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
               }
               delay(500);
