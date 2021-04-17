@@ -14,38 +14,31 @@ boolean check_new_addr(String new_addr) {
 
 void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
 {
-    if (isCustom)
-    {
+    if (isCustom) {
         sdi12_send_command(cmd, true);
         return;
     }
+    
     Serial.print("no_sensors,");
     Serial.print(sensors);
     Serial.print(DELIMITER);
-    if (cmd == "read")
-    {
+
+    if (cmd == "read") {
         sdi12_loop();
-    }
-    else if (cmd == "change")
-    {
-        if (sensors != 1 || sensors < 1)
-        {
+    } else if (cmd == "change") {
+        if (sensors != 1 || sensors < 1) {
             Serial.println("Expect only ONE sensor connected! => ABORT!");
-        }
-        else
-        {
-            if (check_new_addr(new_addr) == false)
-            {
+        } else {
+            if (check_new_addr(new_addr) == false) {
                 Serial.println("Invalid new addr => ABORT!");
             } else {
                 sdi12_change(new_addr.charAt(0)); 
             }
         }
-    }
-    else
-    {
+    } else {
         Serial.println("\nINVALID CMD!");
     }
+
     addressSpace[LOW] = (uint32_t)0x00;
     addressSpace[HIGH] = (uint32_t)0x00;
     mySDI12.flush();
