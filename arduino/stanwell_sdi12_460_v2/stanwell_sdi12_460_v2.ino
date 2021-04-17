@@ -636,43 +636,63 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     if (sdi12_data != -1)
     {
         String default_cmd = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
-        String custom_cmd = hydrogeolog1.parse_argument_string("custom_cmd", "", str_ay_size, str_ay);
+        int start_index_custom_cmd = hydrogeolog1.strcmpi("custom_cmd", str_ay_size, str_ay);
+        // String custom_cmd = hydrogeolog1.parse_argument_string("custom_cmd", "", str_ay_size, str_ay);
         String new_addr = "";
+        String custom_cmd = "";
         int power_off = hydrogeolog1.parse_argument("power_off", 1, str_ay_size, str_ay);
-        if (default_cmd == "change")
+
+        if (default_cmd == "change") {
             new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
-        if (debug_sw == 1)
-        {
-            hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_data));
-            if (default_cmd != "")
-                hydrogeolog1.print_string_delimiter_value("default_cmd", default_cmd);
-            if (default_cmd == "change") {
-                Serial.print(new_addr); Serial.print(DELIMITER);
+        } else if (start_index_custom_cmd > -1) {
+            for (int i = start_index_custom_cmd + 1; i < str_ay_size; i++) {
+                custom_cmd.concat(str_ay[i]);
+                if (str_ay[i].lastIndexOf("!") > -1) {
+                    break;
+                }
+                custom_cmd.concat(DELIMITER);
             }
-            if (custom_cmd != "")
-                hydrogeolog1.print_string_delimiter_value("custom_cmd", custom_cmd);
+        }
+
+        if (debug_sw == 1) {
+            hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_data));
+            if (default_cmd != "") {
+                hydrogeolog1.print_string_delimiter_value("default_cmd", default_cmd);
+                if (default_cmd == "change") {
+                    Serial.print(new_addr);
+                    Serial.print(DELIMITER);
+                }
+            } else if (custom_cmd != "") {
+                hydrogeolog1.print_string_delimiter_value("custom_cmd", "\"" + custom_cmd + "\"");
+            }
             hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
             hydrogeolog1.print_string_delimiter_value("power_off", String(power_off));
         }
-        if (power_sw_pin != -1)
+
+        if (power_sw_pin != -1) {
             digitalWrite(power_sw_pin, HIGH);
+        }
+
         int num_sensors = 0;
-        if (sdi12_init(sdi12_data, &num_sensors) == false)
-        {
+        if (sdi12_init(sdi12_data, &num_sensors) == false) {
             Serial.println("No SDI12 found!");
             digitalWrite(power_sw_pin, LOW);
             return;
         }
+
         if (default_cmd != "" && custom_cmd == "") {
             //Serial.println("HERE");
             process_command(default_cmd, num_sensors, new_addr, false);
-        }
-        if (custom_cmd != "" && default_cmd == "") {
+        } else if (default_cmd == "" && custom_cmd != "") {
+            int str_idx = hydrogeolog1.strcmpi("custom_cmd", str_ay_size, str_ay);
+
             process_command(custom_cmd, num_sensors, new_addr, true);
         }
         
-        if (power_off)
+        if (power_off) {
             digitalWrite(power_sw_pin, LOW);
+        }
+
         Serial.println();
     }//sdi12
 }
