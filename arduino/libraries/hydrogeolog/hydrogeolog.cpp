@@ -700,7 +700,9 @@ void hydrogeolog::si1145(int number_of_dummies, int number_of_measurements, int 
     Adafruit_SI1145 uv = Adafruit_SI1145();
     delay(1000);
     uv.begin();
-    tcaselect(tca9548_channel);
+    if (tca9548_channel > -1) {
+        tcaselect(tca9548_channel);
+    }
     
     for (int j = 0; j < number_of_dummies; j++)
     {
