@@ -50,6 +50,7 @@ while True:
         break
     except Exception, e:
         time.sleep(60)
+	break
 
 delimiter=','
 screen_display=True
@@ -65,9 +66,9 @@ the minimum value.
 '''
 #print("Testing")
 
-test1 = UQ_RainFall(pin = 20, debounce = 0.01, name = "Bucket 1", debug=False)
-test2 = UQ_RainFall(pin = 16, debounce = 0.01, name = "Bucket 2", debug=False)
-test3 = UQ_RainFall(pin = 21, debounce = 0.01, name = "Bucket 3", debug=False)
+test1 = UQ_RainFall(pin = 20, debounce = 0.01, name = "column 4", debug=False)
+test2 = UQ_RainFall(pin = 16, debounce = 0.01, name = "column 5", debug=False)
+test3 = UQ_RainFall(pin = 21, debounce = 0.01, name = "column 6", debug=False)
 #Once config, the tipping is count automatically as an hardware event
 #and immune to sleep in the main thread
 test1.config()
