@@ -265,11 +265,13 @@ void loop() {
                 hydrogeolog1.print_string_delimiter_value("pow" ,String(power_sw_pin)  );
                 hydrogeolog1.print_string_delimiter_value("serial",String(serial_pin)  );
                 hydrogeolog1.print_string_delimiter_value("delay",String(measure_time_interval_ms)  );
-                if (measure_time_interval_ms<1000) {measure_time_interval_ms=1000;}
+                if (measure_time_interval_ms < 1000) {
+                  measure_time_interval_ms=1000;
+                }
 
                 digitalWrite(power_sw_pin,HIGH);
                 delay(1000);
-               if (serial_pin==1){
+               if (serial_pin==1) {
                   Serial1.print("M 1");
                   Serial1.print("\r\n");
                   delay(measure_time_interval_ms);
@@ -288,10 +290,9 @@ void loop() {
                   Serial.print(aa);
                   delay(measure_time_interval_ms);
                   aa= Serial1.readStringUntil('\n');
-                  Serial.println(aa);                
+                  Serial.println(aa);
 
-               }
-               if (serial_pin==2){
+               } else if (serial_pin == 2) {
                   Serial2.print("M 1");
                   Serial2.print("\r\n");
                   delay(measure_time_interval_ms);
@@ -310,9 +311,9 @@ void loop() {
                   Serial.print(aa);
                   delay(measure_time_interval_ms);
                   aa= Serial1.readStringUntil('\n');
-                  Serial.println(aa);                  
-               }
-               if (serial_pin==3){
+                  Serial.println(aa);
+                  
+               } else if (serial_pin == 3){
                   Serial3.print("M 1");
                   Serial3.print("\r\n");
                   delay(measure_time_interval_ms);
@@ -332,7 +333,8 @@ void loop() {
                   Serial.print(aa);
                   delay(measure_time_interval_ms);
                   aa= Serial3.readStringUntil('\n');
-                  Serial.println(aa);                  
+                  Serial.println(aa);
+
                }
                digitalWrite(power_sw_pin,LOW);
         } // lumino2
