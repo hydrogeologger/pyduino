@@ -93,7 +93,8 @@ pht_grange_4_luo2_wet= Phant(publicKey=credential["public_grange_4_luo2_wet"], f
 #port_sensor  = 'USB VID:PID=2341:0042 SNR=5573631383735150B0E0'
 #port_sensor  = 'USB VID:PID=2341:0042 SNR=55639303035351C07261'  #grange 3
 
-port_sensor  = 'USB VID:PID=2341:0042 SNR=5563231363835151C1B1'  #grange 4
+#port_sensor  = 'USB VID:PID=2341:0042 SNR=5563231363835151C1B1'  #grange 4
+port_sensor  = '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_5563231363835151C1B1-if00'
 # whether the result will be displayed on the screen
 screen_display=True
 
@@ -132,6 +133,20 @@ except Exception, e:
     time.sleep(60)
 
 sensor_measure_idx = 1
+
+
+
+ard = serial.Serial(port_sensor,timeout=60)
+
+time.sleep(3)
+
+ard.write("power_switch,49,power_switch_status,1")
+ard.flushInput()
+sleep(1)
+msg=ard.readline()
+if screen_display: print(msg)
+if save_to_file: fid.write(msg  )
+
 
 while True: 
 
@@ -212,14 +227,23 @@ while True:
     
     if np.mod(sensor_measure_idx,3) ==0: 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,0,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,0,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,0,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
         grange_4_mo_su['mo0']=float(current_read[2])
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,1,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,1,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,1,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
+
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -227,7 +251,11 @@ while True:
 
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,2,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,2,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,2,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -235,7 +263,11 @@ while True:
 
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,3,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,3,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,3,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -243,7 +275,12 @@ while True:
 
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,4,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,4,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,4,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
+
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -251,7 +288,11 @@ while True:
 
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,5,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,5,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,5,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -259,7 +300,11 @@ while True:
 
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,6,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,6,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,6,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -267,7 +312,11 @@ while True:
 
 
         sleep(2)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,7,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="analog,7,power,42,point,3,interval_mm,200,debug,0",initialize=False)
+        ard.write("analog,7,power,42,point,3,interval_mm,200,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -303,7 +352,11 @@ while True:
 
         sleep(5)
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,1",initialize=False)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,35,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,35,serial,3",initialize=False)
+        ard.write("lumino2,A,power,35,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -319,7 +372,11 @@ while True:
 
         sleep(5)
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,2",initialize=False)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,37,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,37,serial,3",initialize=False)
+        ard.write("lumino2,A,power,37,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -335,7 +392,11 @@ while True:
 
         sleep(5)
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,3",initialize=False)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,39,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,39,serial,3",initialize=False)
+        ard.write("lumino2,A,power,39,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -350,7 +411,11 @@ while True:
 
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,41,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,41,serial,3",initialize=False)
+        ard.write("lumino2,A,power,41,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -366,7 +431,11 @@ while True:
 
 
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,22,serial,2",initialize=False)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,27,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,27,serial,3",initialize=False)
+        ard.write("lumino2,A,power,27,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -381,7 +450,11 @@ while True:
 
 
 
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,29,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,29,serial,3",initialize=False)
+        ard.write("lumino2,A,power,29,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -396,7 +469,11 @@ while True:
 
 
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,23,serial,1",initialize=False)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,31,serial,3",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,31,serial,3",initialize=False)
+        ard.write("lumino2,A,power,31,serial,3")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -410,7 +487,11 @@ while True:
             print("lumino2,A,power,31,serial,3 reading failed")
 
         # enclosure temperature and humidity
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,2000,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="dht22,10,power,48,points,2,dummies,1,interval_mm,2000,debug,0",initialize=False)
+        ard.write("dht22,10,power,48,points,2,dummies,1,interval_mm,2000,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -422,7 +503,11 @@ while True:
 
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,24,serial,2",initialize=False)
+        ard.write("lumino2,A,power,24,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -433,7 +518,11 @@ while True:
 
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,22,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,22,serial,2",initialize=False)
+        ard.write("lumino2,A,power,22,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
@@ -446,7 +535,11 @@ while True:
 
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,23,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,23,serial,2",initialize=False)
+        ard.write("lumino2,A,power,23,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -457,7 +550,11 @@ while True:
 
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,25,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,25,serial,2",initialize=False)
+        ard.write("lumino2,A,power,25,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -467,7 +564,11 @@ while True:
         #grange_4_luo2_wet[ 'wlup3'] = float(current_read[-8])
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,9,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,9,serial,2",initialize=False)
+        ard.write("lumino2,A,power,9,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -478,7 +579,11 @@ while True:
 
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,8,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,8,serial,2",initialize=False)
+        ard.write("lumino2,A,power,8,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -488,7 +593,11 @@ while True:
         grange_4_luo2_wet[ 'wlup5'] = float(current_read[-8])
 
         sleep(5)
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,2",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,2",initialize=False)
+        ard.write("lumino2,A,power,7,serial,2")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
@@ -541,7 +650,11 @@ while True:
         # if SCREEN_DISPLAY:
         #     print(msg)
 
-        msg = serial_openlock.get_result_by_input(port=port_sensor,command="12,51,custom_cmd,VM!,debug,1",initialize=False).rstrip()
+        #msg = serial_openlock.get_result_by_input(port=port_sensor,command="12,51,custom_cmd,VM!,debug,1",initialize=False).rstrip()
+        ard.write("12,51,custom_cmd,VM!,debug,1")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display:
             print(msg)
 
@@ -563,7 +676,13 @@ while True:
         count = 0
         vaisala_values = ""
         for value_index in range(0, number_points):
-            msg = serial_openlock.get_result_by_input(port=port_sensor,command="12,51,custom_cmd,VD" + str(value_index) + "!,debug,1",initialize=False).rstrip()
+            #msg = serial_openlock.get_result_by_input(port=port_sensor,command="12,51,custom_cmd,VD" + str(value_index) + "!,debug,1",initialize=False).rstrip()
+            msg="12,51,custom_cmd,VD" + str(value_index) + "!,debug,1"
+            ard.write(msg)
+            ard.flushInput()
+            sleep(1)
+            msg=ard.readline()
+            msg=msg.rstrip()
             time.sleep(2)
             response = msg[0:-1].split('response,V')[-1]
             vaisala_values += response
@@ -574,6 +693,7 @@ while True:
                 break
 
        
+        vaisala_values_original=vaisala_values
         # modify string for concatenation
         vaisala_values = vaisala_values.replace('+', ",+")
         vaisala_values = vaisala_values.replace('-', ",-")
@@ -593,7 +713,11 @@ while True:
    
 
         # Reset vaisala rain counter and duration
-        msg = serial_openlock.get_result_by_input(port=port_sensor,command="12,51,custom_cmd,VXZRU!,debug,1",initialize=False).rstrip()
+        #msg = serial_openlock.get_result_by_input(port=port_sensor,command="12,51,custom_cmd,VXZRU!,debug,1",initialize=False).rstrip()
+        ard.write("12,51,custom_cmd,VXZRU!,debug,1")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         time.sleep(2)
 
         if screen_display:
@@ -609,7 +733,11 @@ while True:
         if save_to_file:
             fid.write("\nVaisala" + delimiter + vaisala_values[1:])
        
-        msg=serial_openlock.get_result_by_input(port=port_sensor,command="1145,3,power,33,dummies,1,interval_mm,2000,debug,0",initialize=False)
+        #msg=serial_openlock.get_result_by_input(port=port_sensor,command="1145,3,power,33,dummies,1,interval_mm,2000,debug,0",initialize=False)
+        ard.write("1145,3,power,33,dummies,1,interval_mm,2000,debug,0")
+        ard.flushInput()
+        sleep(1)
+        msg=ard.readline()
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(',')[0:-1]
@@ -638,6 +766,7 @@ while True:
     
     sensor_measure_idx+=1
     time.sleep(sleep_time_seconds)
+    #time.sleep(1)
 
 client.loop_stop()
 client.disconnect()
