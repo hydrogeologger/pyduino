@@ -12,6 +12,8 @@ place new libraries in this location and include as
 #include "timing.h"
 #include "common.h"
 #include "SDI12_function.h"
+#include "arduinoFFT.h"
+#include <stdlib.h>
 
 /*===========================================================================*/
 
@@ -745,6 +747,142 @@ void check_serial(String content)
     //Serial.print("CMD: "); Serial.println(content);
 }
 
+#define VWP_PIN A1
+#define VWP_NUMBER_SAMPLES 256  //Must be a power of 2 (for FFT algorithm)
+#define VWP_SAMPLING_FREQ 9000  //Hz, must be less than 10000 due to ADC and double the frequency you are trying to sample
+#define VWP_FREQ_START 2000
+#define VWP_FREQ_END 3500
+#define VWP_DELAY 3000  //Delay between resampling
+#define VWP_NUMBER_TRIES 1
+#define VWP_SAMPLING_PERIOD_US (float)(1000000 * (1.0 / VWP_SAMPLING_FREQ))  // Sampling period in microseconds
+
+// #if defined(__AVR_ATmega2560__)
+#if defined(ARDUINO_AVR_MEGA2560) || defined(__AVR_ATmega2560__)
+#define INTERNAL1V1 2
+#define INTERNAL2V56 3
+#endif
+
+void vwp_read(String content) {
+    if (content == "") {
+        return;
+    }
+
+    uint8_t vwp_Count = 0;
+    uint8_t vwp_divisor = VWP_NUMBER_TRIES;
+
+    unsigned long sampleTime[VWP_NUMBER_SAMPLES];
+    unsigned long samplePeriod[VWP_NUMBER_SAMPLES];
+    unsigned long totalTime;
+    float averageTime;
+    double vReal[VWP_NUMBER_SAMPLES];
+    double vImag[VWP_NUMBER_SAMPLES];
+    double fftPeak;
+    float correctedNaturalFreq;
+    float naturalFrequencies[VWP_NUMBER_TRIES];
+    float bUnits;
+
+    Serial.print("vwp");
+    Serial.print(DELIMITER);
+
+    while (vwp_Count < VWP_NUMBER_TRIES) {
+        
+        // Serial.println(vwp_Count);
+
+        // sweeping frequency incrementing every 4ms and ending after 150ms to wait for natural frequency pulse
+        for (unsigned int freq = VWP_FREQ_START; freq <= VWP_FREQ_END; freq = freq + 50) {
+            tone(VWP_PIN, freq);
+            //Serial.println(freq);
+            delay(4);
+            noTone(VWP_PIN);
+        }
+
+        // digitalWrite(VWP_PIN, LOW);
+        pinMode(VWP_PIN, INPUT);  // ADJUST!!!
+        delay(20);                // delay 20ms to wait for frequencies other than natural frequency to die out.
+
+        //SAMPLING
+        analogReference(INTERNAL1V1);
+        for (int i = 0; i < VWP_NUMBER_SAMPLES; i++) {
+            sampleTime[i] = micros();        //Overflows after around 70 minutes!
+            vReal[i] = analogRead(VWP_PIN);  // ADJUST!!!
+            vImag[i] = 0;
+            
+            while ((micros() - sampleTime[i]) <= floor(VWP_SAMPLING_PERIOD_US)) {
+                // Give sufficient time to pass bofore getting next sample
+            }
+        }
+
+        totalTime = 0;
+        for (int i = 1; i < VWP_NUMBER_SAMPLES; i++) {
+            samplePeriod[i] = sampleTime[i] - sampleTime[i - 1];
+            //Serial.println(time2[i]);
+            totalTime += samplePeriod[i];
+        }
+
+        averageTime = totalTime / (VWP_NUMBER_SAMPLES - 1.0);
+        
+        // Serial.println(totalTime);
+        // Serial.println(averageTime);
+
+        //FFT
+        arduinoFFT FFT = arduinoFFT(vReal, vImag, VWP_NUMBER_SAMPLES, VWP_SAMPLING_FREQ);
+        FFT.Windowing(FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+        FFT.Compute(FFT_FORWARD);
+        FFT.ComplexToMagnitude();
+        fftPeak = FFT.MajorPeak();
+        FFT.~arduinoFFT();
+
+        correctedNaturalFreq = (VWP_SAMPLING_PERIOD_US / averageTime) * fftPeak;
+
+        //PRINT RESULTS
+        // Serial.println(fftPeak);  //Print out what uncorrected frequency is the most dominant.
+        // Serial.println(correctedNaturalFreq);
+
+        if ((correctedNaturalFreq < VWP_FREQ_START) || (correctedNaturalFreq > VWP_FREQ_END)) {
+            correctedNaturalFreq = 0.00;
+        }
+        naturalFrequencies[vwp_Count] = correctedNaturalFreq;
+        vwp_Count++;
+        delay(VWP_DELAY);  // Wait this long to let wire settle before plucking again
+    }
+
+    if (vwp_Count == VWP_NUMBER_TRIES) {
+        vwp_Count++;
+        float naturalFrequencyAverage = 0.0;
+
+        for (int i = 0; i < VWP_NUMBER_TRIES; i++) {
+            naturalFrequencyAverage += naturalFrequencies[i];
+            if (naturalFrequencies[i] == 0.0) {  // Critical to include this step! It removes any zero values from averaging!
+                vwp_divisor = vwp_divisor - 1;
+            }
+        }
+
+        if (vwp_divisor == 0) {  // If all the readings register zero readings, set outcome to zero!
+            naturalFrequencyAverage = 0.0;      // This would take 2s x 3 tries x 3 readings = 18s per VWP!!! (6s minimum per VWP)
+            bUnits = 0.0;
+        } else {
+            naturalFrequencyAverage /= vwp_divisor;
+            bUnits = (naturalFrequencyAverage * naturalFrequencyAverage) * (0.001);
+        }
+
+        // for (int i = 0; i < (VWP_NUMBER_SAMPLES / 2); i++) {
+        //     //View all these three lines in serial terminal to see which frequencies has which amplitudes
+        //     Serial.print((i * 1.0 * VWP_SAMPLING_FREQ) / VWP_NUMBER_SAMPLES, 1);
+        //     Serial.print("  ");
+        //     Serial.println(vReal[i], 1);  //View only this line in serial plotter to visualize the bins
+        // }
+
+        Serial.print("AvgFreq");
+        Serial.print(DELIMITER);
+        Serial.print(naturalFrequencyAverage);
+        Serial.print(DELIMITER);
+        Serial.print("Bunit");
+        Serial.print(DELIMITER);
+        Serial.println(bUnits);
+        analogReference(DEFAULT);
+    }
+}
+
 // the loop routine runs over and over again forever:
 void loop()
 {
@@ -828,6 +966,9 @@ void loop()
                           hydrogeolog1.parse_argument("75", INVALID, str_ay_size, str_ay),
                           hydrogeolog1.parse_argument("clk", INVALID, str_ay_size, str_ay),
                           power_sw_pin, str_ay);
+
+        vwp_read(hydrogeolog1.parse_argument_string("vwp", "", str_ay_size, str_ay));
+        
         SDI12_sensor(str_ay_size, debug_sw, power_sw_pin, str_ay);
     }//communication
 } //loop
