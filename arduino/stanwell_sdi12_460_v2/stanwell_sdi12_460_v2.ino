@@ -758,9 +758,8 @@ void vwp_read(String content) {
 #define VWP_SAMPLING_PERIOD_US (float)(1000000 * (1.0 / VWP_SAMPLING_FREQ))  // Sampling period in microseconds
 
 // #if defined(__AVR_ATmega2560__)
-#if defined(ARDUINO_AVR_MEGA2560) || defined(__AVR_ATmega2560__)
+#if defined(ARDUINO_AVR_MEGA2560)
 #define INTERNAL1V1 2
-#define INTERNAL2V56 3
 #endif
 
     if (content == "") {
