@@ -747,7 +747,8 @@ void check_serial(String content)
     //Serial.print("CMD: "); Serial.println(content);
 }
 
-void vwp_read(String content) {
+void vwp_read(int8_t analog_pin) {
+#include <pins_arduino.h>
 #define VWP_PIN A1
 #define VWP_NUMBER_SAMPLES 256  //Must be a power of 2 (for FFT algorithm)
 #define VWP_SAMPLING_FREQ 9000  //Hz, must be less than 10000 due to ADC and double the frequency you are trying to sample
@@ -762,7 +763,8 @@ void vwp_read(String content) {
 #define INTERNAL1V1 2
 #endif
 
-    if (content == "") {
+    int8_t analog_pin_digital_number = analogInputToDigitalPin(analog_pin);
+    if (analog_pin_digital_number < A0 || analog_pin_digital_number > A15) {
         return;
     }
 
@@ -780,8 +782,9 @@ void vwp_read(String content) {
     float naturalFrequencies[VWP_NUMBER_TRIES];
     float bUnits;
 
-    Serial.print("vwp");
-    Serial.print(DELIMITER);
+    // Serial.print("vwp");
+    // Serial.print(DELIMITER);
+    hydrogeolog1.print_string_delimiter_value("vwp", String(analog_pin));
 
     while (vwp_Count < VWP_NUMBER_TRIES) {
         
@@ -789,21 +792,25 @@ void vwp_read(String content) {
 
         // sweeping frequency incrementing every 4ms and ending after 150ms to wait for natural frequency pulse
         for (unsigned int freq = VWP_FREQ_START; freq <= VWP_FREQ_END; freq = freq + 50) {
-            tone(VWP_PIN, freq);
+            // tone(VWP_PIN, freq);
+            tone(analog_pin_digital_number, freq);
             //Serial.println(freq);
             delay(4);
-            noTone(VWP_PIN);
+            // noTone(VWP_PIN);
+            noTone(analog_pin_digital_number);
         }
 
         // digitalWrite(VWP_PIN, LOW);
-        pinMode(VWP_PIN, INPUT);  // ADJUST!!!
+        // pinMode(VWP_PIN, INPUT);    // Set pin to input for reading
+        pinMode(analog_pin_digital_number, INPUT);
         delay(20);                // delay 20ms to wait for frequencies other than natural frequency to die out.
 
         //SAMPLING
         analogReference(INTERNAL1V1);
         for (int i = 0; i < VWP_NUMBER_SAMPLES; i++) {
             sampleTime[i] = micros();        //Overflows after around 70 minutes!
-            vReal[i] = analogRead(VWP_PIN);  // ADJUST!!!
+            // vReal[i] = analogRead(VWP_PIN);  // ADJUST!!!
+            vReal[i] = analogRead(analog_pin_digital_number);  // ADJUST!!!
             vImag[i] = 0;
             
             while ((micros() - sampleTime[i]) <= floor(VWP_SAMPLING_PERIOD_US)) {
@@ -877,7 +884,8 @@ void vwp_read(String content) {
         Serial.print(DELIMITER);
         Serial.print("Bunit");
         Serial.print(DELIMITER);
-        Serial.println(bUnits);
+        Serial.print(bUnits);
+        Serial.println(DELIMITER);
         analogReference(DEFAULT);
     }
 }
@@ -966,7 +974,8 @@ void loop()
                           hydrogeolog1.parse_argument("clk", INVALID, str_ay_size, str_ay),
                           power_sw_pin, str_ay);
 
-        vwp_read(hydrogeolog1.parse_argument_string("vwp", "", str_ay_size, str_ay));
+        // vwp_read(hydrogeolog1.parse_argument_string("vwp", "", str_ay_size, str_ay));
+        vwp_read(hydrogeolog1.parse_argument("vwp", INVALID, str_ay_size, str_ay));
         
         SDI12_sensor(str_ay_size, debug_sw, power_sw_pin, str_ay);
     }//communication
