@@ -747,6 +747,7 @@ void check_serial(String content)
     //Serial.print("CMD: "); Serial.println(content);
 }
 
+void vwp_read(String content) {
 #define VWP_PIN A1
 #define VWP_NUMBER_SAMPLES 256  //Must be a power of 2 (for FFT algorithm)
 #define VWP_SAMPLING_FREQ 9000  //Hz, must be less than 10000 due to ADC and double the frequency you are trying to sample
@@ -762,7 +763,6 @@ void check_serial(String content)
 #define INTERNAL2V56 3
 #endif
 
-void vwp_read(String content) {
     if (content == "") {
         return;
     }
