@@ -4,6 +4,8 @@ import numpy as np
 g2kg = 0.001
 kg2g = 1000.
 ms2mmday=3600.*24*1000
+dayPs = 1/(60*60*24)
+sPday =60*60*24
 kelvin=273.15
 mm2m=0.001
 m2mm=1000.
@@ -30,7 +32,6 @@ kmPm=0.001
 minutePday=60.*24
 secPmsec=1e-3 # convert milli second to second
 msecPsec=1000 # convert second to milli second
-
 #class constitutive_relation:
 
 def dv(tk):

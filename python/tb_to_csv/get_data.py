@@ -33,7 +33,7 @@ tb_pandas.plot_df(['sa3_uv','sa3_vis'])
 
 # small optation to the failed measurement
 
-tb_pandas.result_df['temp_2']['value'] [ tb_pandas.result_df['temp_2']['value'] <5  ] =np.nan 
+tb_pandas.result_df['temp2']['value'] [ tb_pandas.result_df['temp2']['value'] <5  ] =np.nan 
 
 tb_pandas.result_df['scale1']['value'] [ tb_pandas.result_df['scale1']['value'] <5  ] =np.nan 
 
@@ -66,11 +66,11 @@ sp_sch=pandas_scale.concat_data_tb(pd.datetime.strptime(sp_input['start_time'],'
 sp_sch.start_dt = pd.datetime.strptime(sp_input['start_time'],'%Y/%b/%d %H:%M')
 sp_sch.end_dt   = pd.datetime.strptime(sp_input['end_time'  ],'%Y/%b/%d %H:%M')
 
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_6'].index, 
-        input_data_series=tb_pandas.result_df['temp_6']['value'], output_time_series=sp_sch.df.index,key_name='temp_6' ,
+sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['sa3_uv'].index, 
+        input_data_series=tb_pandas.result_df['sa3_uv']['value'], output_time_series=sp_sch.df.index,key_name='sa3_uv' ,
         plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_4'].index,
-                input_data_series=tb_pandas.result_df['temp_4']['value'], output_time_series=sp_sch.df.index,key_name='temp_4' ,
+sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp2'].index,
+                input_data_series=tb_pandas.result_df['temp2']['value'], output_time_series=sp_sch.df.index,key_name='temp2' ,
                         plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
 sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_3'].index,
                 input_data_series=tb_pandas.result_df['temp_3']['value'], output_time_series=sp_sch.df.index,key_name='temp_3' ,
@@ -87,13 +87,13 @@ sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['scale2'].index,
 
 
 
-fig = plt.figure(figsize=(16,10))
+fig = plt.figure(figsize=(17.5,9.8))
 ax = [[] for i in range(30)]
-ax[0  ] = plt.subplot2grid((2, 1), (0, 0), colspan=1)
+ax[0] = plt.subplot2grid((2, 1), (0, 0), colspan=1)
 ax[1  ] = plt.subplot2grid((2, 1), (1, 0), colspan=1, sharex = ax[0])
 
-ax[0].plot(sp_sch.df.index,sp_sch.df['temp_6'])
-ax[0].plot(sp_sch.df.index,sp_sch.df['temp_4'])
+ax[0].plot(sp_sch.df.index,sp_sch.df['sa3_uv'])
+ax[0].plot(sp_sch.df.index,sp_sch.df['temp2'])
 ax[0].plot(sp_sch.df.index,sp_sch.df['temp_3'])
 ax[0].plot(sp_sch.df.index,sp_sch.df['temp_2'])
 ax[1].plot(sp_sch.df.index,sp_sch.df['scale1']) #[0]-sp_sch.df['scale1'])
@@ -103,3 +103,4 @@ ax[1].plot(sp_sch.df.index,sp_sch.df['scale_plus'])
 plt.show()
 sp_sch.df.to_csv('result.csv')
 #plt.close()
+tb_pandas.result_df['temp2'].index

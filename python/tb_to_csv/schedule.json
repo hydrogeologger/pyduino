@@ -1,6 +1,6 @@
 {
-"project_name" : "boiling water",
-"start_time"   : "2019/Jul/18 15:01",
-"end_time"     : "2019/Jul/18 19:00",
-"delta_t_s"    : 60
+"project_name" : "ewatering",
+"start_time"   : "2021/Mar/15 15:00",
+"end_time"     : "2021/Jun/1 12:00",
+"delta_t_s"    : 600
 }

@@ -19,7 +19,7 @@ import thingsboard_to_pandas_py3
 #reload(thingsboard_to_pandas_py3)
 
 
-tb_pandas=thingsboard_to_pandas_py3.tingsboard_to_pandas('tb_credential.json')   # input is the location of the json file
+tb_pandas=thingsboard_to_pandas_py3.tingsboard_to_pandas('C:/pyduino/pyduino/python/tb_to_csv/tb_credential.json')   # input is the location of the json file
 # use the below command to show the comments on tb_credential.json
 # print tb_pandas.input_json['comments'] 
 
@@ -38,7 +38,7 @@ tb_pandas.result_df['temp_2']['value'] [ tb_pandas.result_df['temp_2']['value'] 
 tb_pandas.result_df['scale1']['value'] [ tb_pandas.result_df['scale1']['value'] <5  ] =np.nan 
 
 # merge data    
-with open('schedule.json') as data_file:    
+with open('C:/pyduino/pyduino/python/tb_to_csv/schedule.json') as data_file:    
     sp_input = json.load(data_file)
 
 #sys.path.append   (os.environ['pyduino']+'/python/post_processing/')
@@ -48,10 +48,10 @@ with open('schedule.json') as data_file:
 #
 #sys.path.join(os.environ['pyduino'],'python','post_processing')
 #sys.path.append(os.path.join(os.environ['pyduino'],'python','post_processing'))
-py_compile.compile( os.path.join(os.environ['pyduino'],'python','post_processing','pandas_scale.py')  )
-py_compile.compile( os.path.join(os.environ['pyduino'],'python','post_processing','constants.py')  )
+# py_compile.compile( os.path.join(os.environ['pyduino'],'pandas_scale.py')  )
+# py_compile.compile( os.path.join(os.environ['pyduino'],'python','post_processing','constants.py')  )
 
-import pandas_scale
+import pandas_scale_py3
 import constants
 reload(pandas_scale)
 reload(constants)
@@ -60,46 +60,48 @@ sp_sch={}
 plot_interpolate=False
 #plot_interpolate=True
 
-sp_sch=pandas_scale.concat_data_tb(pd.datetime.strptime(sp_input['start_time'],'%Y/%b/%d %H:%M'),
+sp_sch=pandas_scale_py3.concat_data_tb(pd.datetime.strptime(sp_input['start_time'],'%Y/%b/%d %H:%M'),
     pd.datetime.strptime(sp_input['end_time'],'%Y/%b/%d %H:%M'),sp_input['delta_t_s'] );
-
+import matplotlib.pyplot as plt
 sp_sch.start_dt = pd.datetime.strptime(sp_input['start_time'],'%Y/%b/%d %H:%M')
 sp_sch.end_dt   = pd.datetime.strptime(sp_input['end_time'  ],'%Y/%b/%d %H:%M')
 
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_6'].index, 
-        input_data_series=tb_pandas.result_df['temp_6']['value'], output_time_series=sp_sch.df.index,key_name='temp_6' ,
-        plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_4'].index,
-                input_data_series=tb_pandas.result_df['temp_4']['value'], output_time_series=sp_sch.df.index,key_name='temp_4' ,
-                        plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_3'].index,
-                input_data_series=tb_pandas.result_df['temp_3']['value'], output_time_series=sp_sch.df.index,key_name='temp_3' ,
-                        plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_2'].index,
-                input_data_series=tb_pandas.result_df['temp_2']['value'], output_time_series=sp_sch.df.index,key_name='temp_2' ,
-                        plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['scale1'].index,
-                input_data_series=tb_pandas.result_df['scale1']['value'], output_time_series=sp_sch.df.index,key_name='scale1' ,
-                        plot=plot_interpolate  ,coef=5e-8,rm_nan=True)
-sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['scale2'].index,
-                input_data_series=tb_pandas.result_df['scale2']['value'], output_time_series=sp_sch.df.index,key_name='scale2' ,
-                        plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
+sp_sch.merge_data_from_tb(
+        input_time_series=tb_pandas.result_df['p2_cs451'].index, 
+        input_data_series=tb_pandas.result_df['p2_cs451']['value'], 
+        output_time_series=sp_sch.df.index,key_name='p2_cs451' ,
+        plot=plot_interpolate  ,coef=5e-8,rm_nan=True)
+# sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_4'].index,
+#                 input_data_series=tb_pandas.result_df['temp_4']['value'], output_time_series=sp_sch.df.index,key_name='temp_4' ,
+#                         plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
+# sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_3'].index,
+#                 input_data_series=tb_pandas.result_df['temp_3']['value'], output_time_series=sp_sch.df.index,key_name='temp_3' ,
+#                         plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
+# sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['temp_2'].index,
+#                 input_data_series=tb_pandas.result_df['temp_2']['value'], output_time_series=sp_sch.df.index,key_name='temp_2' ,
+#                         plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
+# sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['scale1'].index,
+#                 input_data_series=tb_pandas.result_df['scale1']['value'], output_time_series=sp_sch.df.index,key_name='scale1' ,
+#                         plot=plot_interpolate  ,coef=5e-8,rm_nan=True)
+# sp_sch.merge_data_from_tb(input_time_series=tb_pandas.result_df['scale2'].index,
+#                 input_data_series=tb_pandas.result_df['scale2']['value'], output_time_series=sp_sch.df.index,key_name='scale2' ,
+#                         plot=plot_interpolate  ,coef=5e-5,rm_nan=True)
 
 
 
-fig = plt.figure(figsize=(16,10))
-ax = [[] for i in range(30)]
-ax[0  ] = plt.subplot2grid((2, 1), (0, 0), colspan=1)
-ax[1  ] = plt.subplot2grid((2, 1), (1, 0), colspan=1, sharex = ax[0])
+# fig = plt.figure(figsize=(16,10))
+# ax = [[] for i in range(30)]
+# ax[0  ] = plt.subplot2grid((2, 1), (0, 0), colspan=1)
+# ax[1  ] = plt.subplot2grid((2, 1), (1, 0), colspan=1, sharex = ax[0])
 
-ax[0].plot(sp_sch.df.index,sp_sch.df['temp_6'])
-ax[0].plot(sp_sch.df.index,sp_sch.df['temp_4'])
-ax[0].plot(sp_sch.df.index,sp_sch.df['temp_3'])
-ax[0].plot(sp_sch.df.index,sp_sch.df['temp_2'])
-ax[1].plot(sp_sch.df.index,sp_sch.df['scale1']) #[0]-sp_sch.df['scale1'])
-ax[1].plot(sp_sch.df.index,sp_sch.df['scale2'])#[0]-sp_sch.df['scale2'])
-ax[1].plot(sp_sch.df.index,sp_sch.df['scale_plus'])
+# ax[0].plot(sp_sch.df.index,sp_sch.df['temp_6'])
+# ax[0].plot(sp_sch.df.index,sp_sch.df['temp_4'])
+# ax[0].plot(sp_sch.df.index,sp_sch.df['temp_3'])
+# ax[0].plot(sp_sch.df.index,sp_sch.df['temp_2'])
+# ax[1].plot(sp_sch.df.index,sp_sch.df['scale1']) #[0]-sp_sch.df['scale1'])
+# ax[1].plot(sp_sch.df.index,sp_sch.df['scale2'])#[0]-sp_sch.df['scale2'])
+# ax[1].plot(sp_sch.df.index,sp_sch.df['scale_plus'])
 
-plt.show()
-sp_sch.df.to_csv('result.csv')
-#plt.close()
+# plt.show()
+# sp_sch.df.to_csv('result.csv')
+# #plt.close()
