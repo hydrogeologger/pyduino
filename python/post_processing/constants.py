@@ -4,6 +4,9 @@ import numpy as np
 g2kg = 0.001
 kg2g = 1000.
 ms2mmday=3600.*24*1000
+mmdayPms=1.0/3600/24/1000
+msPmmday=3600*24*1000
+
 dayPs = 1/(60*60*24)
 sPday =60*60*24
 kelvin=273.15
