@@ -511,10 +511,14 @@ while True:
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
         current_read=msg.split(' ')[0:-1]
-        grange_4_luo2_wet[ 'wluo0'] = float(current_read[-2])
-        grange_4_luo2_wet['wlupe0'] = float(current_read[-4])
-        grange_4_luo2_wet[ 'wlut0'] = float(current_read[-6])
-        grange_4_luo2_wet[ 'wlup0'] = float(current_read[-8])
+        try:
+            grange_4_luo2_wet[ 'wluo0'] = float(current_read[-2])
+            grange_4_luo2_wet['wlupe0'] = float(current_read[-4])
+            grange_4_luo2_wet[ 'wlut0'] = float(current_read[-6])
+            grange_4_luo2_wet[ 'wlup0'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,24,serial,2 reading failed")
 
 
         sleep(5)
@@ -526,11 +530,15 @@ while True:
         if screen_display: print msg.replace('\r','')
         if screen_display: print msg.rstrip()
         if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(' ')[0:-1]
-        grange_4_luo2_wet[ 'wluo1'] = float(current_read[-2])
-        grange_4_luo2_wet['wlupe1'] = float(current_read[-4])
-        grange_4_luo2_wet[ 'wlut1'] = float(current_read[-6])
-        grange_4_luo2_wet[ 'wlup1'] = float(current_read[-8])
+        try:
+            current_read=msg.split(' ')[0:-1]
+            grange_4_luo2_wet[ 'wluo1'] = float(current_read[-2])
+            grange_4_luo2_wet['wlupe1'] = float(current_read[-4])
+            grange_4_luo2_wet[ 'wlut1'] = float(current_read[-6])
+            grange_4_luo2_wet[ 'wlup1'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,22,serial,2 reading failed")
 
 
 
@@ -542,11 +550,15 @@ while True:
         msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(' ')[0:-1]
-        grange_4_luo2_wet[ 'wluo2'] = float(current_read[-2])
-        grange_4_luo2_wet['wlupe2'] = float(current_read[-4])
-        grange_4_luo2_wet[ 'wlut2'] = float(current_read[-6])
-        grange_4_luo2_wet[ 'wlup2'] = float(current_read[-8])
+        try:
+            current_read=msg.split(' ')[0:-1]
+            grange_4_luo2_wet[ 'wluo2'] = float(current_read[-2])
+            grange_4_luo2_wet['wlupe2'] = float(current_read[-4])
+            grange_4_luo2_wet[ 'wlut2'] = float(current_read[-6])
+            grange_4_luo2_wet[ 'wlup2'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,23,serial,2 reading failed")
 
 
         sleep(5)
@@ -557,11 +569,15 @@ while True:
         msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(' ')[0:-1]
-        #grange_4_luo2_wet[ 'wluo3'] = float(current_read[-2])
-        #grange_4_luo2_wet['wlupe3'] = float(current_read[-4])
-        #grange_4_luo2_wet[ 'wlut3'] = float(current_read[-6])
-        #grange_4_luo2_wet[ 'wlup3'] = float(current_read[-8])
+        try:
+            current_read=msg.split(' ')[0:-1]
+            #grange_4_luo2_wet[ 'wluo3'] = float(current_read[-2])
+            #grange_4_luo2_wet['wlupe3'] = float(current_read[-4])
+            #grange_4_luo2_wet[ 'wlut3'] = float(current_read[-6])
+            #grange_4_luo2_wet[ 'wlup3'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,25,serial,2 reading failed")
 
         sleep(5)
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,9,serial,2",initialize=False)
@@ -571,11 +587,15 @@ while True:
         msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(' ')[0:-1]
-        grange_4_luo2_wet[ 'wluo4'] = float(current_read[-2])
-        grange_4_luo2_wet['wlupe4'] = float(current_read[-4])
-        grange_4_luo2_wet[ 'wlut4'] = float(current_read[-6])
-        grange_4_luo2_wet[ 'wlup4'] = float(current_read[-8])
+        try:
+            current_read=msg.split(' ')[0:-1]
+            grange_4_luo2_wet[ 'wluo4'] = float(current_read[-2])
+            grange_4_luo2_wet['wlupe4'] = float(current_read[-4])
+            grange_4_luo2_wet[ 'wlut4'] = float(current_read[-6])
+            grange_4_luo2_wet[ 'wlup4'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,9,serial,2 reading failed")
 
 
         sleep(5)
@@ -586,11 +606,15 @@ while True:
         msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(' ')[0:-1]
-        grange_4_luo2_wet[ 'wluo5'] = float(current_read[-2])
-        grange_4_luo2_wet['wlupe5'] = float(current_read[-4])
-        grange_4_luo2_wet[ 'wlut5'] = float(current_read[-6])
-        grange_4_luo2_wet[ 'wlup5'] = float(current_read[-8])
+        try:
+            current_read=msg.split(' ')[0:-1]
+            grange_4_luo2_wet[ 'wluo5'] = float(current_read[-2])
+            grange_4_luo2_wet['wlupe5'] = float(current_read[-4])
+            grange_4_luo2_wet[ 'wlut5'] = float(current_read[-6])
+            grange_4_luo2_wet[ 'wlup5'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,8,serial,2 reading failed")
 
         sleep(5)
         #msg=serial_openlock.get_result_by_input(port=port_sensor,command="lumino2,A,power,7,serial,2",initialize=False)
@@ -600,11 +624,15 @@ while True:
         msg=ard.readline()
         if screen_display: print msg.replace('\r','')
         if save_to_file: fid.write(delimiter+msg.rstrip())
-        current_read=msg.split(' ')[0:-1]
-        grange_4_luo2_wet[ 'wluo6'] = float(current_read[-2])
-        grange_4_luo2_wet['wlupe6'] = float(current_read[-4])
-        grange_4_luo2_wet[ 'wlut6'] = float(current_read[-6])
-        grange_4_luo2_wet[ 'wlup6'] = float(current_read[-8])
+        try:
+            current_read=msg.split(' ')[0:-1]
+            grange_4_luo2_wet[ 'wluo6'] = float(current_read[-2])
+            grange_4_luo2_wet['wlupe6'] = float(current_read[-4])
+            grange_4_luo2_wet[ 'wlut6'] = float(current_read[-6])
+            grange_4_luo2_wet[ 'wlup6'] = float(current_read[-8])
+        except Exception as error:
+            print(error)
+            print("lumino2,A,power,7,serial,2 reading failed")
 
         client.publish('v1/devices/me/telemetry', json.dumps(grange_4_luo2_wet), 1)
         upload_phant(pht_grange_4_luo2_wet,grange_4_luo2_wet,screen_display)
