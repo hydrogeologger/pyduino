@@ -763,6 +763,10 @@ void vwp_read(int8_t analog_pin) {
 #define INTERNAL1V1 2
 #endif
 
+    if (analog_pin == INVALID) {
+        return;
+    }
+    
     int8_t analog_pin_digital_number = analogInputToDigitalPin(analog_pin);
     if (analog_pin_digital_number < A0 || analog_pin_digital_number > A15) {
         return;
