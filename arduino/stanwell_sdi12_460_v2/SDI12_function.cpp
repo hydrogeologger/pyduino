@@ -58,38 +58,34 @@ boolean sdi12_check_pin(int sdi12_data)
     return false;
 }
 
-boolean sdi12_scan(int* sensors) {
-    boolean foundSensor = false;
+/**
+ * @brief Counts the number of connected active SDI-12 devices.
+ * 
+ * @return int8_t Number of unique SDI-12 sensor address
+ */
+int8_t sdi12_scan(void) {
     int count = 0;
     //scan the pin for all avaliable sensors
-    for (uint8_t i = 0; i < MAX_NUM_ADDR; i++)
-    {
+    for (uint8_t i = 0; i < MAX_NUM_ADDR; i++) {
         char c = convert_bit_number_to_char(i);
-        if (checkActive(c))
-        {
+        if (checkActive(c)) {
             setTaken(c);
-            foundSensor = true;
             count++;
-        } else {
-            
         }
     }
-    isInit = true;
-    *sensors = count;
-    return foundSensor;
+    return count;
 }
 
 /*
 initiate sdi12 on a pin
 */
-boolean sdi12_init(int sdi12_data, int *sensors)
-{
-    if (sdi12_check_pin(sdi12_data) == false)
+boolean sdi12_init(int sdi12_pin) {
+    if (sdi12_check_pin(sdi12_pin) == false)
         return false;
-    mySDI12 = SDI12(sdi12_data);
+    mySDI12 = SDI12(sdi12_pin);
     mySDI12.begin();
     delay(500); // allow things to settle
-    return sdi12_scan(sensors);
+    return true;
 }
 
 boolean sdi12_change(char new_addr)
