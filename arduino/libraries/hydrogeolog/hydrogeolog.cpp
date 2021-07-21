@@ -62,9 +62,13 @@ int hydrogeolog::parse_argument(String str_source, int default_values, int numbe
     //strcmpi(str_source,number_opts,str_ay2[20]);
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
     int str_value = default_values;
-    if (str_idx != -1)
-    {
+    if (str_idx != -1) {
         str_ay2[str_idx + 1].trim(); // Remove leading, trailing spaces
+        // Test for empty string
+        if (str_ay2[str_idx + 1] == "") {
+            return default_values;
+        }
+        
         str_value = str_ay2[str_idx + 1].toInt();
         // Test for edge case if toInt returns 0 and string is not "0"
         if (strcmp("0", str_ay2[str_idx + 1].c_str()) != 0 && str_value == 0) {
