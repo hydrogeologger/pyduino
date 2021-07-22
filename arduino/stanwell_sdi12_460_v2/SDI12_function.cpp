@@ -107,10 +107,8 @@ boolean sdi12_change(char new_addr)
                         printInfo(c);
                         Serial.print(DELIMITER);
                         sdi12_send_command(cmd, false);
-                        int sensors = 0;
                         addressSpace[LOW] = (uint32_t)0x00;
                         addressSpace[HIGH] = (uint32_t)0x00;
-                        sdi12_scan(&sensors);
                         printInfo(new_addr);
                         Serial.print(DELIMITER);
                         return true;
