@@ -22,6 +22,7 @@ import thingsboard_to_pandas_py3
 tb_pandas=thingsboard_to_pandas_py3.tingsboard_to_pandas('tb_credential.json')   # input is the location of the json file
 # use the below command to show the comments on tb_credential.json
 # print tb_pandas.input_json['comments'] 
+# ensure that 'tb_crendential.json' is in the current working directory
 
 
 
