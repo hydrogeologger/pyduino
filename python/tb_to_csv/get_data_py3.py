@@ -51,10 +51,19 @@ with open('C:/pyduino/pyduino/python/tb_to_csv/schedule.json') as data_file:
 # py_compile.compile( os.path.join(os.environ['pyduino'],'pandas_scale.py')  )
 # py_compile.compile( os.path.join(os.environ['pyduino'],'python','post_processing','constants.py')  )
 
-import pandas_scale_py3
-import constants
+# CM210730 anaconda has realieased a constants.py, which is in flict with constants here.
+# so a new way of defining constants needs to be done by the following way
+# https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
+constants_file_path=os.path.join(pyduino_path,'python','post_processing','constants.py')
+spec = importlib.util.spec_from_file_location("constants", constants_file_path)
+constants = importlib.util.module_from_spec(spec)
+
+spec.loader.exec_module(constants)
+
+import pandas_scale
 reload(pandas_scale)
-reload(constants)
+import pandas_scale_py3
+
 
 sp_sch={}
 plot_interpolate=False
