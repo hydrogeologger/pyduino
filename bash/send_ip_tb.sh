@@ -16,5 +16,11 @@ source /home/pi/pyduino/credential/tb.sh
 #tb_domain=$(cat /home/pi/pyduino/credential/tb_domain)
 #access_token=$(cat /home/pi/pyduino/credential/access_token)
 
-curl -v -d "{$(cat /etc/hostname): \"$ip_address\"}" $TB_DOMAIN/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
+# curl -v -d "{$(cat /etc/hostname): \"$ip_address\"}" $TB_DOMAIN/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
+
+# Publish IP to all allocated thingsboard access tokens, add multiple access tokens using array format
+for ACCESS_TOKEN in ${ACCESS_TOKEN[@]}; do
+    curl -v --data "{$machine_name: \"$ip_address\"}" $TB_DOMAIN/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
+    # echo -e "$ACCESS_TOKEN"
+done
 
