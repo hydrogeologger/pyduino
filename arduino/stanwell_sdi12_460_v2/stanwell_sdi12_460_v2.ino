@@ -20,6 +20,80 @@ hydrogeolog hydrogeolog1(DELIMITER);
 /*===========================================================================*/
 
 /*Function prototypes========================================================*/
+void icm20948_get_tilt(int number_of_dummies, int number_of_measurements,
+        int measurement_time_interval, int debug_sw, int tca9548_channel) {
+#include <ICM20948_WE.h>
+#define ICM20948_ADDR 0x69
+
+    // hydrogeolog1.tcaselect(tca9548_channel);
+
+    ICM20948_WE myIMU = ICM20948_WE(ICM20948_ADDR);
+
+    if(!myIMU.init()){
+        Serial.print("ICM20948 not responding");
+        return;
+    }
+
+    myIMU.enableGyr(false); // Disable gyro, reduce noise
+    delay(1000);
+
+    // TODO: Check if magnetometer is enabled
+    
+    // myIMU.autoOffsets();
+    
+    /*  ICM20948_ACC_RANGE_2G      2 g   (default)
+    *  ICM20948_ACC_RANGE_4G      4 g
+    *  ICM20948_ACC_RANGE_8G      8 g   
+    *  ICM20948_ACC_RANGE_16G    16 g
+    */
+    myIMU.setAccRange(ICM20948_ACC_RANGE_2G);
+    
+    /*  Choose a level for the Digital Low Pass Filter or switch it off.  
+    *  ICM20948_DLPF_0, ICM20948_DLPF_2, ...... ICM20948_DLPF_7, ICM20948_DLPF_OFF 
+    *  
+    *  DLPF       3dB Bandwidth [Hz]      Output Rate [Hz]
+    *    0              246.0               1125/(1+ASRD) 
+    *    1              246.0               1125/(1+ASRD)
+    *    2              111.4               1125/(1+ASRD)
+    *    3               50.4               1125/(1+ASRD)
+    *    4               23.9               1125/(1+ASRD)
+    *    5               11.5               1125/(1+ASRD)
+    *    6                5.7               1125/(1+ASRD) 
+    *    7              473.0               1125/(1+ASRD)
+    *    OFF           1209.0               4500
+    *    
+    *    ASRD = Accelerometer Sample Rate Divider (0...4095)
+    *    You achieve lowest noise using level 6  
+    */
+    myIMU.setAccDLPF(ICM20948_DLPF_6);    
+    
+    /*  Acceleration sample rate divider divides the output rate of the accelerometer.
+    *  Sample rate = Basic sample rate / (1 + divider) 
+    *  It can only be applied if the corresponding DLPF is not off!
+    *  Divider is a number 0...4095 (different range compared to gyroscope)
+    *  If sample rates are set for the accelerometer and the gyroscope, the gyroscope
+    *  sample rate has priority.
+    */
+    myIMU.setAccSampleRateDivider(4095);
+
+    
+    /* Start Measurement */
+    myIMU.readSensor();
+    // xyzFloat gValue = myIMU.getGValues();
+    xyzFloat angle = myIMU.getAngles();
+    float pitch = myIMU.getPitch();
+    float roll  = myIMU.getRoll();
+
+    Serial.print(angle.x);
+    Serial.print(DELIMITER);
+    Serial.print(angle.y);
+    Serial.print(DELIMITER);
+    Serial.print(angle.z);
+    Serial.print(DELIMITER);
+    Serial.print(pitch);
+    Serial.print(DELIMITER);
+    Serial.print(roll);
+}
 
 /*===========================================================================*/
 
@@ -463,6 +537,10 @@ void read_i2c_sensor(String type, int number_of_dummies, int number_of_measureme
     else if (type == "si1145")
     {
         hydrogeolog1.si1145(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
+    }
+    else if (type == "icm20948")
+    {
+        // TODO: Insert imu function
     } else {
         Serial.print("INVALID_TYPE");
     }
