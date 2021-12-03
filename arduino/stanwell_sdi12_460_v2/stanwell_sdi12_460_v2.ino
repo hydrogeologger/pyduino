@@ -20,9 +20,9 @@ hydrogeolog hydrogeolog1(DELIMITER);
 /*===========================================================================*/
 
 /*Function prototypes========================================================*/
+#include <ICM20948_WE.h>
 void icm20948_get_tilt(int number_of_dummies, int number_of_measurements,
         int measurement_time_interval, int debug_sw, int tca9548_channel) {
-#include <ICM20948_WE.h>
 #define ICM20948_ADDR 0x69
 
     // hydrogeolog1.tcaselect(tca9548_channel);
@@ -540,6 +540,9 @@ void read_i2c_sensor(String type, int number_of_dummies, int number_of_measureme
     }
     else if (type == "icm20948")
     {
+        Serial.print("icm20948");
+        Serial.print(DELIMITER);
+        icm20948_get_tilt(number_of_dummies, number_of_measurements, measure_time_interval_ms, debug_sw, tca9548_channel);
         // TODO: Insert imu function
     } else {
         Serial.print("INVALID_TYPE");
