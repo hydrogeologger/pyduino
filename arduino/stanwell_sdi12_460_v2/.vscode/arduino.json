@@ -1,5 +1,0 @@
-{
-    "board": "arduino:avr:mega",
-    "configuration": "cpu=atmega2560",
-    "sketch": "stanwell_sdi12_460_v2.ino"
-}
