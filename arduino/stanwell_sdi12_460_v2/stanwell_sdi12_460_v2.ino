@@ -79,11 +79,19 @@ void icm20948_get_tilt(int number_of_dummies, int number_of_measurements,
     
     /* Start Measurement */
     myIMU.readSensor();
-    // xyzFloat gValue = myIMU.getGValues();
+    xyzFloat gValue = myIMU.getGValues();
     xyzFloat angle = myIMU.getAngles();
     float pitch = myIMU.getPitch();
     float roll  = myIMU.getRoll();
 
+    Serial.print(myIMU.getTemperature());
+    Serial.print(DELIMITER);
+    Serial.print(gValue.x);
+    Serial.print(DELIMITER);
+    Serial.print(gValue.y);
+    Serial.print(DELIMITER);
+    Serial.print(gValue.z);
+    Serial.print(DELIMITER);
     Serial.print(angle.x);
     Serial.print(DELIMITER);
     Serial.print(angle.y);
