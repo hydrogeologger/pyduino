@@ -479,7 +479,7 @@ void read_i2c_sensor(String type, int number_of_dummies, int number_of_measureme
  * Prints   Time duration for power off in milliseconds
  */
 void multiplexer_i2c_reset(int delayMillisValue) {
-    if (delayMillisValue > INVALID) {
+    if (delayMillisValue != INVALID) {
         // Require a minimum of 400ms delay to hold MULTIPLEXER_SW
         if (delayMillisValue < 400) {
             delayMillisValue = 400;
@@ -517,16 +517,21 @@ void multiplexer_i2c_reset(int delayMillisValue) {
     }
 }
 
-void multiplexer_search(int search_9548)
+void multiplexer_search(int search_9548, int power_sw_pin)
 {
     /*
     search channels for 9548 i2c multiplexer
     9548_search
     */
-    if (search_9548 != INVALID)
-    {
+    if (search_9548 > INVALID || search_9548 == HYDROGEOLOG_ERR_EMPTY_INT) {
         hydrogeolog1.print_string_delimiter_value("9548_search", String(search_9548));
+        if (power_sw_pin > INVALID) {
+            // digitalWrite(power_sw_pin, HIGH);
+            hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+        }
         hydrogeolog1.search_9548_channels();
+
+        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
         Serial.println();
     }
 }
@@ -800,9 +805,10 @@ void loop()
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);
 
-        multiplexer_i2c_reset(hydrogeolog1.parse_argument("9548_reset", INVALID, str_ay_size, str_ay));
+        multiplexer_i2c_reset(hydrogeolog1.parse_argument("9548_reset", INVALID, str_ay_size, str_ay, true));
 
-        multiplexer_search(hydrogeolog1.parse_argument("9548_search", INVALID, str_ay_size, str_ay));
+        multiplexer_search(hydrogeolog1.parse_argument("9548_search", INVALID, str_ay_size, str_ay, true),
+                power_sw_pin);
 
         multiplexer_read(str_ay_size, debug_sw,
                          hydrogeolog1.parse_argument_string("type", "", str_ay_size, str_ay),

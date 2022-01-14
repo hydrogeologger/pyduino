@@ -44,7 +44,7 @@ void hydrogeolog::print_str_ay(int number_opts, String str_ay2[20])
 int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
 /* string match */
 {
-    int str_index = -1;
+    int str_index = HYDROGEOLOG_ERR_INVALID;
     for (int i = 0; i < number_opts; i++)
     {
         if (str_source == str_ay2[i])
@@ -56,17 +56,21 @@ int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
     return str_index;
 } //strcmpi
 
-int hydrogeolog::parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20])
+int hydrogeolog::parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20], bool allow_empty = false)
 /* parse argument */
 {
     //strcmpi(str_source,number_opts,str_ay2[20]);
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
     int str_value = default_values;
-    if (str_idx != -1) {
+    if (str_idx != HYDROGEOLOG_ERR_INVALID) {
         str_ay2[str_idx + 1].trim(); // Remove leading, trailing spaces
         // Test for empty string
         if (str_ay2[str_idx + 1] == "") {
-            return default_values;
+            if (allow_empty) {
+                return HYDROGEOLOG_ERR_EMPTY_INT;
+            } else {
+                return default_values;
+            }
         }
         
         str_value = str_ay2[str_idx + 1].toInt();
@@ -83,7 +87,7 @@ String hydrogeolog::parse_argument_string(String str_source, String default_valu
 {
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
     String str_value = default_values;
-    if (str_idx != -1)
+    if (str_idx != HYDROGEOLOG_ERR_INVALID)
     {
         str_value = str_ay2[str_idx + 1];
     }
@@ -95,7 +99,7 @@ char hydrogeolog::parse_argument_char(String str_source, char default_values, in
 {
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
     char str_value = default_values;
-    if (str_idx != -1)
+    if (str_idx != HYDROGEOLOG_ERR_INVALID)
     {
         str_value = str_ay2[str_idx + 1][0];
     }
