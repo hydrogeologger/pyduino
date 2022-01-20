@@ -28,7 +28,7 @@ hydrogeolog hydrogeolog1(DELIMITER);
 void setup()
 {
     // initialize serial communication at 9600 bits per second:
-    Serial.begin(9600);
+    Serial.begin(4800);
     //Serial1.begin(9600);
     //Serial2.begin(9600);
     //Serial3.begin(9600);
