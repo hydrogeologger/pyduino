@@ -428,13 +428,16 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
     }  //((fredlund_suction_ds18b20 != "") && (power_sw_pin != INVALID))
 } // fredlund_measurement
 
-String get_cmd()
-{
+
+String get_cmd() {
     String content = "";
     char character;
-    while (Serial.available())
-    {
+    while (Serial.available()) {
         character = Serial.read();
+        // Skips newline or carriage return characters
+        if (character == '\r' || character == '\n') {
+            continue;
+        }
         content.concat(character);
         delay(10);
     }
