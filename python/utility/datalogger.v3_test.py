@@ -1,8 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
+import traceback
+import time
 import serial
 import RPi.GPIO as GPIO            # import RPi.GPIO module
-import time
+from textwrap import fill
+from collections import OrderedDict
 # from time import sleep,localtime,strftime
 # import json
 # from phant import Phant
@@ -11,127 +14,174 @@ import time
 
 
 #-------------------- Check Python Version For Compatibility ------------------
-# Introduce Compatibility for input() and raw_input() between python2 and python3
-PY3 = sys.version_info.major >= 3
-
 if sys.version_info.major >= 3:
     pass
 elif sys.version_info.major == 2:
     try:
+        # Introduce Compatibility for input() and raw_input() between python2 and python3
         input = raw_input
-        pass
     except NameError:
         pass
+    # in_waiting = inWaiting
 else:
-    print ("Unknown python version - input function not safe")
+    print ("Unknown python version - some functions may not function appropriately")
 
 
 #------------------- Constants and Ports Information---------------------------
 HARDWARE_NAME = "Datalogger V3"
-DEBUG = False
-# SERIAL_PORT = '/dev/ttyS0' # datalogger version 2 uses ttyS0
-SERIAL_PORT = '/dev/serial0' # Use primary uart
-#SERIAL_PORT = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.2:1.0' # datalogger version 1 uses ttyACM0
+SERIAL_PORT = '/dev/ttyS0' # datalogger version 2 uses ttyS0
+SOFT_SERIAL_PORT = '/dev/ttySOFT0' # Use primary uart
+SERIAL_9600_BAUD = 9600
+SERIAL_4800_BAUD = 4800
+SERIAL_115200_BAUD = 115200
 SERIAL_TIMEOUT_DEFAULT = 10 # Serial timeout in seconds
 RPI_RESET_PIN = 27  #GPIO/BCM pin number to reset arduino
 
-# RPI pins uses GPIO numbering (BCM)
-rpi_digital_pins = (2, 17, 10, 11, 7, 13, 16, 21, 3, 18, 9, 8, 12, 19, 20) # Pins in physical board order
-# rpi_digital_pins = (2, 3, 7, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21)
-rpi_switch_pins = (4, 5, 6, 22, 23, 24, 25, 26)
-arduino_swich_pins = (8, 9, 10, 11, 12, 13, 22, 23, 24, 25, 26, 27, 28,
-        29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
-        47, 48, 49)
-arduino_analog_pins = (0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15) # Pins in physical order
-# arduino_analog_pins = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-arduino_digital_only_pins = (5,)
-arduino_pwm_pins = (3, 4)
-arduino_sdi12_pins = (50, 51, 52, 53)
+FONT_COLOUR_DEFAULT = "\033[0m"
+FONT_BOLD_COLOUR_YELLOW = "\033[1;33m"
 
+# Pin number alias literals
+A8 = 62
+A9 = 63
+A10 = 64
+A11 = 65
+A12 = 66
+A13 = 67
+A14 = 68
+A15 = 69
+
+# RPI pins uses GPIO numbering (BCM)
+RPI_DIGITAL_PINS = (3, 18, 9, 8, 12, 19, 20, 2, 17, 10, 11, 7, 13, 16, 21) # Pins in physical board order, bottom tier -> top tier
+# RPI_DIGITAL_PINS = (2, 3, 7, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21)
+RPI_SWITCH_PINS = (4, 5, 6, 22, 23, 24, 25, 26)
+ARDUINO_SWITCH_PINS = (8, 9, 10, 11, 12, 13, 22, 23, 24, 25, 26, 27, 28, \
+        29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, \
+        47, 48, 49)
+ARDUINO_ANALOG_PINS = (1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 14) # Pins in physical order, bottom tier -> top tier
+# ARDUINO_ANALOG_PINS = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+ARDUINO_UART_PINS = (15, 16, 17, 18, 19)
+ARDUINO_PWM_PINS = (3, 4, 5)
+#Atmega2560 sdi12 compliant pins 0, 11, 12, 13, 14, 15, 50, 51, 52, 53, A8 (62),
+# A9 (63), A10 (64), A11 (65), A12 (66), A13 (67), A14 (68), A15 (69)
+ARDUINO_SDI12_PINS = (50, 51, 52, 53, \
+                    A8, A9, A10, A11, A12, A13, A14, A15) # Digital numbering of analog pin
+ARDUINO_ANALOG_SDI12_PINS = (8, 9, 10, 11, 12, 13, 14, 15)
+
+## Debugging flag
+_DEBUG = False
+_DEBUG_REQUEST = True
 
 #---------------------------- Functions Definition -----------------------------
-def toggle_debug(DEBUG):
-    DEBUG = not DEBUG
-    print("DEBUG Mode: " + str(DEBUG))
-    return DEBUG
+def index_containing_substring(the_list, substring):
+    for i, str_item in enumerate(the_list):
+        if substring in str_item:
+            return i
+    return -1
+
+
+def set_debug(debug):
+    global _DEBUG
+    _DEBUG = debug
+    print("DEBUG Mode: " + str(_DEBUG))
+    return _DEBUG
+
+def set_serial_debug(debug):
+    global _DEBUG_REQUEST
+    _DEBUG_REQUEST = debug
+    print("Serial Receive Debug Mode: " + str(_DEBUG_REQUEST))
+    if _DEBUG_REQUEST:
+        print("\"debug,1\" flag sent with message")
+    return _DEBUG_REQUEST
 
 def is_rpi_digital_pin(element):
     element = int(element)
-    return element in rpi_digital_pins
-    
+    return element in RPI_DIGITAL_PINS
+
 def is_rpi_switch(element):
     element = int(element)
-    return element in rpi_switch_pins
+    return element in RPI_SWITCH_PINS
 
 
 def is_arduino_switch(element):
     element = int(element)
-    return element in arduino_swich_pins
+    return element in ARDUINO_SWITCH_PINS
 
 
 def is_arduino_analog_pin(element):
     element = int(element)
-    return element in arduino_analog_pins
+    return element in ARDUINO_ANALOG_PINS
 
 
 def is_arduino_digital_pin(element):
     element = int(element)
-    return ((element in arduino_digital_only_pins) or
-            (element in arduino_pwm_pins) or
-            (element in arduino_sdi12_pins))
+    return ((element in ARDUINO_UART_PINS) or
+            (element in ARDUINO_PWM_PINS) or
+            (element in ARDUINO_SDI12_PINS))
 
 def is_arduino_pwm_pin(element):
     element = int(element)
-    return element in arduino_pwm_pins
-    
+    return element in ARDUINO_PWM_PINS
+
 def is_arduino_sdi12(element):
     element = int(element)
-    return element in arduino_sdi12_pins
-    
+    return ((element in ARDUINO_SDI12_PINS) or
+            (element in ARDUINO_ANALOG_SDI12_PINS))
+
 def is_escape(value):
-    return (value == 'x')
+    return (value == 'x') or (value == "exit")
 
 
-def perform_handshake():
-    arduino_serial.write("abc")
+def perform_handshake(arduino_serial):
+    message_out = "abc"
+    if _DEBUG:
+        print("DEBUG: " + message_out)
     arduino_serial.flushInput()
+    arduino_serial.write(message_out)
     time.sleep(1)
     message_received = arduino_serial.readline()
-    if (message_received == "abc\r\n"):
+    if message_received == "abc\r\n":
         print("Success Handshake: Received ABC response from Arduino")
     else:
         print("Failed Handshake: No Response from Arduino")
 
 
-def reset_arduino(pin = RPI_RESET_PIN, sleep_duration = 5):
+def reset_arduino(pin=RPI_RESET_PIN, sleep_duration=5):
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
     print("Resetting Arduino...")
-    time.sleep(5)
+    if sleep_duration < 2:
+        sleep_duration = 2
+    time.sleep(sleep_duration)
     GPIO.cleanup()
     print("Reset Complete!")
 
 
-def reset_rpi_by_arduino():
+def reset_rpi_by_arduino(arduino_serial):
     message_out = "RESET"
-    if DEBUG: print("DEBUG: " + message_out)
-    arduino_serial.write(message_out)
+    if _DEBUG:
+        print("DEBUG: " + message_out)
     arduino_serial.flushInput()
+    arduino_serial.write(message_out)
     time.sleep(1)
     message_received = arduino_serial.readline()
-    print(message_received.rstrip())
+    print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
 
-def onboard_dht22_test():
+def onboard_dht22_test(arduino_serial):
     # try:
-        arduino_serial.write("dht22,54,power,2,points,2,dummies,1,interval_mm,200,debug,1")
-        arduino_serial.flushInput()
-        message_received = arduino_serial.readline()
-        current_read = message_received.split(',')[0:-1]
-        print(message_received.rstrip())
-        print("Temp: " + current_read[-2])
-        print("Humdity: " + current_read[-1])
+    message_out = "dht22,54,power,2,points,2,dummies,1,interval_mm,200"
+    if _DEBUG_REQUEST:
+        message_out += ",debug,1"
+    if _DEBUG:
+        print("DEBUG: " + message_out)
+    arduino_serial.flushInput()
+    arduino_serial.write(message_out)
+    message_received = arduino_serial.readline()
+    current_read = message_received.split(',')[0:-1]
+    print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
+    print("Temp: " + current_read[-2])
+    print("Humdity: " + current_read[-1])
     # except Exception as error:
     #     print('humidity sensor reading failed')
 
@@ -139,7 +189,7 @@ def onboard_dht22_test():
 def rpi_digital_input_test():
     try:
         GPIO.setmode(GPIO.BCM)
-        for pin in rpi_digital_pins:
+        for pin in RPI_DIGITAL_PINS:
             GPIO.setup(pin, GPIO.IN)
             value = GPIO.input(pin)
             print(str(pin) + ": " + str(value))
@@ -159,38 +209,42 @@ def rpi_digital_output_test():
 
     try:
         user_timer = input("Duration of RPI IO state in seconds, default 5 seconds: ")
-        if (user_timer =='x'):
+        if is_escape(user_timer):
             return
         else:
             user_timer = float(user_timer)
+            if user_timer <= 0:
+                user_timer = 1
     except ValueError:
         #Defaults to 5 seconds if user input anything other than a number or x
         user_timer = float(5)
 
     try:
-        while index < len(rpi_digital_pins):
-            gpio_pin = rpi_digital_pins[index]
+        while index < len(RPI_DIGITAL_PINS):
+            gpio_pin = RPI_DIGITAL_PINS[index]
 
             try:
                 user_pin = input("RPI IO pin, x escape, enter for #" + str(gpio_pin) + ": ")
-                if (user_pin == ""):
+                if user_pin == "":
                     pass
-                elif (is_escape(user_pin)):
+                elif is_escape(user_pin):
                     return
-                elif (is_rpi_digital_pin(user_pin)):
+                elif is_rpi_digital_pin(user_pin):
                     gpio_pin = int(user_pin)
-                    index = rpi_digital_pins.index(int(user_pin))
+                    index = RPI_DIGITAL_PINS.index(int(user_pin))
                 else:
                     continue
 
                 GPIO.setup(gpio_pin, GPIO.OUT)
                 GPIO.output(gpio_pin, GPIO.HIGH)
+                print(FONT_BOLD_COLOUR_YELLOW + "GPIO #" + str(gpio_pin) + ": HIGH" + FONT_COLOUR_DEFAULT)
 
                 time.sleep(user_timer)
 
                 GPIO.output(gpio_pin, GPIO.LOW)
+                print(FONT_BOLD_COLOUR_YELLOW + "GPIO #" + str(gpio_pin) + ": LOW" + FONT_COLOUR_DEFAULT)
                 index = index + 1
-        
+
             except ValueError:
                 # Prompt again if is incorrect power pin
                 continue
@@ -199,7 +253,7 @@ def rpi_digital_output_test():
         print("RPI digital GPIO Output test failed on pin " + str(gpio_pin))
         print(type(error))
         print(error)
-        
+
     finally:
         GPIO.cleanup()
 
@@ -211,38 +265,42 @@ def rpi_switches_test():
 
     try:
         user_timer = input("Duration of switch state in seconds, default 5 seconds: ")
-        if (user_timer =='x'):
+        if is_escape(user_timer):
             return
         else:
             user_timer = float(user_timer)
+            if user_timer <= 0:
+                user_timer = 1
     except ValueError:
         #Defaults to 5 seconds if user input anything other than a number or x
         user_timer = float(5)
 
     try:
-        while index < len(rpi_switch_pins):
-            power_pin = rpi_switch_pins[index]
+        while index < len(RPI_SWITCH_PINS):
+            power_pin = RPI_SWITCH_PINS[index]
 
             try:
                 user_pin = input("RPI Switch, x escape, enter for #" + str(power_pin) + ": ")
-                if (user_pin == ""):
+                if user_pin == "":
                     pass
-                elif (is_escape(user_pin)):
+                elif is_escape(user_pin):
                     return
-                elif (is_rpi_switch(user_pin)):
+                elif is_rpi_switch(user_pin):
                     power_pin = int(user_pin)
-                    index = rpi_switch_pins.index(int(user_pin))
+                    index = RPI_SWITCH_PINS.index(int(user_pin))
                 else:
                     continue
 
                 GPIO.setup(power_pin, GPIO.OUT)
                 GPIO.output(power_pin, GPIO.HIGH)
+                print(FONT_BOLD_COLOUR_YELLOW + "Switch #" + str(power_pin) + ": ON" + FONT_COLOUR_DEFAULT)
 
                 time.sleep(user_timer)
 
                 GPIO.output(power_pin, GPIO.LOW)
+                print(FONT_BOLD_COLOUR_YELLOW + "Switch #" + str(power_pin) + ": OFF" + FONT_COLOUR_DEFAULT)
                 index = index + 1
-        
+
             except ValueError:
                 # Prompt again if is incorrect power pin
                 continue
@@ -251,64 +309,59 @@ def rpi_switches_test():
         print("RPI Switch failed on Switch " + str(power_pin))
         print(type(error))
         print(error)
-        
+
     finally:
         GPIO.cleanup()
 
 
-def sdi12_sensor_test():
+def sdi12_sensor_test(arduino_serial):
     while True:
         try:
-            # if (PY3):
-            #     sdi12_pin = input("SDI12 Pin, 'x' to escape: ")
-            # else:
-            #     sdi12_pin = raw_input("SDI12 Pin, 'x' to escape: ")
             sdi12_pin = input("SDI12 Pin, 'x' to escape: ")
-            if (is_escape(sdi12_pin)):
+            if is_escape(sdi12_pin):
                 return
-            elif (is_arduino_sdi12(sdi12_pin)):
+            elif is_arduino_sdi12(sdi12_pin):
                 break
-                
-        except (ValueError):
+
+        except ValueError:
             # Try again if user input is not an sdi12 pin or x
             continue
-            
-            
+
+
     while True:
         try:
-            # if (PY3):
-            #     power_pin = input("Power Pin, 'x' to escape: ")
-            # else:
-            #     power_pin = raw_input("Power Pin, 'x' to escape: ")
             power_pin = input("Power Pin, 'x' to escape: ")
-            if (is_escape(power_pin)):
+            if is_escape(power_pin):
                 return
             elif ((power_pin == "") or (power_pin == '-1')):
                 power_pin = -1
                 break
-            elif (power_pin.isalpha()):
-                continue
-            elif (is_arduino_switch(power_pin)):
+            elif is_arduino_switch(power_pin):
                 break
-                
-        except (ValueError):
+            else:
+                continue
+
+        except ValueError:
             # Prompt for pin again if incorrect input
-            print("SDI12 Test, Power Pin ValueError")
-            break
-    
+            continue
+
     try:
-        message_out = "SDI-12,{0},power,{1},default_cmd,read,debug,1".format(
-                sdi12_pin, power_pin)
-        if DEBUG: print("DEBUG: " + message_out)
-        arduino_serial.write(message_out)
+        message_out = "SDI-12,{0},power,{1},default_cmd,read".format(sdi12_pin, power_pin)
+        if _DEBUG_REQUEST:
+            message_out += ",debug,1"
+        if _DEBUG:
+            print("DEBUG: " + message_out)
         arduino_serial.flushInput()
-        time.sleep(2)
-        message_received = arduino_serial.readline() # Get DEBUG response
-        print(message_received.rstrip())
-        # time.sleep(5)
-        message_received = arduino_serial.readline() # Get sensor Data
-        print(message_received.rstrip())
-    
+        arduino_serial.write(message_out)
+        # SDI-12 takes roughly 13 seconds to scan for all SDI12 devices
+        time.sleep(4) # Pad defualt 10sec timeout with 4sec
+        while True:
+            message_received = arduino_serial.read()
+            if message_received == "":
+                break
+            sys.stdout.write(FONT_BOLD_COLOUR_YELLOW + message_received + FONT_COLOUR_DEFAULT)
+            sys.stdout.flush()
+
     except Exception as error:
         print('SDI12 sensor reading failed')
         print(type(error))
@@ -316,286 +369,483 @@ def sdi12_sensor_test():
 
 
 
-def arduino_switches_test():
+def arduino_switches_test(arduino_serial):
     index = 0
 
     try:
         user_timer = input("Duration of switch state in seconds, default 5 seconds: ")
-        if (user_timer =='x'):
+        if is_escape(user_timer):
             return
         else:
             user_timer = float(user_timer)
+            if user_timer <= 0:
+                user_timer = 1
     except ValueError:
         #Defaults to 5 seconds if user input anything other than a number or x
         user_timer = float(5)
-    
 
-    while index < len(arduino_swich_pins):
-        
-        power_pin = arduino_swich_pins[index]
-        
+
+    while index < len(ARDUINO_SWITCH_PINS):
+
+        power_pin = ARDUINO_SWITCH_PINS[index]
+
         try:
-            # if (PY3):
-            #     user_pin = input("Arduino Switch, x escape, enter for #" + str(pin) + ": ")
-            # else:
-            #     user_pin = raw_input("Arduino Switch, x escape, enter for #" + str(pin) + ": ")
             user_pin = input("Arduino Switch, x escape, enter for #" + str(power_pin) + ": ")
-            if (user_pin == ""):
+            if user_pin == "":
                 pass
-            elif (is_escape(user_pin)):
+            elif is_escape(user_pin):
                 return
-            elif (is_arduino_switch(user_pin)):
+            elif is_arduino_switch(user_pin):
                 power_pin = user_pin
-                index = arduino_swich_pins.index(int(user_pin))
+                index = ARDUINO_SWITCH_PINS.index(int(user_pin))
             else:
                 continue
-            
+
             # message_out = "power,{0},analog,9,point,3,interval_mm,200,debug,1".format(power_pin)
             message_out = "power_switch,{0},power_switch_status,1".format(power_pin)
-            if DEBUG: print("DEBUG: " + message_out)
-            arduino_serial.write(message_out)
+            if _DEBUG:
+                print("DEBUG: " + message_out)
             arduino_serial.flushInput()
+            arduino_serial.write(message_out)
             message_received = arduino_serial.readline()
-            print(message_received.rstrip())
+            print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
             # Duration for switch to stay on
             time.sleep(user_timer)
 
             message_out = "power_switch,{0},power_switch_status,0".format(power_pin)
-            if DEBUG: print("DEBUG: " + message_out)
-            arduino_serial.write(message_out)
+            if _DEBUG:
+                print("DEBUG: " + message_out)
             arduino_serial.flushInput()
+            arduino_serial.write(message_out)
             message_received = arduino_serial.readline()
-            print(message_received.rstrip())
+            print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
             index = index + 1
-                
+
         except ValueError:
             # Prompt again if is incorrect power pin
             continue
 
 
-def arduino_analog_test():
+def arduino_analog_test(arduino_serial):
     index = 0
     while True:
         try:
             power_pin = input("Power Pin, 'x' to escape: ")
-            if (is_escape(power_pin)):
+            if is_escape(power_pin):
                 return
             elif ((power_pin == "") or (power_pin == '-1')):
                 power_pin = -1
                 break
-            elif (power_pin.isalpha()):
-                continue
-            elif (is_arduino_switch(power_pin)):
+            elif is_arduino_switch(power_pin):
                 break
-                
-        except (ValueError):
-            # Prompt for pin again if incorrect input
-            print("Arduino Analog Test, Power Pin ValueError")
-            break
-
-    while index < len(arduino_analog_pins):
-
-        analog_pin = arduino_analog_pins[index]
-
-        try:
-            user_pin = input("Arduino Analog, x escape, enter for #" + str(analog_pin) + ": ")
-            if (user_pin == ""):
-                pass
-            elif (is_escape(user_pin)):
-                return
-            elif (is_arduino_analog_pin(user_pin)):
-                analog_pin = user_pin
-                index = arduino_analog_pins.index(int(user_pin))
             else:
                 continue
-            
-            message_out = "analog,{0},power,{1},points,3,dummies,1,interval_mm,200,debug,1".format(analog_pin, power_pin)
-            if DEBUG: print("DEBUG: " + message_out)
-            arduino_serial.write(message_out)
+
+        except ValueError:
+            # Prompt for pin again if incorrect input
+            continue
+
+    while index < len(ARDUINO_ANALOG_PINS):
+        analog_pin = ARDUINO_ANALOG_PINS[index]
+        try:
+            user_pin = input("Arduino Analog, x escape, enter for #" + str(analog_pin) + ": ")
+            if user_pin == "":
+                pass
+            elif is_escape(user_pin):
+                return
+            elif is_arduino_analog_pin(user_pin):
+                analog_pin = user_pin
+                index = ARDUINO_ANALOG_PINS.index(int(user_pin))
+            else:
+                continue
+
+            message_out = "analog,{0},power,{1},points,3,dummies,1,interval_mm,100" \
+                    .format(analog_pin, power_pin)
+            if _DEBUG_REQUEST:
+                message_out += ",debug,1"
+            if _DEBUG:
+                print("DEBUG: " + message_out)
             arduino_serial.flushInput()
-            time.sleep(8)
+            arduino_serial.write(message_out)
+            time.sleep(2)
             message_received = arduino_serial.readline()
-            print(message_received.rstrip())
+            print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
             index = index + 1
-                
+
         except ValueError:
             # Prompt again if is incorrect power pin
             continue
 
 
-def vsense_adc_check():
+def vsense_adc_check(arduino_serial):
+    '''
+    Reports the Vsense voltage (Battery Voltage) based on
+    V_battery = ADC * (ADC_Resolution) * ((R2 + R3) / R3)
+    '''
     vref = 5.1
-    r1 = 0.0 #defined later
-    r2 = 680.0
+    r2 = 0.0 #defined later
+    r3 = 680.0
 
     while True:
         try:
             print("    1:   V2")
             print("    2:   V3")
+            print("    3:   V3.2")
             logger_version = input("Select logger version, 'x' to escape: ")
-            if (is_escape(logger_version)):
+            if is_escape(logger_version):
                 return
-            elif (logger_version == ""):
+            elif logger_version == "":
                 break
-            elif (logger_version.isalpha()):
+            elif logger_version == '1': # datalogger V2
+                r2 = 2200
+                break
+            elif logger_version == '2': # datalogger V3.0 - V3.1
+                r2 = 2000
+                break
+            elif logger_version == '3': # datalogger V3.2
+                r2 = 120e3
+                r3 = 39e3
+                break
+            else:
                 continue
-            elif (logger_version == '1'): # datalogger V2
-                r1 = 2200
-                break
-            elif (logger_version == '2'): # datalogger V3.x
-                r1 = 2000
-                break
-                
-        except (ValueError):
+
+        except ValueError:
             # Prompt for logger version again if incorrect input
-            print("Vsense Test, logger version ValueError")
-            break
-    
-    message_out = "analog,15,power,9,point,3,interval_mm,200,debug,1"
-    if DEBUG: print("DEBUG: " + message_out)
-    arduino_serial.write(message_out)
+            continue
+
+    message_out = "analog,15,power,9,points,3,dummies,1,interval_mm,200"
+    if _DEBUG_REQUEST:
+        message_out += ",debug,1"
+    if _DEBUG:
+        print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    time.sleep(1)
+    arduino_serial.write(message_out)
+    time.sleep(2)
     message_received = arduino_serial.readline()
-    print(message_received.rstrip())
-    if (r1 > 0):
+    print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
+    if r2 > 0:
         array_received = message_received.split(',')[0:-1]
-        voltage_value = float(array_received[-1]) * float(((r1 + r2)/r2)) * float((vref/1024))
-        print("Battery Voltage: {0} (V)".format(str(voltage_value)))
+        voltage_value = float(array_received[-1]) * float(((r2 + r3)/r3)) * float((vref/1024))
+        print("Battery Voltage: {0:.3f} (V)".format(voltage_value))
 
 
 
-def check_arduino_runtime_since_last_comm():
+def check_arduino_runtime_since_last_comm(arduino_serial):
     message_out = "check_millis"
-    if DEBUG: print("DEBUG: " + message_out)
-    arduino_serial.write(message_out)
+    if _DEBUG:
+        print("DEBUG: " + message_out)
     arduino_serial.flushInput()
+    arduino_serial.write(message_out)
     time.sleep(1)
     message_received = arduino_serial.readline()
-    print(message_received.rstrip())
+    print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
 
-def scan_i2c_multiplexer():
+def scan_i2c_multiplexer(arduino_serial):
     while True:
         try:
             power_pin = input("Power Pin to switch for duration of scan, 'x' to escape: ")
-            if (is_escape(power_pin)):
+            if is_escape(power_pin):
                 return
             elif ((power_pin == "") or (power_pin == '-1')):
                 power_pin = -1
                 break
-            elif (power_pin.isalpha()):
-                continue
-            elif (is_arduino_switch(power_pin)):
+            elif is_arduino_switch(power_pin):
                 break
-                
-        except (ValueError):
+            else:
+                continue
+        except ValueError:
             # Prompt for pin again if incorrect input
-            print("I2C Power Pin ValueError")
             continue
-    
+
     if is_arduino_switch(power_pin):
         message_out = "power_switch,{0},power_switch_status,1".format(power_pin)
-        if DEBUG: print("DEBUG: " + message_out)
+        if _DEBUG:
+            print("DEBUG: " + message_out)
         arduino_serial.write(message_out)
-        arduino_serial.flushInput()
         time.sleep(1)
+        arduino_serial.flushInput()
 
     message_out = "9548_search"
-    if DEBUG: print("DEBUG: " + message_out)
-    arduino_serial.write(message_out)
+    if _DEBUG:
+        print("DEBUG: " + message_out)
     arduino_serial.flushInput()
+    arduino_serial.write(message_out)
     time.sleep(1)
-    message_received = ""
-    while message_received != "Done\r\n":
+    while arduino_serial.inWaiting() > 0:
         message_received = arduino_serial.readline()
-        print(message_received.rstrip())
-    
+        print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
+        time.sleep(0.1)
+
     if is_arduino_switch(power_pin):
         message_out = "power_switch,{0},power_switch_status,0".format(power_pin)
-        if DEBUG: print("DEBUG: " + message_out)
+        if _DEBUG:
+            print("DEBUG: " + message_out)
         arduino_serial.write(message_out)
-        arduino_serial.flushInput()
         time.sleep(1)
+        arduino_serial.flushInput()
 
 
+def scan_for_ds18b20_suction(arduino_serial):
+    while True:
+        try:
+            suction_pin = input("Suction Pin, 'x' to escape: ")
+            if is_escape(suction_pin):
+                return
+            elif (is_arduino_digital_pin(suction_pin) or is_arduino_sdi12(suction_pin) or \
+                    is_arduino_analog_pin(suction_pin)):
+                break
+            else:
+                continue
+        except ValueError:
+            # Try again if user input is not an sdi12 pin or x
+            continue
 
-def display_options_menu():
+    while True:
+        try:
+            power_pin = input("Power Pin, 'x' to escape: ")
+            if is_escape(power_pin):
+                return
+            elif is_arduino_switch(power_pin):
+                break
+            else:
+                continue
+        except ValueError:
+            # Prompt for pin again if incorrect input
+            continue
+
+    message_out = "ds18b20_search,{0},power,{1}".format(suction_pin, power_pin)
+    if _DEBUG_REQUEST:
+        message_out += ",debug,1"
+    if _DEBUG:
+        print("DEBUG: " + message_out)
+    arduino_serial.flushInput()
+    arduino_serial.write(message_out)
+    time.sleep(1)
+    while arduino_serial.inWaiting() > 0:
+        message_received = arduino_serial.readline()
+        current_read = message_received.split(',')[0:-2]
+        print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
+        rom_addr_index = index_containing_substring(current_read, "ROM = ")
+        if rom_addr_index > -1:
+            rom_list = current_read[rom_addr_index].split(' ')[2:]
+            rom_address = ""
+            for rom in rom_list:
+                rom_address += "{:0>2}".format(rom)
+            if len(rom_address) == 16:
+                print("Rom Address: {}".format(rom_address))
+            else:
+                print("Rom Address: Failed to decipher")
+        time.sleep(0.5)
+
+
+def serial_session(arduino_serial):
+    arduino_serial.timeout = 5
+    # Flush here so any subsequent serial input is still displayed on next cycle
+    arduino_serial.flushInput()
+    while True:
+        user_input = input(">> ")
+        if is_escape(user_input):
+            arduino_serial.timout = SERIAL_TIMEOUT_DEFAULT
+            return
+        arduino_serial.write((user_input + "\r\n").encode())
+        # message_received = arduino_serial.readline()
+        # while arduino_serial.in_waiting() > 0:
+        #     msg_byte = arduino_serial.read(1)
+        #     if (msg_byte == '\r' or msg_byte == '\n'):
+        #         message_received += '!'
+        #         arduino_serial.flushInput()
+        #         break
+        #     message_received += msg_byte
+
+        # if message_received != "":
+        while True:
+            message_received = arduino_serial.read()
+            if message_received == "":
+                break
+            sys.stdout.write(FONT_BOLD_COLOUR_YELLOW + message_received + FONT_COLOUR_DEFAULT)
+            sys.stdout.flush()
+
+
+def desc(desc, indent, total_length):
+    return fill(desc, width=total_length-indent, subsequent_indent=' '*indent)
+
+
+def display_options_menu(mode_list):
+    # from textwrap import fill
+    WIDTH = 70
+    LEFT_LEN = 7
+    PAD = 2
+    INDENT = LEFT_LEN + PAD + 1
+
+    mode = OrderedDict(mode_list)
+
     print("Select the following options for [" + HARDWARE_NAME + "] testing:\n")
-    print("    1:   Arduino Handshake Serial COM")
-    print("    2:   Reset Arduino")
-    print("    3:   Onboard DHT22 Humidity and Temperature Sensor")
-    print("    4:   RPI Switches")
-    print("    5:   RPI digital IO as OUTPUT")
-    print("    6:   RPI digital IO as INPUT")
-    print("    7:   Arduino Switches")
-    print("    8:   Arduino Analog IO as INPUT")
-    print("    9:   SDI12 Sensor Ports")
-    print("   10:   Scan I2C Multiplexer")
-    print("   11:   Get onboard DC voltage via VSENSE, requires vsense\n         and jumper (switch 9) set correctly")
-    print("   12:   Check Arduino Runtime Since Last Communication")
-    print("    m:   Display This Main Options Menu")
-    print("    x:   Exit")
-    print("reset:   Initiate RPI RESET request from Arduino")
-    print("debug:   Debug Mode Toggle")
+    for key, value in mode.items():
+        print("{2:>{0}}:{1}{3}".format(LEFT_LEN, ' '*PAD, key, desc(value, INDENT, WIDTH)))
+
+def general_callback(arduino_serial, user_option):
+    global _DEBUG, _DEBUG_REQUEST
+    if user_option == "debug":
+        _DEBUG = set_debug(not _DEBUG)
+    elif user_option == "debug0":
+        _DEBUG_REQUEST = set_serial_debug(not _DEBUG_REQUEST)
+    elif user_option == "serial":
+        serial_session(arduino_serial)
+
+def get_main_options_list():
+    mode = OrderedDict()
+    mode[1] = "Arduino Handshake Serial COM"
+    mode[2] = "Reset Arduino"
+    mode[3] = "Onboard DHT22 Humidity and Temperature Sensor"
+    mode[4] = "RPI Switches"
+    mode[5] = "RPI digital IO as OUTPUT"
+    mode[6] = "RPI digital IO as INPUT"
+    mode[7] = "Arduino Switches"
+    mode[8] = "Arduino Analog IO as INPUT"
+    mode[9] = "SDI12 Sensor Ports"
+    mode[10] = "Scan I2C Multiplexer"
+    mode[11] = "VSENSE DC Voltage, req vsense & SW9 jumper set correctly"
+    mode[12] = "Sensor Tools"
+    mode[13] = "Check Arduino Runtime Since Last Communication"
+    mode["m"] = "Display This Main Options Menu"
+    mode["x"] = "Exit"
+    mode["reset"] = "Initiate RPI RESET request from Arduino"
+    mode["serial"] = "Serial Session for Custom User Input"
+    mode["debug0"] = "Toggle sending \"debug,1\" flag, default=True"
+    mode["debug"] = "Debug Mode Toggle (Show sent command string)"
+    return mode
+
+
+def get_suction_util_list():
+    mode = OrderedDict()
+    mode[1] = "Get Suction ROM Address"
+    mode["m"] = "Display This Main Options Menu"
+    mode["x"] = "Exit"
+    mode["serial"] = "Serial Session for Custom User Input"
+    mode["debug0"] = "Toggle sending \"debug,1\" flag, default=True"
+    mode["debug"] = "Debug Mode Toggle (Show sent command string)"
+    return mode
+
+
+def primary_menu_callback_loop(arduino_serial):
+    while True:
+        user_option = input("\r\nOption: ")
+
+        if is_escape(user_option):
+            break
+        elif user_option == 'm':
+            display_options_menu(get_main_options_list())
+        elif user_option == '1':
+            perform_handshake(arduino_serial)
+        elif user_option == '2':
+            reset_arduino()
+        elif user_option == '3':
+            onboard_dht22_test(arduino_serial)
+        elif user_option == '4':
+            rpi_switches_test()
+        elif user_option == '5':
+            rpi_digital_output_test()
+        elif user_option == '6':
+            rpi_digital_input_test()
+        elif user_option == '7':
+            arduino_switches_test(arduino_serial)
+        elif user_option == '8':
+            arduino_analog_test(arduino_serial)
+        elif user_option == '9':
+            sdi12_sensor_test(arduino_serial)
+        elif user_option == '10':
+            scan_i2c_multiplexer(arduino_serial)
+        elif user_option == '11':
+            vsense_adc_check(arduino_serial)
+        elif user_option == '12':
+            display_options_menu(get_suction_util_list())
+            suction_util_callback_loop(arduino_serial)
+        elif user_option == '13':
+            check_arduino_runtime_since_last_comm(arduino_serial)
+        elif user_option == 'reset':
+            reset_rpi_by_arduino(arduino_serial)
+
+        general_callback(arduino_serial, user_option)
+
+
+def suction_util_callback_loop(arduino_serial):
+    while True:
+        user_option = input("\r\nSensor Tools: ")
+        if is_escape(user_option):
+            break
+        elif user_option == 'm':
+            display_options_menu(get_suction_util_list())
+        elif user_option == '1':
+            scan_for_ds18b20_suction(arduino_serial)
+
+        general_callback(arduino_serial, user_option)
 
 
 #---------------------------- Main Loop ----------------------------------------
-print("Starting serial...")
-arduino_serial = serial.Serial(port = SERIAL_PORT, timeout = SERIAL_TIMEOUT_DEFAULT)
-time.sleep(2)
-
-display_options_menu()
-
-while True:
-
+def main():
+    arduino_serial = None
     try:
-        print("")
-        user_option = input("Option: ")
+        print("\r\nSelect Serial Baudrate:")
+        print("{0:>2s}:  {1} ({2})".format("1", SERIAL_9600_BAUD, "Hardware"))
+        print("{0:>2s}:  {1} ({2})".format("2", SERIAL_4800_BAUD, "SoftSerial/Hardware"))
+        print("{0:>2s}:  {1} ({2})".format("3", "User Defined", "Hardware"))
+        serial_port = SERIAL_PORT
+        user_option = input("\r\nSelection (Default Enter = 1): ")
+        if is_escape(user_option):
+            exit()
+        elif user_option == "2":
+            serial_baud = SERIAL_4800_BAUD
+            print("\r\nSelect Serial Port:")
+            print("{0:>2s}:  {1} ({2})".format("1", SERIAL_PORT, "Hardware"))
+            print("{0:>2s}:  {1} ({2})".format("2", SOFT_SERIAL_PORT, "SoftSerial"))
+            user_option = input("\r\nSelection (Default Enter = 1): ")
+            if is_escape(user_option):
+                exit()
+            elif user_option == "2":
+                serial_port = SOFT_SERIAL_PORT
+            else:
+                serial_port = SERIAL_PORT
+        elif user_option == "3":
+            try:
+                serial_baud = input("Enter baudrate (Default = {0}): ".format(SERIAL_115200_BAUD))
+                if is_escape(serial_baud):
+                    return
+                else:
+                    serial_baud = int(serial_baud)
+                if serial_baud <= 0:
+                    serial_baud = SERIAL_115200_BAUD
+            except ValueError:
+                serial_baud = SERIAL_115200_BAUD
+        else:
+            serial_baud = SERIAL_9600_BAUD
 
-        if (user_option == 'x'):
-            break
-        if (user_option == '1'):
-            perform_handshake()
-        elif (user_option == '2'):
-            reset_arduino()
-        elif (user_option == '3'):
-            onboard_dht22_test()
-        elif (user_option == '4'):
-            rpi_switches_test()
-        elif (user_option == '5'):
-            rpi_digital_output_test()
-        elif (user_option == '6'):
-            rpi_digital_input_test()
-        elif (user_option == '7'):
-            arduino_switches_test()
-        elif (user_option == '8'):
-            arduino_analog_test()
-        elif (user_option == '9'):
-            sdi12_sensor_test()
-        elif (user_option == '10'):
-            scan_i2c_multiplexer()
-        elif (user_option == '11'):
-            vsense_adc_check()
-        elif (user_option == '12'):
-            check_arduino_runtime_since_last_comm()
-        elif (user_option == 'm'):
-            display_options_menu()
-        elif (user_option == 'reset'):
-            reset_rpi_by_arduino()
-        elif (user_option == 'debug'):
-            DEBUG = toggle_debug(DEBUG)
+        print("\r\nStarting {3}{0}{2} serial @ {3}{1}{2} baud..." \
+                .format(serial_port, serial_baud, \
+                FONT_COLOUR_DEFAULT, FONT_BOLD_COLOUR_YELLOW))
+        arduino_serial = serial.Serial(port=serial_port, baudrate=serial_baud, \
+                timeout=SERIAL_TIMEOUT_DEFAULT)
+        time.sleep(1)
+
+        display_options_menu(get_main_options_list())
+        primary_menu_callback_loop(arduino_serial)
 
     except KeyboardInterrupt:
-        arduino_serial.close()
         print("")
-        exit()
     # except Exception as error:
-            # print(type(error))
-            # print(error)
+    #     print(type(error))
+    #     print(error)
+    except Exception:
+        traceback.print_exc()
+        # print(sys.exc_info()[0])
+    finally:
+        # Cleaning up
+        if arduino_serial is not None and arduino_serial.isOpen():
+            arduino_serial.close()
+        exit()
 
-#---------------------------- Cleaning Up --------------------------------------
-arduino_serial.close()
+if __name__ == "__main__":
+    main()
