@@ -224,8 +224,8 @@ void hydrogeolog::print_string_delimiter_value(String string_input, String value
 void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
 {
     OneWire ds(digi_pin); // on pin 2 (a 4.7K resistor is necessary)
-    digitalWrite(power_switch, HIGH);
-    delay(1000);
+    // digitalWrite(power_switch, HIGH);
+    // delay(1000);
 
     byte i;
     byte present = 0;
@@ -234,29 +234,26 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
     byte addr[8];
     float celsius, fahrenheit;
     int loop_time = 3;
-    int j = 0;
-    for (int kk = 0; kk < loop_time; kk++)
-    {
-        Serial.print(kk);
+    int searchIndex = 0;
+    char hexAddr[4];
+    // for (int kk = 0; kk < loop_time; kk++) {
+    //     Serial.print(kk);
         boolean while_indicator = true;
-        while (while_indicator == true)
-        {
-            if (!ds.search(addr))
-            {
+        while (while_indicator == true) {
+            if (!ds.search(addr)) {
                 Serial.println("No more addresses.");
                 ds.reset_search();
-                delay(3000);
+                delay(250);
                 //j+=1;
                 while_indicator = false;
-
                 break;
             }
-
-            Serial.print("ROM =");
-            for (i = 0; i < 8; i++)
-            {
-                Serial.write(' ');
-                Serial.print(addr[i], HEX);
+            Serial.print(String(searchIndex) + "_ROM =");
+            for (i = 0; i < 8; i++) {
+                sprintf(hexAddr, " %02X",addr[i]);
+                Serial.print(hexAddr);
+                // Serial.write(' ');
+                // Serial.print(addr[i], HEX);
             }
 
             //  if (OneWire::crc8(addr, 7) != addr[7]) {
@@ -266,8 +263,7 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
             //Serial.println();
 
             // the first ROM byte indicates which chip
-            switch (addr[0])
-            {
+            switch (addr[0]) {
             case 0x10:
                 //Serial.println("  Chip = DS18S20");  // or old DS1820
                 type_s = 1;
@@ -282,6 +278,7 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
                 break;
             default:
                 //Serial.println("Device is not a DS18x20 family device.");
+                Serial.println("");
                 return;
             }
 
@@ -289,7 +286,7 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
             ds.select(addr);
             ds.write(0x44); // start conversion, use ds.write(0x44,1) with parasite power on at the end
 
-            delay(100); // maybe 750ms is enough, maybe not
+            delay(1000); // maybe 750ms is enough, maybe not
             // we might do a ds.depower() here, but the reset will take care of it.
 
             present = ds.reset();
@@ -299,8 +296,7 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
             //Serial.print("  Data = ");
             //Serial.print(present, HEX);
             //Serial.print(" ");
-            for (i = 0; i < 9; i++)
-            { // we need 9 bytes
+            for (i = 0; i < 9; i++) { // we need 9 bytes
                 data[i] = ds.read();
                 //Serial.print(data[i], HEX);
                 //Serial.print(" ");
@@ -314,17 +310,14 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
             // be stored to an "int16_t" type, which is always 16 bits
             // even when compiled on a 32 bit processor.
             int16_t raw = (data[1] << 8) | data[0];
-            if (type_s)
-            {
+            if (type_s) {
                 raw = raw << 3; // 9 bit resolution default
                 if (data[7] == 0x10)
                 {
                     // "count remain" gives full 12 bit resolution
                     raw = (raw & 0xFFF0) + 12 - data[6];
                 }
-            }
-            else
-            {
+            } else {
                 byte cfg = (data[4] & 0x60);
                 // at lower res, the low bits are undefined, so let's zero them
                 if (cfg == 0x00)
@@ -342,8 +335,9 @@ void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
             Serial.print(" Celsius, ");
             Serial.print(fahrenheit);
             Serial.println(" Fahrenheit");
+            searchIndex++;
         } //while true
-    }     // looptime
+    // }     // looptime
 } //search_ds18b20
 
 void hydrogeolog::read_DS18B20_by_addr(byte addr[8], int digi_pin)
