@@ -1,4 +1,15 @@
+# Installation
+## Arduino Firmware Directory
+~\pyduino\arduino\stanwell_sdi12_460_v2
 
+In linux: can use makefile
+```
+make upload
+make softupload
+```
+
+
+# Serial Example
 in serial connection:
 
 ```
