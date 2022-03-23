@@ -27,23 +27,17 @@ void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
         sdi12_loop();
     } else if (cmd == "change") {
         if (sensors != 1 || sensors < 1) {
-            Serial.println("Expect only ONE sensor connected! => ABORT!");
+            Serial.print("Expect only ONE sensor connected! => ABORT!");
         } else {
             if (check_new_addr(new_addr) == false) {
-                Serial.println("Invalid new addr => ABORT!");
+                Serial.print("Invalid new addr => ABORT!");
             } else {
                 sdi12_change(new_addr.charAt(0)); 
             }
         }
     } else {
-        Serial.println("\nINVALID CMD!");
+        Serial.print("INVALID CMD!");
     }
-
-    addressSpace[LOW] = (uint32_t)0x00;
-    addressSpace[HIGH] = (uint32_t)0x00;
-    mySDI12.flush();
-    mySDI12.clearBuffer();
-    mySDI12.end();
 }
 
 boolean sdi12_check_pin(int sdi12_data)
@@ -86,6 +80,14 @@ boolean sdi12_init(int sdi12_pin) {
     mySDI12.begin();
     delay(500); // allow things to settle
     return true;
+}
+
+void sdi12_end(void) {
+    addressSpace[LOW] = (uint32_t)0x00;
+    addressSpace[HIGH] = (uint32_t)0x00;
+    mySDI12.flush();
+    mySDI12.clearBuffer();
+    mySDI12.end();
 }
 
 boolean sdi12_change(char new_addr)

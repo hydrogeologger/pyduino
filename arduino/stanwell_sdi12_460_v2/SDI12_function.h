@@ -15,6 +15,7 @@ void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
 boolean sdi12_check_pin(int sdi12_data);
 boolean sdi12_init(int sdi12_pin);
 int8_t sdi12_scan(void);
+void sdi12_end(void);
 void sdi12_loop();
 void takeMeasurement_sdi12(char i);
 void printBufferToScreen();
