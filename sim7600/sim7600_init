@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Turn of flight mode
+#echo "4" > /sys/class/gpio/export
+#sleep 0.1
+#echo "out" > /sys/class/gpio/gpio4/direction
+#echo "0" > /sys/class/gpio/gpio4/value
+
+# Initialize module, BCM-GPIO6, wPI-gpio22
+if [ ! -e /sys/class/gpio/gpio6 ]; then
+#    echo "File exists."
+    echo "6" > /sys/class/gpio/export
+fi
+echo "out" > /sys/class/gpio/gpio6/direction
+sleep 0.1
+echo "1" > /sys/class/gpio/gpio6/value
+sleep 0.5 # Min time of 0.1sec and less than 2.5sec
+echo "0" > /sys/class/gpio/gpio6/value
+sleep 0.1
+echo "6" > /sys/class/gpio/unexport
