@@ -1,0 +1,8 @@
+# Ignore VSCode IDE specific files
+**/.vscode/settings.json
+**/.vscode/arduino.json
+**/.vscode/*.log
+
+# Python Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
