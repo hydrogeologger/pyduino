@@ -50,35 +50,50 @@ class tingsboard_to_pandas:
         self.input_json["key_list"] = requests.get(url, headers=headers).json()
     
     
-    def get_data(self):
+    def get_data(self, start_time=None, end_time=None):
         if self.input_json['keys'].lower()=='all':
             self.key_string=','.join(self.input_json['key_list'])
         else:
             self.key_string=self.input_json['keys']
 
-        if self.input_json['startTs'].lower()=='':
-           self.input_json['startTs_str']='0'
+        if start_time is None:
+            if self.input_json['startTs'].lower()=='':
+                self.input_json['startTs_str']='0'
+            else:
+                #date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
+                # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+                #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+                date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
+                # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+                # below is found not compatible with spyder somehow
+                #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+                self.input_json['startTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
+        elif start_time.strip() == "":
+            self.input_json['startTs_str'] = "0"
         else:
-            #date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
-            # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
-            #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
-            date_time = pd.datetime.strptime( self.input_json['startTs']   ,'%Y/%b/%d %H:%M')
-            # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
-            # below is found not compatible with spyder somehow
-            #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+            date_time = pd.datetime.strptime(start_time, '%Y/%b/%d %H:%M')
             self.input_json['startTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
 
-        if self.input_json['endTs'].lower()=='':
-           self.input_json['endTs_str']=str(int(time.time()*constants.msecPsec))
+
+        if end_time is None:
+            if self.input_json['endTs'].lower()=='':
+                self.input_json['endTs_str']=str(int(time.time()*constants.msecPsec))
+            else:
+                date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
+                #self.input_json['endTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+                #date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
+                # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
+                # below is found not compatible with spyder somehow
+                #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
+                #self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1969,12,31,14)).total_seconds()*constants.msecPsec ))
+                self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
+        elif end_time.strip() == "":
+            self.input_json['endTs_str'] = "0"
         else:
-           date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
-           #self.input_json['endTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
-           #date_time = pd.datetime.strptime( self.input_json['endTs']   ,'%Y/%b/%d %H:%M')
-           # https://stackoverflow.com/questions/7588511/format-a-datetime-into-a-string-with-milliseconds/35643540
-           # below is found not compatible with spyder somehow
-           #self.input_json['startTs_str']='%s%03d'%(date_time.strftime("%s"), int(date_time.microsecond/1000))
-           #self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1969,12,31,14)).total_seconds()*constants.msecPsec ))
-           self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
+            date_time = pd.datetime.strptime(end_time, '%Y/%b/%d %H:%M')
+            self.input_json['endTs_str']=str(int( (date_time - datetime.datetime(1970,1,1,10)).total_seconds()*constants.msecPsec ))
+
+
         if self.input_json['limit']=='':
            self.input_json['limit'] = '100000'
            
