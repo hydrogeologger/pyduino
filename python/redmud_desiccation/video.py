@@ -9,6 +9,72 @@ from datetime import datetime
 import glob
 import operator
 
+def swcc_reverse_fredlund_xing_1994(**kwargs):
+    '''Soil water retention curve from Fredlund and Xing [1994]
+      reversing calculating from content to suction
+      input should be volumetric water content
+      output unit is kpa
+      input:
+      input explanation:
+      af -- [kpa] a soil parameter which is primarily a function of air entry value
+      nf -- a soil parameter which is primarily a function of the rate of water extraction from the soil once the air-entry value has been exceeded
+      mf -- a soil parameter which is primarily a function of the residual water content
+      hr -- [kpa] suction at which residual water contents occurrs 
+      por-- porosity
+      psi_0  -- the suction kpa when volumetric water content is saturated
+      '''
+    arg_defaults = {
+                'nf'  :0.85,
+                'mf'  :0.31,
+                'af'  :24.9999,
+                'hr'  :223873.8,
+                'por':0.54,
+                'vwc':0.1,
+                'psi_0':1e-1,
+                'psi_1':0.02  
+                }
+
+    arg=arg_defaults
+    for d in kwargs:
+        arg[d]= kwargs.get(d)
+
+    psi_outcome=np.zeros(len(np.atleast_1d(arg['vwc'])))
+
+    for i,k in enumerate(np.atleast_1d(arg['vwc'])) :
+        #import pdb
+#        psi_1=0.02  # after a testing, the starting point would be good to be near the saturation level
+        psi_1=arg['psi_1'] #2020-01-03 
+#        psi_1=arg['af']  #2017-07-08 16:27 turns out the air entry pressure is the best start guessing point 
+        psi_0=arg['psi_0'] #2020-01-03
+        
+        #pdb.set_trace()
+        if k>=arg['por']:
+            psi_1=arg['psi_0']
+        else:
+            while abs(psi_0-psi_1)>0.0001:
+                psi_0=psi_1
+
+                psi_on_af  = psi_0/arg['af']
+                log_on_log =  np.log(1+psi_0/arg['hr']) / np.log(1+1.e6/arg['hr']) 
+
+                e_plus    = np.e+psi_on_af**arg['nf']
+                log_e      = np.log(e_plus) 
+                dw_dpsi_0   =  - arg['mf']*arg['nf']*psi_on_af**(-1+arg['nf']) * arg['por'] * (1- log_on_log) * log_e **(-1-arg['mf']) /  arg['af'] / e_plus - arg['por']* log_e**(-arg['mf'])/arg['hr']/(1+psi_0/arg['hr'])/np.log(1+1.e6/arg['hr'])
+
+
+                tmp1=1  -  np.log(1+psi_0/arg['hr'])  /  np.log(1+1.0e6/arg['hr'])
+                tmp2=np.exp(1)+(psi_0/arg['af'])**arg['nf']
+                tmp3=np.log(tmp2)**arg['mf']
+                w_0=arg['por']*tmp1*(1/tmp3)-k
+
+
+                psi_1= psi_0 - w_0/dw_dpsi_0
+        #print psi_1
+        psi_outcome[i] = psi_1
+
+
+    return psi_outcome
+
 """ Information about the sample and setup"""
 #
 #                ---------- ---------- ---------- ---------- ----------
@@ -19,6 +85,17 @@ import operator
 #Initial GWC (%) 136.1      124.8      117.5      143.61     123.9
 #Initial SC  (%) 42.4       44.5       46         41.05      44.8
 #SG              2.9        2.83       2.82       2.90       2.675
+SG_A = 2.9
+SG_B = 2.83
+SG_C = 2.82
+SG_D = 2.90
+SG_E = 2.675
+
+SC_A = 0.424
+SC_B = 0.445
+SC_C = 0.460
+SC_D = 0.411
+SC_E = 0.448
 
 """Read the csv file and create a DataFrame"""
 df=pd.read_csv('result_all.csv')
@@ -29,23 +106,23 @@ Second, we make a boolean mask to select the duration we want---------------"""
 df['date_time']=pd.to_datetime(df['date_time'], format='%Y/%m/%d %H:%M:%S')
 
 start_date_A = '2022-05-24 16:20:00'
-end_date_A   = '2022-06-17 12:00:00'
+end_date_A   = '2022-07-07 12:00:00'
 duration_A   = (df['date_time'] > start_date_A) & (df['date_time'] <= end_date_A)
 
 start_date_B = '2022-05-24 16:20:00'
-end_date_B   = '2022-06-17 12:00:00'
+end_date_B   = '2022-07-7 12:00:00'
 duration_B   = (df['date_time'] > start_date_B) & (df['date_time'] <= end_date_B)
 
 start_date_C = '2022-05-24 16:20:00'
-end_date_C   = '2022-06-17 12:00:00'
+end_date_C   = '2022-07-07 12:00:00'
 duration_C   = (df['date_time'] > start_date_C) & (df['date_time'] <= end_date_C)
 
 start_date_D = '2022-06-03 16:20:00'
-end_date_D   = '2022-06-17 12:00:00'
+end_date_D   = '2022-07-07 12:00:00'
 duration_D   = (df['date_time'] > start_date_D) & (df['date_time'] <= end_date_D)
 
 start_date_E = '2022-04-14 15:30:00'
-end_date_E   = '2022-06-17 12:00:00'
+end_date_E   = '2022-07-07 12:00:00'
 duration_E   = (df['date_time'] > start_date_E) & (df['date_time'] <= end_date_E)
 
 df_A         = df.loc[duration_A]
@@ -156,7 +233,7 @@ The code here is a bit lumpy and needs to be improved.
 """
 df_A['evap_mmPday_smooth_A'] = df_A['evap_mmPday_A'] # Initialization
 for i in df_A['evap_mmPday_A']:
-    index_i = int(np.where(df_A['evap_mmPday_A']==i)[0])
+    index_i = int(np.where(df_A['evap_mmPday_A']==i)[0][0])
     if index_i >=10 and index_i <= (len(df_A['evap_mmPday_A'])-10):
         new_rate_A = (df_A['evap_mmPday_A'][index_i-1]+df_A['evap_mmPday_A'][index_i-2]+df_A['evap_mmPday_A'][index_i-3]+
                       df_A['evap_mmPday_A'][index_i-4]+df_A['evap_mmPday_A'][index_i-5]+df_A['evap_mmPday_A'][index_i-6]+
@@ -170,7 +247,7 @@ for i in df_A['evap_mmPday_A']:
 
 df_B['evap_mmPday_smooth_B'] = df_B['evap_mmPday_B'] # Initialization
 for i in df_B['evap_mmPday_B']:
-    index_i = int(np.where(df_B['evap_mmPday_B']==i)[0])
+    index_i = int(np.where(df_B['evap_mmPday_B']==i)[0][0])
     if index_i >=10 and index_i <= (len(df_B['evap_mmPday_B'])-10):
         new_rate_B = (df_B['evap_mmPday_B'][index_i-1]+df_B['evap_mmPday_B'][index_i-2]+df_B['evap_mmPday_B'][index_i-3]+
                       df_B['evap_mmPday_B'][index_i-4]+df_B['evap_mmPday_B'][index_i-5]+df_B['evap_mmPday_B'][index_i-6]+
@@ -184,7 +261,7 @@ for i in df_B['evap_mmPday_B']:
         
 df_C['evap_mmPday_smooth_C'] = df_C['evap_mmPday_C'] # Initialization
 for i in df_C['evap_mmPday_C']:
-    index_i = int(np.where(df_C['evap_mmPday_C']==i)[0])
+    index_i = int(np.where(df_C['evap_mmPday_C']==i)[0][0])
     if index_i >=10 and index_i <= (len(df_C['evap_mmPday_C'])-10):
         new_rate_C = (df_C['evap_mmPday_C'][index_i-1]+df_C['evap_mmPday_C'][index_i-2]+df_C['evap_mmPday_C'][index_i-3]+
                       df_C['evap_mmPday_C'][index_i-4]+df_C['evap_mmPday_C'][index_i-5]+df_C['evap_mmPday_C'][index_i-6]+
@@ -198,7 +275,7 @@ for i in df_C['evap_mmPday_C']:
         
 df_D['evap_mmPday_smooth_D'] = df_D['evap_mmPday_D'] # Initialization
 for i in df_D['evap_mmPday_D']:
-    index_i = int(np.where(df_D['evap_mmPday_D']==i)[0])
+    index_i = int(np.where(df_D['evap_mmPday_D']==i)[0][0])
     if index_i >=10 and index_i <= (len(df_D['evap_mmPday_D'])-10):
         new_rate_D = (df_D['evap_mmPday_D'][index_i-1]+df_D['evap_mmPday_D'][index_i-2]+df_D['evap_mmPday_D'][index_i-3]+
                       df_D['evap_mmPday_D'][index_i-4]+df_D['evap_mmPday_D'][index_i-5]+df_D['evap_mmPday_D'][index_i-6]+
@@ -223,7 +300,43 @@ for i in df_E['evap_mmPday_E']:
                       df_E['evap_mmPday_E'][index_i])/19
         
         df_E['evap_mmPday_smooth_E'].iloc[index_i] = new_rate_E    
-        
+
+""" Convert GWC to VWC """
+# VWC = GWC*DD/WD (DD is dry density, WD is water density)
+
+water_density = 1000 # kg/m3
+depth_basinA_m = 0.098 # m
+depth_basinB_m = 0.088 # m
+depth_basinC_m = 0.089 # m
+depth_basinD_m = 0.085 # m
+depth_basinE_m = 0.094 # m
+
+df_A['total_volume'] = area_basin_m2*depth_basinA_m  # assume volume does not change
+df_A['VWC_A'] = df_A['GWC_A']*(SC_A*initial_weight_A/1000/df_A['total_volume'])/water_density
+df_B['total_volume'] = area_basin_m2*depth_basinB_m  # assume volume does not change
+df_B['VWC_B'] = df_B['GWC_B']*(SC_B*initial_weight_B/1000/df_B['total_volume'])/water_density
+df_C['total_volume'] = area_basin_m2*depth_basinC_m  # assume volume does not change
+df_C['VWC_C'] = df_C['GWC_C']*(SC_C*initial_weight_C/1000/df_C['total_volume'])/water_density
+df_D['total_volume'] = area_basin_m2*depth_basinD_m  # assume volume does not change
+df_D['VWC_D'] = df_D['GWC_D']*(SC_D*initial_weight_D/1000/df_D['total_volume'])/water_density
+df_E['total_volume'] = area_basin_m2*depth_basinE_m  # assume volume does not change
+df_E['VWC_E'] = df_E['GWC_E']*(SC_E*initial_weight_E/1000/df_E['total_volume'])/water_density
+
+""" Convert VWC to DoS """
+# VWC = DoS * n
+# DoS = GWC*DD/WD/n
+# n = 1- rho(bulk)/rho(grain)
+df_A['porosity'] = 1 - (initial_weight_A/df_A['total_volume']/1000)/(SG_A*1000)
+df_A['DoS_A'] = df_A['GWC_A']*(SC_A*initial_weight_A/1000/df_A['total_volume'])/water_density/df_A['porosity']
+df_B['porosity'] = 1 - (initial_weight_B/df_B['total_volume']/1000)/(SG_B*1000)
+df_B['DoS_B'] = df_B['GWC_B']*(SC_B*initial_weight_B/1000/df_B['total_volume'])/water_density/df_B['porosity']
+df_C['porosity'] = 1 - (initial_weight_C/df_C['total_volume']/1000)/(SG_C*1000)
+df_C['DoS_C'] = df_C['GWC_C']*(SC_C*initial_weight_C/1000/df_C['total_volume'])/water_density/df_C['porosity']
+df_D['porosity'] = 1 - (initial_weight_D/df_D['total_volume']/1000)/(SG_D*1000)
+df_D['DoS_D'] = df_D['GWC_D']*(SC_D*initial_weight_D/1000/df_D['total_volume'])/water_density/df_D['porosity']
+df_E['porosity'] = 1 - (initial_weight_E/df_E['total_volume']/1000)/(SG_E*1000)
+df_E['DoS_E'] = df_E['GWC_E']*(SC_E*initial_weight_E/1000/df_E['total_volume'])/water_density/df_E['porosity']
+
 """----------------------------Plots Configuration--------------------------"""
 #Overall styles
 params = {'legend.fontsize': 4,
@@ -240,7 +353,7 @@ params = {'legend.fontsize': 4,
 pylab.rcParams.update(params)
 
 lw=2
-ms=6
+ms=3
 mew=2
 grid_width=2
 y_fontsize=20
@@ -315,7 +428,7 @@ class IMG:
 """----------------Start plotting figures used for video--------------------"""
 gwc_increment = 0.05
 initial_gwc   = 1.4
-residual_gwc  = 0.10
+residual_gwc  = 0.04
 selected_gwc = np.arange(initial_gwc, residual_gwc, -gwc_increment)
 
 """ Find the image we need for given GWCs
@@ -371,7 +484,7 @@ for gwc in selected_gwc:
     
     #------------adjust size and spacing of the subplot------------------------
     
-    fig.subplots_adjust(left   = 0.05,  # position of the left edge of the subplots, as a fraction of the figure width
+    fig.subplots_adjust(left   = 0.08,  # position of the left edge of the subplots, as a fraction of the figure width
                         right  = 0.95,  # position of the right edge of the subplots, as a fraction of the figure width
                         top    = 0.95,  # position of the top edge of the subplots, as a fraction of the figure height
                         bottom = 0.05,  # position of the bottom edge of the subplots, as a fraction of the figure height
@@ -401,43 +514,257 @@ for gwc in selected_gwc:
     ax[24].plot(df_E['time_days'][:idx_gwc_E], df_E['evap_cum_mm_E'][:idx_gwc_E], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='Cumulative Evap (mm)', markevery=2)
 
     # """-----------Plot Moisture Sensor Readings-----------------------"""
+    # Convert moisture sensor readings to VWC
+    # moisture sensor upper and lower bounds
+    mo_a1_min, mo_a1_max = (df_A['m_a1'].min(), df_A['m_a1'].max())
+    mo_a2_min, mo_a2_max = (df_A['m_a2'].min(), df_A['m_a2'].max())
+    mo_a3_min, mo_a3_max = (df_A['m_a3'].min(), df_A['m_a3'].max())
+    mo_b1_min, mo_b1_max = (df_B['m_b1'].min(), df_B['m_b1'].max())
+    mo_b2_min, mo_b2_max = (df_B['m_b2'].min(), df_B['m_b2'].max())
+    mo_b3_min, mo_b3_max = (df_B['m_b3'].min(), df_B['m_b3'].max())
+    mo_c1_min, mo_c1_max = (df_C['m_c1'].min(), df_C['m_c1'].max())
+    mo_c2_min, mo_c2_max = (df_C['m_c2'].min(), df_C['m_c2'].max())
+    mo_c3_min, mo_c3_max = (df_C['m_c3'].min(), df_C['m_c3'].max())
+    mo_d1_min, mo_d1_max = (df_D['m_d1'].min(), df_D['m_d1'].max())
+    mo_d2_min, mo_d2_max = (df_D['m_d2'].min(), df_D['m_d2'].max())
+    mo_d3_min, mo_d3_max = (df_D['m_d3'].min(), df_D['m_d3'].max())
+    mo_e1_min, mo_e1_max = (df_E['m_e1'].min(), df_E['m_e1'].max())
+    mo_e2_min, mo_e2_max = (df_E['m_e2'].min(), df_E['m_e2'].max())
+    mo_e3_min, mo_e3_max = (df_E['m_e3'].min(), df_E['m_e3'].max())
+    
+    # Normalize data 
+    df_A['m_a1_norm'] = (df_A['m_a1']-mo_a1_min)/(mo_a1_max-mo_a1_min)
+    df_A['m_a2_norm'] = (df_A['m_a2']-mo_a2_min)/(mo_a2_max-mo_a2_min)
+    df_A['m_a3_norm'] = (df_A['m_a3']-mo_a3_min)/(mo_a3_max-mo_a3_min)
+    df_B['m_b1_norm'] = (df_B['m_b1']-mo_b1_min)/(mo_b1_max-mo_b1_min)
+    df_B['m_b2_norm'] = (df_B['m_b2']-mo_b2_min)/(mo_b2_max-mo_b2_min)
+    df_B['m_b3_norm'] = (df_B['m_b3']-mo_b3_min)/(mo_b3_max-mo_b3_min)
+    df_C['m_c1_norm'] = (df_C['m_c1']-mo_c1_min)/(mo_c1_max-mo_c1_min)
+    df_C['m_c2_norm'] = (df_C['m_c2']-mo_c2_min)/(mo_c2_max-mo_c2_min)
+    df_C['m_c3_norm'] = (df_C['m_c3']-mo_c3_min)/(mo_c3_max-mo_c3_min)
+    df_D['m_d1_norm'] = (df_D['m_d1']-mo_d1_min)/(mo_d1_max-mo_d1_min)
+    df_D['m_d2_norm'] = (df_D['m_d2']-mo_d2_min)/(mo_d2_max-mo_d2_min)
+    df_D['m_d3_norm'] = (df_D['m_d3']-mo_d3_min)/(mo_d3_max-mo_d3_min)
+    df_E['m_e1_norm'] = (df_E['m_e1']-mo_e1_min)/(mo_e1_max-mo_e1_min)
+    df_E['m_e2_norm'] = (df_E['m_e2']-mo_e2_min)/(mo_e2_max-mo_e2_min)
+    df_E['m_e3_norm'] = (df_E['m_e3']-mo_e3_min)/(mo_e3_max-mo_e3_min)
+    
+    # df_A['m_a1_VWC']= 0.5*df_A['m_a1_norm']**0.3+0.0
+    # df_A['m_a2_VWC']= 0.5*df_A['m_a2_norm']**0.3+0.0
+    # df_A['m_a3_VWC']= 0.5*df_A['m_a3_norm']**0.3+0.0
+    
+    # df_B['m_b1_VWC']= 0.5*df_B['m_b1_norm']**0.2+0.0
+    # df_B['m_b2_VWC']= 0.5*df_B['m_b2_norm']**0.2+0.0
+    # df_B['m_b3_VWC']= 0.5*df_B['m_b3_norm']**0.2+0.0
+    
+    # df_C['m_c1_VWC']= 0.5*df_C['m_c1_norm']**0.3+0.0
+    # df_C['m_c2_VWC']= 0.5*df_C['m_c2_norm']**0.3+0.0
+    # df_C['m_c3_VWC']= 0.5*df_C['m_c3_norm']**0.3+0.0
+    
+    # df_D['m_d1_VWC']= 0.45*df_D['m_d1_norm']**0.7+0.0
+    # df_D['m_d2_VWC']= 0.45*df_D['m_d2_norm']**0.7+0.0
+    # df_D['m_d3_VWC']= 0.45*df_D['m_d3_norm']**0.7+0.0
+    
+    # df_E['m_e1_VWC']= 0.6*df_E['m_e1_norm']**0.4+0.0
+    # df_E['m_e2_VWC']= 0.6*df_E['m_e2_norm']**0.4+0.0
+    # df_E['m_e3_VWC']= 0.6*df_E['m_e3_norm']**0.4+0.0
+    
+    (m_a1, n_a1) = (0.0039, -0.48)
+    (m_a2, n_a2) = (0.003, -0.35) 
+    (m_a3, n_a3) = (0.003, -0.35)
 
-    ax[10].plot(df_A['time_days'][:idx_gwc_A], df_A['m_a1'][:idx_gwc_A], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.1', markevery=2)
-    ax[10].plot(df_A['time_days'][:idx_gwc_A], df_A['m_a2'][:idx_gwc_A], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.2', markevery=2)
-    ax[10].plot(df_A['time_days'][:idx_gwc_A], df_A['m_a3'][:idx_gwc_A], '-', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.3', markevery=2)
+    (m_b1, n_b1) = (0.0027, -0.2) 
+    (m_b2, n_b2) = (0.0027, -0.2) 
+    (m_b3, n_b3) = (0.0027, -0.2)
 
-    ax[11].plot(df_B['time_days'][:idx_gwc_B], df_B['m_b1'][:idx_gwc_B], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.1', markevery=2)
-    ax[11].plot(df_B['time_days'][:idx_gwc_B], df_B['m_b2'][:idx_gwc_B], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.2', markevery=2)
-    ax[11].plot(df_B['time_days'][:idx_gwc_B], df_B['m_b3'][:idx_gwc_B], '-', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.3', markevery=2)
+    (m_c1, n_c1) = (0.0027, -0.2) 
+    (m_c2, n_c2) = (0.0027, -0.2)  
+    (m_c3, n_c3) = (0.0027, -0.2)
 
-    ax[12].plot(df_C['time_days'][:idx_gwc_C], df_C['m_c1'][:idx_gwc_C], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.1', markevery=2)
-    ax[12].plot(df_C['time_days'][:idx_gwc_C], df_C['m_c2'][:idx_gwc_C], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.2', markevery=2)
-    ax[12].plot(df_C['time_days'][:idx_gwc_C], df_C['m_c3'][:idx_gwc_C], '-', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.3', markevery=2)
+    (m_d1, n_d1) = (0.0028, -0.275)
+    (m_d2, n_d2) = (0.0028, -0.275)
+    (m_d3, n_d3) = (0.0028, -0.275) 
 
-    ax[13].plot(df_D['time_days'][:idx_gwc_D], df_D['m_d1'][:idx_gwc_D], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.1', markevery=2)
-    ax[13].plot(df_D['time_days'][:idx_gwc_D], df_D['m_d2'][:idx_gwc_D], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.2', markevery=2)
-    ax[13].plot(df_D['time_days'][:idx_gwc_D], df_D['m_d3'][:idx_gwc_D], '-', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.3', markevery=2)
-
-    ax[14].plot(df_E['time_days'][:idx_gwc_E], df_E['m_e1'][:idx_gwc_E], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.1', markevery=2)
-    ax[14].plot(df_E['time_days'][:idx_gwc_E], df_E['m_e2'][:idx_gwc_E], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.2', markevery=2)
-    ax[14].plot(df_E['time_days'][:idx_gwc_E], df_E['m_e3'][:idx_gwc_E], '-', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='MO.3', markevery=2)
+    (m_e1, n_e1) = (0.0046, -1.05) 
+    (m_e2, n_e2) = (0.0046, -1.05)
+    (m_e3, n_e3) = (0.0046, -1.05) 
+    
+    df_A['m_a1_DoS']= m_a1*df_A['m_a1']+n_a1
+    df_A['m_a2_DoS']= m_a2*df_A['m_a2']+n_a2
+    df_A['m_a3_DoS']= m_a3*df_A['m_a3']+n_a3
+    df_B['m_b1_DoS']= m_b1*df_B['m_b1']+n_b1
+    df_B['m_b2_DoS']= m_b2*df_B['m_b2']+n_b2
+    df_B['m_b3_DoS']= m_b3*df_B['m_b3']+n_b3
+    df_C['m_c1_DoS']= m_c1*df_C['m_c1']+n_c1
+    df_C['m_c2_DoS']= m_c2*df_C['m_c2']+n_c2
+    df_C['m_c3_DoS']= m_c3*df_C['m_c3']+n_c3
+    df_D['m_d1_DoS']= m_d1*df_D['m_d1']+n_d1
+    df_D['m_d2_DoS']= m_d2*df_D['m_d2']+n_d2
+    df_D['m_d3_DoS']= m_d3*df_D['m_d3']+n_d3
+    df_E['m_e1_DoS']= m_e1*df_E['m_e1']+n_e1
+    df_E['m_e2_DoS']= m_e2*df_E['m_e2']+n_e2
+    df_E['m_e3_DoS']= m_e3*df_E['m_e3']+n_e3
+    
+    
+    k = 10
+    ax[10].plot(df_A['time_days'][:idx_gwc_A][::k], df_A['m_a1_DoS'][:idx_gwc_A][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='MOISTURE 1', markevery=2)
+    ax[10].plot(df_A['time_days'][:idx_gwc_A][::k], df_A['m_a2_DoS'][:idx_gwc_A][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='MOISTURE 2', markevery=2)
+    ax[10].plot(df_A['time_days'][:idx_gwc_A][::k], df_A['m_a3_DoS'][:idx_gwc_A][::k], 'x', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='y', label='MOISTURE 3', markevery=2)
+    ax[11].plot(df_B['time_days'][:idx_gwc_B][::k], df_B['m_b1_DoS'][:idx_gwc_B][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='MOISTURE 1', markevery=2)
+    ax[11].plot(df_B['time_days'][:idx_gwc_B][::k], df_B['m_b2_DoS'][:idx_gwc_B][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='MOISTURE 2', markevery=2)
+    ax[11].plot(df_B['time_days'][:idx_gwc_B][::k], df_B['m_b3_DoS'][:idx_gwc_B][::k], 'x', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='y', label='MOISTURE 3', markevery=2)
+    ax[12].plot(df_C['time_days'][:idx_gwc_C][::k], df_C['m_c1_DoS'][:idx_gwc_C][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='MOISTURE 1', markevery=2)
+    ax[12].plot(df_C['time_days'][:idx_gwc_C][::k], df_C['m_c2_DoS'][:idx_gwc_C][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='MOISTURE 2', markevery=2)
+    ax[12].plot(df_C['time_days'][:idx_gwc_C][::k], df_C['m_c3_DoS'][:idx_gwc_C][::k], 'x', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='y', label='MOISTURE 3', markevery=2)
+    ax[13].plot(df_D['time_days'][:idx_gwc_D][::k], df_D['m_d1_DoS'][:idx_gwc_D][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='MOISTURE 1', markevery=2)
+    ax[13].plot(df_D['time_days'][:idx_gwc_D][::k], df_D['m_d2_DoS'][:idx_gwc_D][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='MOISTURE 2', markevery=2)
+    ax[13].plot(df_D['time_days'][:idx_gwc_D][::k], df_D['m_d3_DoS'][:idx_gwc_D][::k], 'x', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='y', label='MOISTURE 3', markevery=2)
+    ax[14].plot(df_E['time_days'][:idx_gwc_E][::k], df_E['m_e1_DoS'][:idx_gwc_E][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='MOISTURE 1', markevery=2)
+    ax[14].plot(df_E['time_days'][:idx_gwc_E][::k], df_E['m_e2_DoS'][:idx_gwc_E][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='MOISTURE 2', markevery=2)
+    ax[14].plot(df_E['time_days'][:idx_gwc_E][::k], df_E['m_e3_DoS'][:idx_gwc_E][::k], 'x', color='y', markersize=ms, markeredgewidth=mew, markeredgecolor='y', label='MOISTURE 3', markevery=2)
     
     # """-----------Plot Suction Sensor Readings-----------------------"""
+    # Convert delta_t_sa1 to matric suction
 
-    ax[15].plot(df_A['time_days'][:idx_gwc_A], df_A['delta_t_sa1'][:idx_gwc_A], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.1', markevery=2)
-    ax[15].plot(df_A['time_days'][:idx_gwc_A], df_A['delta_t_sa2'][:idx_gwc_A], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.2', markevery=2)
+    nf_1 = 0.9311
+    af_1 = 2.7090
+    mf_1 = 0.1229
+    hr_1 = 238968
+    por_1 = 0.5  # equals to saturated VWC
+    residual_1 = 0.03
 
-    ax[16].plot(df_B['time_days'][:idx_gwc_B], df_B['delta_t_sb1'][:idx_gwc_B], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.1', markevery=2)
-    ax[16].plot(df_B['time_days'][:idx_gwc_B], df_B['delta_t_sb2'][:idx_gwc_B], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.2', markevery=2)
+    # For Basin E
+    nf_2 = 0.9311
+    af_2 = 2.7090
+    mf_2 = 0.1229
+    hr_2 = 238968
+    por_2 = 0.5  # equals to saturated VWC
+    residual_2 = 0.03
 
-    ax[17].plot(df_C['time_days'][:idx_gwc_C], df_C['delta_t_sc1'][:idx_gwc_C], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.1', markevery=2)
-    ax[17].plot(df_C['time_days'][:idx_gwc_C], df_C['delta_t_sc2'][:idx_gwc_C], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.2', markevery=2)
+# por=0.5,nf=0.9311,mf=0.1229,hr=238968.16,af=2.7090
+# vwc_cali = np.arange(0,100)/100
+# calculated_suction = lambda x: swcc_reverse_fredlund_xing_1994(nf = nf_1,
+#                                                                 mf = mf_1,
+#                                                                 af = af_1,
+#                                                                 hr = hr_1,
+#                                                                 por = por_1,
+#                                                                 vwc = x)
+# calculated_suction = np.array([calculated_suction(i) for i in vwc_cali])
+# plt.semilogy(vwc_cali, calculated_suction)
 
-    ax[18].plot(df_D['time_days'][:idx_gwc_D], df_D['delta_t_sd1'][:idx_gwc_D], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.1', markevery=2)
-    ax[18].plot(df_D['time_days'][:idx_gwc_D], df_D['delta_t_sd2'][:idx_gwc_D], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.2', markevery=2)
+    df_A['suction_sa1_swcc'] = df_A['VWC_A'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_A['suction_sa2_swcc'] = df_A['VWC_A'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_B['suction_sb1_swcc'] = df_B['VWC_B'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_B['suction_sb2_swcc'] = df_B['VWC_B'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_C['suction_sc1_swcc'] = df_C['VWC_C'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_C['suction_sc2_swcc'] = df_C['VWC_C'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_D['suction_sd1_swcc'] = df_D['VWC_D'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
+    df_D['suction_sd2_swcc'] = df_D['VWC_D'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_1,
+                                                                                          mf  = mf_1,
+                                                                                          af  = af_1,
+                                                                                          hr  = hr_1,
+                                                                                          por = por_1,
+                                                                                          vwc = x))
 
-    ax[19].plot(df_E['time_days'][:idx_gwc_E], df_E['delta_t_se1'][:idx_gwc_E], '-', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.1', markevery=2)
-    ax[19].plot(df_E['time_days'][:idx_gwc_E], df_E['delta_t_se2'][:idx_gwc_E], '-', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='m', label='SUC.2', markevery=2)
+    df_E['suction_se1_swcc'] = df_E['VWC_E'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_2,
+                                                                                          mf  = mf_2,
+                                                                                          af  = af_2,
+                                                                                          hr  = hr_2,
+                                                                                          por = por_2,
+                                                                                          vwc = x))
+    df_E['suction_se2_swcc'] = df_E['VWC_E'].apply(lambda x : swcc_reverse_fredlund_xing_1994(nf  = nf_2,
+                                                                                          mf  = mf_2,
+                                                                                          af  = af_2,
+                                                                                          hr  = hr_2,
+                                                                                          por = por_2,
+                                                                                          vwc = x))
+
+    (alpha_A, beta_A) = (21,-7)
+    (alpha_B, beta_B) = (21,-7)
+    (alpha_C, beta_C) = (24,-7)
+    (alpha_D, beta_D) = (16,-2)
+    (alpha_E, beta_E) = (48,-32)
+
+    # suction sensor upper and lower bounds
+    su_a1_min, su_a1_max = (df_A['delta_t_sa1'].min(), df_A['delta_t_sa1'].max())
+    su_a2_min, su_a2_max = (df_A['delta_t_sa2'].min(), df_A['delta_t_sa2'].max())
+    su_b1_min, su_b1_max = (df_B['delta_t_sb1'].min(), df_B['delta_t_sb1'].max())
+    su_b2_min, su_b2_max = (df_B['delta_t_sb2'].min(), df_B['delta_t_sb2'].max())
+    su_c1_min, su_c1_max = (df_C['delta_t_sc1'].min(), df_C['delta_t_sc1'].max())
+    su_c2_min, su_c2_max = (df_C['delta_t_sc2'].min(), df_C['delta_t_sc2'].max())
+    su_d1_min, su_d1_max = (df_D['delta_t_sd1'].min(), df_D['delta_t_sd1'].max())
+    su_d2_min, su_d2_max = (df_D['delta_t_sd2'].min(), df_D['delta_t_sd2'].max())
+    su_e1_min, su_e1_max = (df_E['delta_t_se1'].min(), df_E['delta_t_se1'].max())
+    su_e2_min, su_e2_max = (df_E['delta_t_se2'].min(), df_E['delta_t_se2'].max())
+
+    # normalize suction data
+    df_A['delta_t_sa1_norm'] = (df_A['delta_t_sa1']-su_a1_min)/(su_a1_max-su_a1_min)
+    df_A['delta_t_sa2_norm'] = (df_A['delta_t_sa2']-su_a2_min)/(su_a2_max-su_a2_min)
+    df_B['delta_t_sb1_norm'] = (df_B['delta_t_sb1']-su_b1_min)/(su_b1_max-su_b1_min)
+    df_B['delta_t_sb2_norm'] = (df_B['delta_t_sb2']-su_b2_min)/(su_b2_max-su_b2_min)
+    df_C['delta_t_sc1_norm'] = (df_C['delta_t_sc1']-su_c1_min)/(su_c1_max-su_c1_min)
+    df_C['delta_t_sc2_norm'] = (df_C['delta_t_sc2']-su_c2_min)/(su_c2_max-su_c2_min)
+    df_D['delta_t_sd1_norm'] = (df_D['delta_t_sd1']-su_d1_min)/(su_d1_max-su_d1_min)
+    df_D['delta_t_sd2_norm'] = (df_D['delta_t_sd2']-su_d2_min)/(su_d2_max-su_d2_min)
+    df_E['delta_t_se1_norm'] = (df_E['delta_t_se1']-su_e1_min)/(su_e1_max-su_e1_min)
+    df_E['delta_t_se2_norm'] = (df_E['delta_t_se2']-su_e2_min)/(su_e2_max-su_e2_min)
+
+    df_A['suction_sa1_cali'] = np.exp(alpha_A*df_A['delta_t_sa1_norm']+beta_A)
+    df_A['suction_sa2_cali'] = np.exp(alpha_A*df_A['delta_t_sa2_norm']+beta_A)
+    df_B['suction_sb1_cali'] = np.exp(alpha_B*df_B['delta_t_sb1_norm']+beta_B)
+    df_B['suction_sb2_cali'] = np.exp(alpha_B*df_B['delta_t_sb2_norm']+beta_B)
+    df_C['suction_sc1_cali'] = np.exp(alpha_C*df_C['delta_t_sc1_norm']+beta_C)
+    df_C['suction_sc2_cali'] = np.exp(alpha_C*df_C['delta_t_sc2_norm']+beta_C)
+    df_D['suction_sd1_cali'] = np.exp(alpha_D*df_D['delta_t_sd1_norm']+beta_D)
+    df_D['suction_sd2_cali'] = np.exp(alpha_D*df_D['delta_t_sd2_norm']+beta_D)
+    df_E['suction_se1_cali'] = np.exp(alpha_E*df_E['delta_t_se1_norm']+beta_E)
+    df_E['suction_se2_cali'] = np.exp(alpha_E*df_E['delta_t_se2_norm']+beta_E)
+
+    ax[15].semilogy(df_A['time_days'][:idx_gwc_A][::k], df_A['suction_sa1_cali'][:idx_gwc_A][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='SUCTION 1', markevery=2)
+    ax[15].semilogy(df_A['time_days'][:idx_gwc_A][::k], df_A['suction_sa2_cali'][:idx_gwc_A][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='SUCTION 2', markevery=2)
+    ax[16].semilogy(df_B['time_days'][:idx_gwc_B][::k], df_B['suction_sb1_cali'][:idx_gwc_B][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='SUCTION 1', markevery=2)
+    ax[16].semilogy(df_B['time_days'][:idx_gwc_B][::k], df_B['suction_sb2_cali'][:idx_gwc_B][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='SUCTION 2', markevery=2)
+    ax[17].semilogy(df_C['time_days'][:idx_gwc_C][::k], df_C['suction_sc1_cali'][:idx_gwc_C][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='SUCTION 1', markevery=2)
+    ax[17].semilogy(df_C['time_days'][:idx_gwc_C][::k], df_C['suction_sc2_cali'][:idx_gwc_C][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='SUCTION 2', markevery=2)
+    ax[18].semilogy(df_D['time_days'][:idx_gwc_D][::k], df_D['suction_sd1_cali'][:idx_gwc_D][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='SUCTION 1', markevery=2)
+    ax[18].semilogy(df_D['time_days'][:idx_gwc_D][::k], df_D['suction_sd2_cali'][:idx_gwc_D][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='SUCTION 2', markevery=2)
+    ax[19].semilogy(df_E['time_days'][:idx_gwc_E][::k], df_E['suction_se1_cali'][:idx_gwc_E][::k], '^', color='b', markersize=ms, markeredgewidth=mew, markeredgecolor='b', label='SUCTION 1', markevery=2)
+    ax[19].semilogy(df_E['time_days'][:idx_gwc_E][::k], df_E['suction_se2_cali'][:idx_gwc_E][::k], 's', color='r', markersize=ms, markeredgewidth=mew, markeredgecolor='r', label='SUCTION 2', markevery=2)
 
 
     # """--------------Detailed Configurations--------------------------------"""
@@ -485,17 +812,17 @@ for gwc in selected_gwc:
     ax[23].set_ylim([0, 80])
     ax[24].set_ylim([0, 80])
     
-    ax[10].set_ylim([100, 500])  # limits for daily moisture sensor
-    ax[11].set_ylim([100, 500])
-    ax[12].set_ylim([100, 500])
-    ax[13].set_ylim([100, 500])
-    ax[14].set_ylim([100, 500])
+    ax[10].set_ylim([-0.1, 1.1])  # limits for degree of saturation
+    ax[11].set_ylim([-0.1, 1.1])
+    ax[12].set_ylim([-0.1, 1.1])
+    ax[13].set_ylim([-0.1, 1.1])
+    ax[14].set_ylim([-0.1, 1.1])
         
-    ax[15].set_ylim([5, 15])  # limits for daily suction sensor
-    ax[16].set_ylim([5, 15])
-    ax[17].set_ylim([5, 15])
-    ax[18].set_ylim([5, 15])
-    ax[19].set_ylim([5, 15])
+    ax[15].set_ylim([1, 1e8])  # limits for daily suction sensor
+    ax[16].set_ylim([1, 1e8])
+    ax[17].set_ylim([1, 1e8])
+    ax[18].set_ylim([1, 1e8])
+    ax[19].set_ylim([1, 1e8])
     
     #---------------Set labels for x-axis--------------------------------------
     
@@ -507,10 +834,10 @@ for gwc in selected_gwc:
 
     #---------------Set labels for x-axis--------------------------------------    
     
-    ax[5].set_ylabel('EVAP RATE\n(mm/day)', fontsize=y_fontsize, labelpad=20, color='b')  
-    ax[10].set_ylabel('MOISTURE\nSENSOR', fontsize=y_fontsize, labelpad=2)    
-    ax[15].set_ylabel('SUCTION\nSENSOR', fontsize=y_fontsize, labelpad=9)
-    ax[24].set_ylabel('CUMULATIVE\nEVAP (mm)', fontsize=y_fontsize, labelpad=3, color='r')
+    ax[5].set_ylabel('EVAP. RATE\n(mm/day)', fontsize=y_fontsize, labelpad=30, color='b')  
+    ax[10].set_ylabel('DEGREE OF\nSATURATION', fontsize=y_fontsize, labelpad=20)    
+    ax[15].set_ylabel('MATRIC\nSUCTION\n(kPa)', fontsize=y_fontsize, labelpad=2)
+    ax[24].set_ylabel('CUMULATIVE\nEVAP. (mm)', fontsize=y_fontsize, labelpad=3, color='r')
   
     #---------------Set ticks for x-axis and y-axis----------------------------
     
@@ -520,17 +847,17 @@ for gwc in selected_gwc:
     ax[8].set_yticks([1, 2, 3, 4, 5, 6])
     ax[9].set_yticks([1, 2, 3, 4, 5, 6])
     
-    ax[10].set_yticks([150, 250, 350, 450])
-    ax[11].set_yticks([150, 250, 350, 450])
-    ax[12].set_yticks([150, 250, 350, 450])
-    ax[13].set_yticks([150, 250, 350, 450])
-    ax[14].set_yticks([150, 250, 350, 450])
+    ax[10].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax[11].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax[12].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax[13].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax[14].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
-    ax[15].set_yticks([6, 8, 10, 12, 14])
-    ax[16].set_yticks([6, 8, 10, 12, 14])
-    ax[17].set_yticks([6, 8, 10, 12, 14])
-    ax[18].set_yticks([6, 8, 10, 12, 14])
-    ax[19].set_yticks([6, 8, 10, 12, 14])
+    ax[15].set_yticks([1e1, 1e3, 1e5, 1e7])
+    ax[16].set_yticks([1e1, 1e3, 1e5, 1e7])
+    ax[17].set_yticks([1e1, 1e3, 1e5, 1e7])
+    ax[18].set_yticks([1e1, 1e3, 1e5, 1e7])
+    ax[19].set_yticks([1e1, 1e3, 1e5, 1e7])
         
     #-----------------------Remove labels and ticks----------------------------
 
@@ -646,13 +973,13 @@ for gwc in selected_gwc:
     # ax[8].legend(loc='upper right', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
     # ax[9].legend(loc='upper right', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
 
-    ax[10].legend(loc='lower left', borderaxespad=0.8, fontsize=16, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
+    ax[10].legend(loc='upper right', borderaxespad=0.2, fontsize=12, handletextpad=0.1, labelspacing=0.1, ncol=1, columnspacing=0.1)
     # ax[11].legend(loc='lower left', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
     # ax[12].legend(loc='lower left', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
     # ax[13].legend(loc='lower left', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
     # ax[14].legend(loc='lower left', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
 
-    ax[15].legend(loc='upper left', borderaxespad=0.8, fontsize=16, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
+    ax[15].legend(loc='lower right', borderaxespad=0.2, fontsize=12, handletextpad=0.1, labelspacing=0.1, ncol=1, columnspacing=0.1)
     # ax[16].legend(loc='lower right', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
     # ax[17].legend(loc='lower right', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
     # ax[18].legend(loc='lower right', borderaxespad=0.8, fontsize=14, handletextpad=0.5, labelspacing=0.1, ncol=1, columnspacing=0.4)
@@ -662,35 +989,33 @@ for gwc in selected_gwc:
     """--------Add the JPG file to the figure and label the image-----------"""
     ax[0].imshow(current_im_basin_A)
     ax[0].axis('off')
-    ax[0].set_title('Basin A (SP04)', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
+    ax[0].set_title('SP04', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
     
     ax[1].imshow(current_im_basin_B)
     ax[1].axis('off')
-    ax[1].set_title('Basin B (SP06)', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
+    ax[1].set_title('SP06', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
     
     ax[2].imshow(current_im_basin_C)
     ax[2].axis('off')
-    ax[2].set_title('Basin C (SP11)', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
+    ax[2].set_title('SP11', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
     
     ax[3].imshow(current_im_basin_D)
     ax[3].axis('off')
-    ax[3].set_title('Basin D (SP09)', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
+    ax[3].set_title('SP09', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
 
     ax[4].imshow(current_im_basin_E)
     ax[4].axis('off')
-    ax[4].set_title('Basin E (SP01)', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
+    ax[4].set_title('SP01', x=0.01, y=0.75, fontweight='bold', fontsize=24, color='r', loc='left')
     
     """-----------Add the Moisture Content to the figure--------------------"""
     
     GWC_basin_A = str(round(IMG(lst_im_path_basin_A[idx_im_A], gwc).gwc,2))
-    text = "GWC\n= " + GWC_basin_A
-    fig.text(0.0, 0.82, text, fontsize=24, bbox=dict(boxstyle="square",
-                                                       ec=(1., 0.2, 0.2),
-                                                       fc=(1., 0.2, 0.2),))
+    text = "GWC\n " + GWC_basin_A
+    fig.text(0.02, 0.82, text, fontsize=24)
     
     """--------Save the figure----------------------------------------------"""
     plt.show(block=False)
-    output_name = os.getcwd() + '\\photos_for_video' + '\\' + str(round(gwc*100,2))+'.jpg'
+    output_name = os.getcwd() + '\\photos_for_video2' + '\\' + str(round(gwc*100,2))+'.jpg'
     fig.savefig(output_name, format='jpg', dpi=100, bbox_inches='tight', pad_inches=0.01 )
     # plt.close()
 
@@ -703,8 +1028,8 @@ we can sort them mathematically."""
 def get_jpg_number(jpg_name):
     return float(jpg_name.split('.')[-3])
 
-image_folder = os.getcwd() + '\\photos_for_video'
-video_name = 'basin_all.avi'
+image_folder = os.getcwd() + '\\photos_for_video2'
+video_name = 'basin_all2.avi'
 images = [img for img in os.listdir(image_folder) if img.endswith(".jpg")]
 images.sort(key=lambda x: get_jpg_number(x), reverse=True)
 frame = cv2.imread(os.path.join(image_folder, images[0]))
@@ -716,6 +1041,7 @@ for img in images:
 
 cv2.destroyAllWindows()
 video.release()
+
 
 
 
