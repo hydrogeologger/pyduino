@@ -11,8 +11,11 @@ json
 
 ## Python 2/3 compatibility imports
 # To print multiple strings, import print_function to prevent Py2 from interpreting it as a tuple:
-from __future__ import print_function
-from builtins import int # subclass of long on Py2
+# from __future__ import print_function
+# from builtins import int # subclass of long on Py2
+import sys
+if sys.version_info >= (3,0):
+    long = int
 
 # Module Info
 __version__ = "1.0"
@@ -124,16 +127,16 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0,
             # publish_result = paho.mqtt.client.MQTTMessageInfo
             publish_result.wait_for_publish(timeout=timeout)
             if debug:
-                print(publish_result, index_json_payload)
+                print("{0} {1}".format(publish_result, index_json_payload))
             # if publish_result.rc != paho.mqtt.client.MQTT_ERR_SUCCESS or not publish_result._published:
             #     break # Escape publishing loop on publish failure
             if not publish_result.is_published():
                 break # Escape publishing loop on publish failure
         except (ValueError, RuntimeError) as error:
-            print("PayloadIndex:", payload_index, type(error), error)
+            print("PayloadIndex: {0} {1} {2}".format(payload_index, type(error), error))
             break # Escape loop on error
         except Exception as error:
-            print("MQTT Publish Error! PayloadIndex:", payload_index, type(error), error)
+            print("MQTT Publish Error! PayloadIndex: {0} {1} {2}".format(payload_index, type(error), error))
             break # Escape loop on error
         else:
             publish_success = True
@@ -212,7 +215,7 @@ def publish_to_thingsboard(client, payload, ts=None,
     """
     if ts is None:
         current_json_data = payload
-    elif not isinstance(ts, (int, float)):
+    elif not isinstance(ts, (int, float, long)):
         raise TypeError("Expect ts to be of numeric type, received %s" % type(ts))
     else:
         if isinstance(payload, (dict, list)):

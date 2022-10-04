@@ -3,7 +3,6 @@ This is an MQTT client publishing python helper module.
 Contains support and wrapper functions for MQTT publishing.
 
 # Dependencies
-* future
 * paho.mqtt.client
 * json
 
