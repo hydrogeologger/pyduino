@@ -20,7 +20,9 @@ if sys.version_info >= (3,0):
 # Module Info
 __version__ = "1.0"
 __all__ = [
-    "is_json_string", "publish_mqtt_queue", "publish_to_thingsboard"
+    "is_json_string", "update_json_mqtt_queue",
+    "save_json_mqtt_queue", "package_thingsboard_payload",
+    "publish_mqtt_queue", "publish_to_thingsboard"
 ]
 
 # Standard Imports
@@ -65,6 +67,89 @@ def is_json_string(text):
             return False
     return False
 
+
+def update_json_mqtt_queue(filename, payload):
+    """
+    Get the json mqtt queue data from file including current payload.
+
+    Args:
+        filename: Name of JSON queue file archive, must include extension in filename, Default - None
+        payload: JSON payload for appending to queue
+
+    Returns:
+        List of mqtt json dictionary items.
+
+    Raises:
+        ValueError: Invalid payload format.
+    """
+
+    # Read backup JSON Data from previous failed uploads
+    json_data = []
+    if os.path.isfile(filename):
+        with open(filename) as json_file:
+            try:
+                json_data = json.load(json_file)
+            except ValueError:
+                pass # JSON file is empty
+
+    # try:
+    if isinstance(payload, (dict, list)):
+        json_data.append(payload)
+    elif is_json_string(payload):
+        json_data.append(json.loads(payload))
+    else:
+        raise ValueError("json payload format is invalid.")
+    # except ValueError:
+    #     raise ValueError("json payload format is invalid.")
+    return json_data
+
+
+def save_json_mqtt_queue(filename, json_data, payload_index=None):
+    """
+    Saves json mqtt queue to file.
+
+    Args:
+        filename: Name of JSON queue file archive, must include extension in filename, Default - None
+        json_data: list of json data
+        payload_index: (Optional) List index to start saving from. Default: None
+    """
+    if payload_index is None:
+        payload_index = 0
+
+    with open(filename, 'w') as json_file:
+        json.dump(json_data[payload_index:], json_file, indent=4, separators=(",", ": "))
+
+
+def package_thingsboard_payload(payload, ts=None):
+    """
+    Prepare payload for thingsboard.
+
+    Args:
+        payload: JSON payload for appending to queue
+        ts: (Optional) Timestamp in milliseconds from epoch, Default - None, ommits timestamp
+
+    Returns:
+        JSON payload for thingsboard
+
+    Raises:
+        ValueError: Invalid payload format.
+        TypeError: Timestamp not of numeric type.
+    """
+    if ts is None:
+        current_json_data = payload
+    elif not isinstance(ts, (int, float, long)):
+        raise TypeError("Expect ts to be of numeric type, received %s" % type(ts))
+    else:
+        if isinstance(payload, (dict, list)):
+            current_json_data = {"ts":ts, "values": payload}
+        elif is_json_string(payload):
+            current_json_data = {"ts":ts, "values": json.loads(payload)}
+        else:
+            raise ValueError("json payload format is invalid.")
+
+    return current_json_data
+
+
 # def publish_mqtt_queue(client: paho.mqtt.client, topic: str, json_payload: json doc,
 #                       timeout: float, filename: str | None = None, debug=False) -> paho.mqtt.client.MQTTMessageInfo:
 def publish_mqtt_queue(client, topic, json_payload, timeout=1.0,
@@ -99,23 +184,7 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0,
         json_filename = "mqtt_queue_%s.json" % parent_filename
 
     # Read backup JSON Data from previous failed uploads
-    json_data = []
-    if os.path.isfile(json_filename):
-        with open(json_filename) as json_file:
-            try:
-                json_data = json.load(json_file)
-            except ValueError:
-                pass # JSON file is empty
-
-    # try:
-    if isinstance(json_payload, (dict, list)):
-        json_data.append(json_payload)
-    elif is_json_string(json_payload):
-        json_data.append(json.loads(json_payload))
-    else:
-        raise ValueError("json payload format is invalid.")
-    # except ValueError:
-    #     raise ValueError("json payload format is invalid.")
+    json_data = update_json_mqtt_queue(filename=json_filename, payload=json_payload)
 
     # Loop through json data for publishing
     payload_index = 0
@@ -159,8 +228,7 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0,
             pass
     elif not publish_success:
         # Archive unsent data to file queue for sending later
-        with open(json_filename, 'w') as json_file:
-            json.dump(json_data[payload_index:], json_file, indent=4, separators=(",", ": "))
+        save_json_mqtt_queue(filename=json_filename, json_data=json_data, payload_index=payload_index)
 
     # If payload index and publish_result.mid does not match then there was a failure in publishing
     # if publish_result.rc != paho.mqtt.client.MQTT_ERR_SUCCESS:
@@ -213,18 +281,8 @@ def publish_to_thingsboard(client, payload, ts=None,
         ValueError: Invalid payload format.
         TypeError: Timestamp not of numeric type.
     """
-    if ts is None:
-        current_json_data = payload
-    elif not isinstance(ts, (int, float, long)):
-        raise TypeError("Expect ts to be of numeric type, received %s" % type(ts))
-    else:
-        if isinstance(payload, (dict, list)):
-            current_json_data = {"ts":ts, "values": payload}
-        elif is_json_string(payload):
-            current_json_data = {"ts":ts, "values": json.loads(payload)}
-        else:
-            raise ValueError("json payload format is invalid.")
-    
+    current_json_data = package_thingsboard_payload(payload=payload, ts=ts)
+
     if display_payload:
         print(current_json_data)
 

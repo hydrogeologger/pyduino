@@ -61,3 +61,49 @@ paho.mqtt.client.MQTTMessageInfo from the last publishing call.
 
 ### Raises
 `ValueError` if payload format is not appropriate or `TypeError` if timestamp is not numeric.
+
+
+## update_json_mqtt_queue()
+```python
+update_json_mqtt_queue(filename, json_payload)
+```
+Get the json mqtt queue data from file including current payload.
+
+### Params
+* `filename` - Name of JSON queue file archive, must include extension in filename, Default - None
+* `payload` - JSON payload for appending to queue
+
+### Returns
+List of mqtt json dictionary items.
+
+### Raises
+`ValueError` if payload format is not appropriate.
+
+
+## save_json_mqtt_queue()
+```python
+save_json_mqtt_queue(filename, json_data, payload_index=None):
+```
+Saves json mqtt queue to file.
+
+### Params
+* `filename` - Name of JSON queue file archive, must include extension in filename, Default - None
+* `json_data` - list of json data
+* `payload_index` - (Optional) List index to start saving from. Defaults: None (Saves all)
+
+
+## package_thingsboard_payload()
+```python
+package_thingsboard_payload(payload, ts=None)
+```
+Prepare payload for thingsboard to include or omit timestamp. 
+
+### Params
+* `payload` - JSON payload for appending to queue
+* `ts` - (Optional) Timestamp in milliseconds from epoch, Default - None, ommits 
+
+### Returns
+JSON payload for thingsboard
+
+### Raises
+`ValueError` if payload format is not appropriate or `TypeError` if timestamp is not numeric.
