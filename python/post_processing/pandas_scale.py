@@ -496,6 +496,9 @@ class concat_data_roof():
 
 
         #pdb.set_trace()
+        if arg['plot']==True:
+            pdb.set_trace()
+
         # this is not going to work for slicing as the first row is not indexed as 0
         #source_sec=(source_df['date_time']-source_df['date_time'][0])/np.timedelta64(1,'s')
         #source_sec=(source_df['date_time']-source_df['date_time'].iloc[0])/np.timedelta64(1,'s')
