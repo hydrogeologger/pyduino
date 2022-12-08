@@ -87,7 +87,7 @@ function disable_network_manager_dependencies() {
     # connections config stored in /etc/NetworkManager/system-connections
     local NM_CONF="/etc/NetworkManager/system-connections/eduroam.nmconnection"
     readonly NM_CONF
-    
+
     # Edit/delete eduroam config from NetworkManager connections
 
     # Remove username and password
@@ -126,6 +126,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/install.sh" "$@"
 # shellcheck source=/dev/null
 # source "$(dirname "$0")/install.sh"
 
+systemctl disable wpa_supplicant
 setup_dhcpcd_and_dependencies
 disable_network_manager_dependencies
 wpasupplicant_connect
