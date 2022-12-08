@@ -1,0 +1,4 @@
+# /etc/systemd/network/pan0.netdev
+[NetDev]
+Name=pan0
+Kind=bridge
