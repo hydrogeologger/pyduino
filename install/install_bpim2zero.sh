@@ -108,10 +108,13 @@ configure_default_boot_overlay
 create_primary_serial_symbolic_link
 install_GrazerComputerClub_rpi_gpio_pymodule
 install_bontango_bpi_wiringpi2
+# Enable bluetooth as PAN
 # shellcheck source=SCRIPTDIR/bluetooth_pan/install.sh
 source "$(dirname "${BASH_SOURCE[0]}")/bluetooth_pan/install.sh"
+# Configure device as USB gadget
 # shellcheck source=SCRIPTDIR/ssh_over_usb/install_armbian.sh
 source "$(dirname "${BASH_SOURCE[0]}")/ssh_over_usb/install_armbian.sh"
+# Configure eduroam
 # shellcheck source=SCRIPTDIR/wpasupplicant/install_armbian.sh
 source "$(dirname "${BASH_SOURCE[0]}")/wpasupplicant/install_armbian.sh" --name "eduroam" --reset
 
