@@ -3,7 +3,7 @@
 Description=Bluetooth Auth Agent
 
 [Service]
-ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
+ExecStart=/usr/bin/bt-agent --capability=NoInputNoOutput
 Type=simple
 
 [Install]
