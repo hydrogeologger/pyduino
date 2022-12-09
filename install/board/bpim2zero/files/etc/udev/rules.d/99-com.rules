@@ -1,0 +1,16 @@
+# /etc/udev/rules.d/99-com.rules
+# SUBSYSTEM=="input", GROUP="input", MODE="0660"
+# SUBSYSTEM=="i2c-dev", GROUP="i2c", MODE="0660"
+# SUBSYSTEM=="spidev", GROUP="spi", MODE="0660"
+
+# KERNEL=="spidev*", GROUP="spi", MODE="0660"
+
+# SUBSYSTEM=="gpio", GROUP="gpio", MODE="0660"
+
+# SUBSYSTEM=="gpio*", PROGRAM="/bin/sh -c '\
+# 	chown -R root:gpio /sys/class/gpio && chmod -R 0770 /sys/class/gpio;\
+#     chown -R root:gpio /sys/devices/platform/soc/1c20800.pinctrl/gpio && chmod -R 0770 /sys/devices/platform/soc/1c20800.pinctrl/gpio;\
+# 	chown -R root:gpio /sys/devices/platform/soc/1f02c00.pinctrl/gpio && chmod -R 0770 /sys/devices/platform/soc/1f02c00.pinctrl/gpio
+# '"
+
+KERNEL=="ttyS3", SYMLINK+="serial0"

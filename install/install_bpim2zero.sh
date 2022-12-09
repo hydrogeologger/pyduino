@@ -29,6 +29,8 @@ function create_board_file() {
 
 function create_primary_serial_symbolic_link() {
     echo "Generating primary serial symbolic link..."
+    transfer_conf_files_from_path "$(dirname "${BASH_SOURCE[0]}")/board/bpim2zero/files"
+    # Following softlink is temporary for current session
     ln -s /dev/ttyS3 /dev/serial0
 }
 
