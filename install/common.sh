@@ -2,6 +2,13 @@
 
 # Common functions to support installation/configuration of pyduino setup
 
+BASE_DIR=$(pwd)
+
+function return_to_base_dir() {
+    # Function to working directory when script was called
+    cd "$BASE_DIR" || { echo "Unable to enter $BASE_DIR"; return 1; }
+}
+
 function version() {
     # Function to convert a string of up to four decimal places to integer
     echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
@@ -78,16 +85,73 @@ function get_declared_args_python_version() {
     shift #get rid of the '--'
 }
 
-do_finish() {
-    if [ "$ASK_TO_REBOOT" = true ]; then
-        if (whiptail --yesno "Would you like to reboot now?" 20 60 2); then 
-            # yes
-            sync
-            reboot
+function do_finish() {
+    # if [ "$ASK_TO_REBOOT" = true ]; then
+    #     if (whiptail --yesno "Would you like to reboot now?" 20 60 2); then
+    #         # yes
+    #         sync
+    #         reboot
+    #     fi
+    # fi
+    # exit 0
+    echo "System will reboot in approximately 15 Seconds."
+    echo "Would you like to defer system reboot? You will need to manually reboot later. Y/N"
+    while true; do
+        if read -r -t 15 -n 1 yesno; then
+            # user input something
+            if [ "$yesno" = "y" ]; then
+                return 0
+            fi
+        else
+            # no user input
+            break
         fi
-    fi
-    exit 0
+    done
+    echo "Rebooting now!"
+    sync
+    reboot
 }
+
+function create_empty_crontab_template() {
+{ echo "# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+#
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').
+#
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+#
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+#
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command"; } | crontab -u "${SUDO_USER:-$USER}" -
+
+    # chmod 600  "/var/spool/cron/crontabs/${SUDO_USER:-$USER}"
+    # chown "${SUDO_USER:-$USER}":crontab "/var/spool/cron/crontabs/${SUDO_USER:-$USER}"
+}
+
+function add_report_ip_to_thingsboard_to_cron() {
+    local -r cron_command="/home/${SUDO_USER:-$USER}/pyduino/bash/send_ip_tb.sh"
+    local -r cronjob="@reboot $cron_command"
+
+    ( crontab -u "${SUDO_USER:-$USER}" -l | grep -v -F "$cron_command"; echo "$cronjob" ) | crontab -u "${SUDO_USER:-$USER}" -
+
+    # To Remove
+    # ( crontab -u ${SUDO_USER:-$USER} -l | grep -v -F "$cronjob" ) | crontab -u ${SUDO_USER:-$USER} -
+}
+
+
 
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} \;
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} +;
