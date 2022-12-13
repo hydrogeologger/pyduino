@@ -12,8 +12,6 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
-BASE_DIR=$(pwd)
-
 # Include common
 # shellcheck source=SCRIPTDIR/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
@@ -50,16 +48,20 @@ function configure_default_boot_overlay() {
     fi
 }
 
-function return_to_base_dir() {
-    cd "$BASE_DIR" || echo "Unable to enter $BASE_DIR" || return 2
-}
 
 function install_bontango_bpi_wiringpi2() {
+    local CLONE_DIR
+    CLONE_DIR="/home/${SUDO_USER:-$USER}/BPI-WiringPi2"
+
     echo "Downloading and installing BPI-WiringPi2..."
     # clone repo
-    git clone "https://github.com/bontango/BPI-WiringPi2.git" "/home/pi/BPI-WiringPi2"
+    git clone "https://github.com/bontango/BPI-WiringPi2.git" "$CLONE_DIR"
 
-    cd "/home/pi/BPI-WiringPi2" || echo "Unable to enter /home/pi/BPI-WiringPi2" || return 2
+    # Change owner of directory to current user
+    chown -R "${SUDO_USER:-$USER}":"${SUDO_USER:-$USER}" "$CLONE_DIR"
+
+    # Build and install
+    cd "$CLONE_DIR" || { echo "Unable to enter $CLONE_DIR"; return 1; }
     ./build
 
     return_to_base_dir
@@ -92,24 +94,32 @@ function install_rpi_gpio() {
 
 
 function install_GrazerComputerClub_rpi_gpio_pymodule() {
+    local CLONE_DIR
+    CLONE_DIR="/home/${SUDO_USER:-$USER}/RPi.Gpio"
+
     echo "Downloading and installing GrazerComputerClub fork of SINOVOIP RPi.Gpio module..."
-    git clone "https://github.com/GrazerComputerClub/RPi.GPIO.git" "/home/pi/RPi.GPIO"
+    git clone "https://github.com/GrazerComputerClub/RPi.GPIO.git" "$CLONE_DIR"
+
+    # Change owner of directory to current user
+    chown -R "${SUDO_USER:-$USER}":"${SUDO_USER:-$USER}" "$CLONE_DIR"
 
     # Build and install
-    cd "/home/pi/RPi.GPIO" || echo "Unable to enter /home/pi/RPi.GPIO" || return 2
+    cd "$CLONE_DIR" || { echo "Unable to enter $CLONE_DIR"; return 1; }
 
     install_rpi_gpio
     return_to_base_dir
 }
 
 apt update
-install_packages "python-is-python3"
 get_declared_args_python_version "$@"
 create_board_file
 configure_default_boot_overlay
 create_primary_serial_symbolic_link
+install_packages "python-is-python3 python3-serial"
 install_GrazerComputerClub_rpi_gpio_pymodule
 install_bontango_bpi_wiringpi2
+create_empty_crontab_template
+add_report_ip_to_thingsboard_to_cron
 # Enable bluetooth as PAN
 # shellcheck source=SCRIPTDIR/bluetooth_pan/install.sh
 source "$(dirname "${BASH_SOURCE[0]}")/bluetooth_pan/install.sh"
@@ -119,5 +129,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/ssh_over_usb/install_armbian.sh"
 # Configure eduroam
 # shellcheck source=SCRIPTDIR/wpasupplicant/install_armbian.sh
 source "$(dirname "${BASH_SOURCE[0]}")/wpasupplicant/install_armbian.sh" --name "eduroam" --reset
+
 
 if [ "$ASK_TO_REBOOT" = true ]; then do_finish; fi
