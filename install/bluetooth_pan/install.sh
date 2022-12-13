@@ -15,8 +15,8 @@ BT_CONF_DNSMASQ="0"       # do not install dnsmasq (supported values: 0|1)
 BT_CONF_HIDDEN="0"        # system is permanently discoverable/pairable
                           # supported values: 0|1
 
-function bluez_noinputnooutput_bug_workaround() {    
-    local CONF_FILE="/home/pi/bt-agent-pins.conf"
+function bluez_noinputnooutput_bug_workaround() {
+    local CONF_FILE="/home/${SUDO_USER:-$USER}/bt-agent-pins.conf"
     readonly CONF_FILE
 
     echo "Implementing bluez NoInputNoOutput bug workaround..."
