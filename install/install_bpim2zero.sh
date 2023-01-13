@@ -110,12 +110,15 @@ function install_GrazerComputerClub_rpi_gpio_pymodule() {
     return_to_base_dir
 }
 
+
 apt update
 get_declared_args_python_version "$@"
 create_board_file
 configure_default_boot_overlay
 create_primary_serial_symbolic_link
-install_packages "python-is-python3 python3-serial"
+install_packages "dos2unix python-is-python3 python3-serial arduino-mk"
+install_avrdude_rpi_autoreset
+apply_avrdudeconf_missing_fix
 install_GrazerComputerClub_rpi_gpio_pymodule
 install_bontango_bpi_wiringpi2
 create_empty_crontab_template
