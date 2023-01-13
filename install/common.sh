@@ -85,6 +85,45 @@ function get_declared_args_python_version() {
     shift #get rid of the '--'
 }
 
+function apply_avrdudeconf_missing_fix() {
+    echo "Apply avrdude.conf missing fix - Add symbolic link"
+    # Weird avrdude.conf fix, where avrdude.conf is not detected in the right directory
+    mkdir /usr/share/arduino/hardware/tools/avr/etc
+    ln -s ../../avrdude.conf /usr/share/arduino/hardware/tools/avr/etc/avrdude.conf
+}
+
+function install_avrdude_rpi_autoreset() {
+    # install dependency
+    install_packages "strace"
+
+    local CLONE_DIR
+    CLONE_DIR="/home/${SUDO_USER:-$USER}/avrdude-rpi"
+
+    echo "Downloading and installing avrdude-rpi from hydrogeologger repo"
+    git clone "https://github.com/hydrogeologger/avrdude-rpi.git" "$CLONE_DIR"
+
+    # Change owner of directory to current user
+    chown -R "${SUDO_USER:-$USER}":"${SUDO_USER:-$USER}" "$CLONE_DIR"
+
+    # Go to
+    cd "$CLONE_DIR" || { echo "Unable to enter $CLONE_DIR"; return 1; }
+
+
+    cp autoreset /usr/bin
+    cp avrdude-autoreset /usr/bin
+
+    # If avrdude is not a symlink, then back it up
+    if [ -f "/usr/bin/avrdude" ] && ! [ -L "/usr/bin/avrdude" ]; then
+        mv /usr/bin/avrdude /usr/bin/avrdude-original
+    fi
+
+    # symlink avrdude to avrdude-autoreset
+    ln -s /usr/bin/avrdude-autoreset /usr/bin/avrdude
+
+    return_to_base_dir
+}
+
+
 function do_finish() {
     # if [ "$ASK_TO_REBOOT" = true ]; then
     #     if (whiptail --yesno "Would you like to reboot now?" 20 60 2); then
@@ -151,7 +190,12 @@ function add_report_ip_to_thingsboard_to_cron() {
     # ( crontab -u ${SUDO_USER:-$USER} -l | grep -v -F "$cronjob" ) | crontab -u ${SUDO_USER:-$USER} -
 }
 
-
+function add_pyduino_arduino_library_symlink() {
+    # Shouldn't be needed but if want to
+    # Adds a Arduino/libraries symlink to pyduino/arduino/libraries
+    mkdir "/home/${SUDO_USER:-$USER}/Arduino"
+    ln -s "/home/${SUDO_USER:-$USER}/pyduino/arduino/libraries" "/home/${SUDO_USER:-$USER}/Arduino/libraries"
+}
 
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} \;
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} +;
