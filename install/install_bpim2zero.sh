@@ -111,6 +111,20 @@ function install_GrazerComputerClub_rpi_gpio_pymodule() {
 }
 
 
+function apply_sudo_python_gpio_fix() {
+    if [ -f "/usr/bin/python" ]; then
+        echo "Apply python not having sudo access to GPIO fix."
+
+        # Create copy of python with different setuid permissions
+        cp "/usr/bin/python" "/usr/bin/python-as-root"
+        chmod 4775 "/usr/bin/python-as-root"
+
+        # Change shebang of avrdude-rpi autoreset file to use sudoed python
+        sed -i "1 s/python.*/python-as-root/" "/usr/bin/autoreset"
+    fi
+}
+
+
 apt update
 get_declared_args_python_version "$@"
 create_board_file
@@ -118,6 +132,7 @@ configure_default_boot_overlay
 create_primary_serial_symbolic_link
 install_packages "dos2unix python-is-python3 python3-serial arduino-mk"
 install_avrdude_rpi_autoreset
+apply_sudo_python_gpio_fix
 apply_avrdudeconf_missing_fix
 install_GrazerComputerClub_rpi_gpio_pymodule
 install_bontango_bpi_wiringpi2
