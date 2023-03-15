@@ -197,6 +197,28 @@ function add_pyduino_arduino_library_symlink() {
     ln -s "/home/${SUDO_USER:-$USER}/pyduino/arduino/libraries" "/home/${SUDO_USER:-$USER}/Arduino/libraries"
 }
 
+function create_thingsboard_ip_report_credentials() {
+    local -r credential_file="/home/${SUDO_USER:-$USER}/pyduino/credential/tb.sh"
+    local access_token
+    local access_token_repeat
+
+    if [ ! -f "$credential_file" ]; then
+        while true; do
+            # Get thingsboard Acess Token for IP address reporting
+            # turn off terminal echoing
+            read -r -p "Enter Access Token for IP Reporting: " access_token
+            read -r -p "Repeat Access Token: " access_token_repeat
+            echo # Turn it back on
+            [ "$access_token" = "$access_token_repeat" ] && break
+            echo "Please try again."
+        done
+
+        echo -e '#!/bin/bash\n' > "$credential_file"
+        echo "TB_DOMAIN=\"monitoring.uqgec.org:8080\"" >> "$credential_file"
+        echo "ACCESS_TOKEN=(\"$access_token\")" >> "$credential_file"
+    fi
+}
+
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} \;
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} +;
 # find ./install/ -type f -exec dos2unix {} \;
