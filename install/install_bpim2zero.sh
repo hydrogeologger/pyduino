@@ -136,6 +136,7 @@ apply_sudo_python_gpio_fix
 apply_avrdudeconf_missing_fix
 install_GrazerComputerClub_rpi_gpio_pymodule
 install_bontango_bpi_wiringpi2
+create_thingsboard_ip_report_credentials
 create_empty_crontab_template
 add_report_ip_to_thingsboard_to_cron
 # Enable bluetooth as PAN
