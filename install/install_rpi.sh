@@ -49,6 +49,7 @@ install_packages "arduino-mk"
 install_avrdude_rpi_autoreset
 apply_avrdudeconf_missing_fix
 install_wiringpi
+create_thingsboard_ip_report_credentials
 create_empty_crontab_template
 add_report_ip_to_thingsboard_to_cron
 # shellcheck source=/dev/null
