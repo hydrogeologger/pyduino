@@ -9,6 +9,7 @@ place new libraries in this location and include as
 #include <SDI12.h>
 #include <hydrogeolog.h>
 #include <Wire.h>
+#include <HardwareSerial.h>
 #include "timing.h"
 #include "common.h"
 #include "SDI12_function.h"
@@ -43,7 +44,7 @@ void setup()
 void print_debug(int debug_sw, int pw_pin, int no_measures, int no_dum, int interval)
 {
     if (debug_sw)
-    { 
+    {
         hydrogeolog1.print_string_delimiter_value("power", String(pw_pin));
         hydrogeolog1.print_string_delimiter_value("points", String(no_measures));
         hydrogeolog1.print_string_delimiter_value("dummies", String(no_dum));
@@ -139,18 +140,18 @@ boolean is_digi_out_pin(int pinName)
 }
 
 
-/* 
+/*
  * Function power_switch
  * Desc     Sets power pin or initiate PWM for compatible pins.
- * 
+ *
  * Note     Power_status of 255 will be treated as power_status = 1 for
  *          backwards compatibilityfor backwards compatibility
- * 
+ *
  * Input    pow_sw: power switch pin number
  *          pow_sw_status: digital state of power switch pin
  *          pwmValue: PWM value between 0 - 255
  * Output   none
- * 
+ *
  * Logic    PWM refers to any pwm value between 0 and 255 non inclusive
  *          power_status | PWM  | pin state
  *          1 or 255     |  0   | HIGH
@@ -159,10 +160,10 @@ boolean is_digi_out_pin(int pinName)
  *          0            |  0   | LOW
  *          1 or 255     | PWM  | PWM for PWM pins
  *          0            | PWM  | PWM for PWM pins
- * 
+ *
  * Usage    power_switch,46,power_switch_status,1
  *          power_switch,10,pwm_status,50
- * 
+ *
  * Prints   Prints "Invalid" to serial if incorrect power pin selected
  *          Will print invalid status if incorrect configuration
  */
@@ -170,12 +171,12 @@ void power_switch(int pow_sw, int pow_sw_status, int pwmValue)
 {
     if (pow_sw != INVALID)
     {
-        if (is_pwm_pin(pow_sw) || is_digi_out_pin(pow_sw)) {      
+        if (is_pwm_pin(pow_sw) || is_digi_out_pin(pow_sw)) {
             // pwm value protection as max is 255 for arduino
             if (pwmValue >= 255) {
                 pwmValue = 255;
             }
-            
+
             // For backward compatibility
             if (pow_sw_status == 255 || (pow_sw_status == LOW && pwmValue == 255)) {
                 pow_sw_status = HIGH;
@@ -248,57 +249,65 @@ void dhto2_measurement(int str_ay_size, int debug_sw, int dhto2_in_pin, int anai
     }
 }
 
-void luminox_reading(int str_ay_size, String lumino2, int serial_pin, int power_sw_pin, String str_ay[])
-{
-    //luminox sensor
-    //lumino2,M 2,power,42,serial,2
-    
-    /*if ((lumino2 != "") && (power_sw_pin != INVALID) && (serial_pin >= 1) && (serial_pin <= 3))
-    {
+void luminox_reading(int str_ay_size, int debug_sw, String command, int serial_pin, int power_sw_pin, String str_ay[]) {
+    // luminox sensor
+    // luminox,<command>,power,<powerPin>,serial,<serialPort>
+    // luminox,M 2,power,42,serial,2
+
+    if ((command != "") && (serial_pin != INVALID)) {
         int measure_time_interval_ms = hydrogeolog1.parse_argument("interval_mm", 1000, str_ay_size, str_ay);
-        String input_linebreak = hydrogeolog1.parse_argument_string("inp_linebreak", "\r\n", str_ay_size, str_ay);
-        hydrogeolog1.print_string_delimiter_value("lumino2_cmd", lumino2);
-        hydrogeolog1.print_string_delimiter_value("pow", String(power_sw_pin));
-        hydrogeolog1.print_string_delimiter_value("serial", String(serial_pin));
-        hydrogeolog1.print_string_delimiter_value("delay", String(measure_time_interval_ms));
         // needs to be at leaset 1000 ms
         measure_time_interval_ms = measure_time_interval_ms < 1000 ? 1000 : measure_time_interval_ms;
-        digitalWrite(power_sw_pin, HIGH);
-        delay(1000);
-        HardwareSerial mySerial = Serial;
-        switch (serial_pin)
-        {
-        case 1:
-            mySerial = Serial1;
-            break;
-        case 2:
-            mySerial = Serial2;
-            break;
-        case 3:
-            mySerial = Serial3;
-            break;
-        default:
-            return;
+        // String input_linebreak = hydrogeolog1.parse_argument_string("inp_linebreak", "\r\n", str_ay_size, str_ay);
+        hydrogeolog1.print_string_delimiter_value("luminox_cmd", command);
+        hydrogeolog1.print_string_delimiter_value("pow", String(power_sw_pin));
+        hydrogeolog1.print_string_delimiter_value("serial", String(serial_pin));
+        if (debug_sw == 1) {
+            hydrogeolog1.print_string_delimiter_value("delay", String(measure_time_interval_ms));
         }
-        mySerial.print("M 1\r\n");
+
+        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, HIGH);
+        HardwareSerial *mySerial;
+        switch (serial_pin) {
+            case 1:
+                mySerial = &Serial1;
+                break;
+            case 2:
+                mySerial = &Serial2;
+                break;
+            case 3:
+                mySerial = &Serial3;
+                break;
+            default:
+                Serial.println("Invalid serial port");
+                return;
+        }
+        mySerial->begin(9600);
+        mySerial->setTimeout(1000); // Set timeout for readStringUntil()
+        delay(800); // Wait for serial to initialize and stabilize
+
+        mySerial->print("M 1\r\n"); // Send command to initiate polling mode
         delay(measure_time_interval_ms);
-        String aa1 = mySerial.readStringUntil('\n');
-        Serial.print(aa1);
-        mySerial.print("M 1\r\n");
-        delay(measure_time_interval_ms);
-        aa1 = mySerial.readStringUntil('\n');
-        Serial.print(aa1);
-        Serial.print("result,");
-        mySerial.print(lumino2);
-        mySerial.print("\r\n");
-        delay(measure_time_interval_ms);
-        String aa = mySerial.readStringUntil('\n');
-        Serial.print(aa);
-        delay(measure_time_interval_ms);
-        aa = mySerial.readStringUntil('\n');
-        Serial.println(aa);
-        digitalWrite(power_sw_pin, LOW);
-    } */
+        // Empty rx buffer
+        while (mySerial->available()) {
+            mySerial->read();
+        }
+        mySerial->print(command);
+        mySerial->print("\r\n");
+        // delay(measure_time_interval_ms);
+        String luminoReply = mySerial->readStringUntil('\n');
+
+        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+        mySerial->end();
+        luminoReply.trim();
+        if (luminoReply != command) {
+            Serial.print("result");
+            Serial.print(DELIMITER);
+            Serial.println(luminoReply);
+        } else {
+            Serial.println("No Response!");
+        }
+    }
 }
 
 void ds18b20_search(int ds18b20_search_pin, int power_sw_pin)
@@ -425,7 +434,7 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
             Serial.println();
             digitalWrite(power_sw_pin,LOW);
 
-            }  //fredlund_suction_ds18b20.length else 
+            }  //fredlund_suction_ds18b20.length else
     }  //((fredlund_suction_ds18b20 != "") && (power_sw_pin != INVALID))
 } // fredlund_measurement
 
@@ -470,16 +479,16 @@ void read_i2c_sensor(String type, int number_of_dummies, int number_of_measureme
 
 
 
-/* 
+/*
  * Function MultiplexerReset
  * Desc     Resets 9548 i2c multiplexer by disable twi and toggle multiplexer power
- * 
+ *
  * Input    Time interval for power off in milliseconds
  * Output   none
- * 
+ *
  * Usage    9548_reset
  *          9548_reset,400
- * 
+ *
  * Prints   Time duration for power off in milliseconds
  */
 void multiplexer_i2c_reset(int delayMillisValue) {
@@ -544,7 +553,7 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
                       int power_sw_pin, String str_ay[])
 {
     /*
-    use tca9548 i2c multiplexer to obtain results from ms5803 pressure transducer 
+    use tca9548 i2c multiplexer to obtain results from ms5803 pressure transducer
     9548,2,type,5803,debug,1
     9548,2,type,sht31,power,34,debug,1
     */
@@ -590,7 +599,7 @@ void multiplexer_read(int str_ay_size, int debug_sw, String i2c_type, int tca954
 
 void rc_swtich(int str_ay_size, int debug_sw, String sw_code, int rc_sw, String str_ay[])
 {
-    /*rcswitch for arlec RC213 sockets 
+    /*rcswitch for arlec RC213 sockets
     rc_sw,5,code,011101101101100000001111100111100,pulse_len,306
     */
     if ((rc_sw != INVALID) && (sw_code != ""))
@@ -641,7 +650,7 @@ void sht75_measurement(int str_ay_size, int debug_sw, int sht75_data, int sht75_
 
 void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay[]) {
     int sdi12_pin_input = hydrogeolog1.parse_argument("SDI-12", INVALID, str_ay_size, str_ay);
-    
+
     if (sdi12_pin_input == INVALID) {
         return;
     }
@@ -655,7 +664,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
         sdi12_pin = sdi12_pin_input;
         hydrogeolog1.print_string_delimiter_value("SDI-12", String(sdi12_pin));
     }
-    
+
     if (!sdi12_check_pin(sdi12_pin)) {
         Serial.println("Invalid Port");
         return;
@@ -724,7 +733,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     }
 
     sdi12_end();
-    
+
     if ((power_sw_pin != INVALID) && (power_off >= 1)) {
         digitalWrite(power_sw_pin, LOW);
     }
@@ -736,7 +745,7 @@ void check_serial(String content)
     /*
      if input abc in serial, arduino will return abc
     */
-  
+
 {
     if (content == "abc")
     {
@@ -788,8 +797,8 @@ void loop()
                           hydrogeolog1.parse_argument("anain", INVALID, str_ay_size, str_ay),
                           power_sw_pin, str_ay);
 
-        luminox_reading(str_ay_size,
-                        hydrogeolog1.parse_argument_string("lumino2", "", str_ay_size, str_ay),
+        luminox_reading(str_ay_size, debug_sw,
+                        hydrogeolog1.parse_argument_string("luminox", "", str_ay_size, str_ay),
                         hydrogeolog1.parse_argument("serial", INVALID, str_ay_size, str_ay),
                         power_sw_pin, str_ay);
 
