@@ -29,10 +29,10 @@ else:
 
 #------------------- Constants and Ports Information---------------------------
 HARDWARE_NAME = "Datalogger V3"
-SERIAL_PORT = '/dev/ttyS0' # datalogger version 2 uses ttyS0
+SERIAL_PORT = '/dev/serial0' # Alias for default serial device, ttyS0/ttyAM0 or ttyS3
 SOFT_SERIAL_PORT = '/dev/ttySOFT0' # Use primary uart
 SERIAL_9600_BAUD = 9600
-SERIAL_4800_BAUD = 4800
+SERIAL_2400_BAUD = 2400
 SERIAL_115200_BAUD = 115200
 SERIAL_TIMEOUT_DEFAULT = 10 # Serial timeout in seconds
 RPI_RESET_PIN = 27  #GPIO/BCM pin number to reset arduino
@@ -136,9 +136,9 @@ def perform_handshake(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
+    arduino_serial.write(message_out.encode())
     time.sleep(1)
-    message_received = arduino_serial.readline()
+    message_received = arduino_serial.readline().decode()
     if message_received == "abc\r\n":
         print("Success Handshake: Received ABC response from Arduino")
     else:
@@ -162,9 +162,9 @@ def reset_rpi_by_arduino(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
+    arduino_serial.write(message_out.encode())
     time.sleep(1)
-    message_received = arduino_serial.readline()
+    message_received = arduino_serial.readline().decode()
     print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
 
@@ -176,8 +176,8 @@ def onboard_dht22_test(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
-    message_received = arduino_serial.readline()
+    arduino_serial.write(message_out.encode())
+    message_received = arduino_serial.readline().decode()
     current_read = message_received.split(',')[0:-1]
     print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
     print("Temp: " + current_read[-2])
@@ -352,11 +352,11 @@ def sdi12_sensor_test(arduino_serial):
         if _DEBUG:
             print("DEBUG: " + message_out)
         arduino_serial.flushInput()
-        arduino_serial.write(message_out)
+        arduino_serial.write(message_out.encode())
         # SDI-12 takes roughly 13 seconds to scan for all SDI12 devices
         time.sleep(4) # Pad defualt 10sec timeout with 4sec
         while True:
-            message_received = arduino_serial.read()
+            message_received = arduino_serial.read().decode()
             if message_received == "":
                 break
             sys.stdout.write(FONT_BOLD_COLOUR_YELLOW + message_received + FONT_COLOUR_DEFAULT)
@@ -406,8 +406,8 @@ def arduino_switches_test(arduino_serial):
             if _DEBUG:
                 print("DEBUG: " + message_out)
             arduino_serial.flushInput()
-            arduino_serial.write(message_out)
-            message_received = arduino_serial.readline()
+            arduino_serial.write(message_out.encode())
+            message_received = arduino_serial.readline().decode()
             print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
             # Duration for switch to stay on
@@ -417,8 +417,8 @@ def arduino_switches_test(arduino_serial):
             if _DEBUG:
                 print("DEBUG: " + message_out)
             arduino_serial.flushInput()
-            arduino_serial.write(message_out)
-            message_received = arduino_serial.readline()
+            arduino_serial.write(message_out.encode())
+            message_received = arduino_serial.readline().decode()
             print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
             index = index + 1
@@ -468,9 +468,9 @@ def arduino_analog_test(arduino_serial):
             if _DEBUG:
                 print("DEBUG: " + message_out)
             arduino_serial.flushInput()
-            arduino_serial.write(message_out)
+            arduino_serial.write(message_out.encode())
             time.sleep(2)
-            message_received = arduino_serial.readline()
+            message_received = arduino_serial.readline().decode()
             print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
             index = index + 1
@@ -522,9 +522,9 @@ def vsense_adc_check(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
+    arduino_serial.write(message_out.encode())
     time.sleep(2)
-    message_received = arduino_serial.readline()
+    message_received = arduino_serial.readline().decode()
     print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
     if r2 > 0:
         array_received = message_received.split(',')[0:-1]
@@ -538,9 +538,9 @@ def check_arduino_runtime_since_last_comm(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
+    arduino_serial.write(message_out.encode())
     time.sleep(1)
-    message_received = arduino_serial.readline()
+    message_received = arduino_serial.readline().decode()
     print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
 
 
@@ -565,7 +565,7 @@ def scan_i2c_multiplexer(arduino_serial):
         message_out = "power_switch,{0},power_switch_status,1".format(power_pin)
         if _DEBUG:
             print("DEBUG: " + message_out)
-        arduino_serial.write(message_out)
+        arduino_serial.write(message_out.encode())
         time.sleep(1)
         arduino_serial.flushInput()
 
@@ -573,10 +573,10 @@ def scan_i2c_multiplexer(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
+    arduino_serial.write(message_out.encode())
     time.sleep(1)
     while arduino_serial.inWaiting() > 0:
-        message_received = arduino_serial.readline()
+        message_received = arduino_serial.readline().decode()
         print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
         time.sleep(0.1)
 
@@ -584,7 +584,7 @@ def scan_i2c_multiplexer(arduino_serial):
         message_out = "power_switch,{0},power_switch_status,0".format(power_pin)
         if _DEBUG:
             print("DEBUG: " + message_out)
-        arduino_serial.write(message_out)
+        arduino_serial.write(message_out.encode())
         time.sleep(1)
         arduino_serial.flushInput()
 
@@ -623,10 +623,10 @@ def scan_for_ds18b20_suction(arduino_serial):
     if _DEBUG:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
-    arduino_serial.write(message_out)
+    arduino_serial.write(message_out.encode())
     time.sleep(1)
     while arduino_serial.inWaiting() > 0:
-        message_received = arduino_serial.readline()
+        message_received = arduino_serial.readline().decode()
         current_read = message_received.split(',')[0:-2]
         print(FONT_BOLD_COLOUR_YELLOW + message_received.rstrip() + FONT_COLOUR_DEFAULT)
         rom_addr_index = index_containing_substring(current_read, "ROM = ")
@@ -652,7 +652,7 @@ def serial_session(arduino_serial):
             arduino_serial.timout = SERIAL_TIMEOUT_DEFAULT
             return
         arduino_serial.write((user_input + "\r\n").encode())
-        # message_received = arduino_serial.readline()
+        # message_received = arduino_serial.readline().decode()
         # while arduino_serial.in_waiting() > 0:
         #     msg_byte = arduino_serial.read(1)
         #     if (msg_byte == '\r' or msg_byte == '\n'):
@@ -663,7 +663,7 @@ def serial_session(arduino_serial):
 
         # if message_received != "":
         while True:
-            message_received = arduino_serial.read()
+            message_received = arduino_serial.read().decode()
             if message_received == "":
                 break
             sys.stdout.write(FONT_BOLD_COLOUR_YELLOW + message_received + FONT_COLOUR_DEFAULT)
@@ -785,49 +785,82 @@ def suction_util_callback_loop(arduino_serial):
         general_callback(arduino_serial, user_option)
 
 
-#---------------------------- Main Loop ----------------------------------------
-def main():
-    arduino_serial = None
-    try:
-        print("\r\nSelect Serial Baudrate:")
-        print("{0:>2s}:  {1} ({2})".format("1", SERIAL_9600_BAUD, "Hardware"))
-        print("{0:>2s}:  {1} ({2})".format("2", SERIAL_4800_BAUD, "SoftSerial/Hardware"))
-        print("{0:>2s}:  {1} ({2})".format("3", "User Defined", "Hardware"))
-        serial_port = SERIAL_PORT
+def serial_port_and_baudrate_selection():
+    print("\r\nSelect Serial Baudrate:")
+    print("{0:>2s}:  {1} ({2})".format("1", SERIAL_9600_BAUD, "Hardware"))
+    print("{0:>2s}:  {1} ({2})".format("2", SERIAL_2400_BAUD, "SoftSerial/Hardware"))
+    print("{0:>2s}:  {1} ({2})".format("3", "User Defined", "SoftSerial/Hardware/Other"))
+    serial_port = SERIAL_PORT
+    user_option = input("\r\nSelection (Default Enter = 1): ")
+    if is_escape(user_option):
+        exit()
+    elif user_option == "2":
+        serial_baud = SERIAL_2400_BAUD
+        print("\r\nSelect Serial Port:")
+        print("{0:>2s}:  {1} ({2})".format("1", SERIAL_PORT, "Hardware"))
+        print("{0:>2s}:  {1} ({2})".format("2", SOFT_SERIAL_PORT, "SoftSerial"))
         user_option = input("\r\nSelection (Default Enter = 1): ")
         if is_escape(user_option):
             exit()
         elif user_option == "2":
-            serial_baud = SERIAL_4800_BAUD
-            print("\r\nSelect Serial Port:")
-            print("{0:>2s}:  {1} ({2})".format("1", SERIAL_PORT, "Hardware"))
-            print("{0:>2s}:  {1} ({2})".format("2", SOFT_SERIAL_PORT, "SoftSerial"))
-            user_option = input("\r\nSelection (Default Enter = 1): ")
-            if is_escape(user_option):
-                exit()
-            elif user_option == "2":
-                serial_port = SOFT_SERIAL_PORT
-            else:
-                serial_port = SERIAL_PORT
-        elif user_option == "3":
-            try:
-                serial_baud = input("Enter baudrate (Default = {0}): ".format(SERIAL_115200_BAUD))
-                if is_escape(serial_baud):
-                    return
-                else:
-                    serial_baud = int(serial_baud)
-                if serial_baud <= 0:
-                    serial_baud = SERIAL_115200_BAUD
-            except ValueError:
-                serial_baud = SERIAL_115200_BAUD
+            serial_port = SOFT_SERIAL_PORT
         else:
-            serial_baud = SERIAL_9600_BAUD
+            serial_port = SERIAL_PORT
+    elif user_option == "3":
+        print("\r\nSelect Serial Port:")
+        print("{0:>2s}:  {1} ({2})".format("1", SERIAL_PORT, "Hardware"))
+        print("{0:>2s}:  {1} ({2})".format("2", SOFT_SERIAL_PORT, "SoftSerial"))
+        print("{0:>2s}:  {1} ({2})".format("3", "Other", "User Defined"))
+        user_option = input("\r\nSelection (Default Enter = 1): ")
+        if is_escape(user_option):
+            exit()
+        elif user_option == "2":
+            serial_port = SOFT_SERIAL_PORT
+        elif user_option == "3":
+            serial_port = input("Enter Serial Port (Example = {0}): ".format("/dev/ttyS0")).strip()
+            if is_escape(serial_port):
+                return
+        else:
+            serial_port = SERIAL_PORT
+        try:
+            serial_baud = input("Enter baudrate (Default = {0}): ".format(SERIAL_115200_BAUD))
+            if is_escape(serial_baud):
+                return
+            else:
+                serial_baud = int(serial_baud)
+            if serial_baud <= 0:
+                serial_baud = SERIAL_115200_BAUD
+        except ValueError:
+            serial_baud = SERIAL_115200_BAUD
+    else:
+        serial_baud = SERIAL_9600_BAUD
 
-        print("\r\nStarting {3}{0}{2} serial @ {3}{1}{2} baud..." \
-                .format(serial_port, serial_baud, \
-                FONT_COLOUR_DEFAULT, FONT_BOLD_COLOUR_YELLOW))
-        arduino_serial = serial.Serial(port=serial_port, baudrate=serial_baud, \
-                timeout=SERIAL_TIMEOUT_DEFAULT)
+    return serial_port, serial_baud
+
+
+
+#---------------------------- Main Loop ----------------------------------------
+def main():
+    arduino_serial = None
+    try:
+        while True:
+            serial_port, serial_baud = serial_port_and_baudrate_selection()
+
+            print("\r\nStarting {3}{0}{2} serial @ {3}{1}{2} baud..." \
+                    .format(serial_port, serial_baud, \
+                    FONT_COLOUR_DEFAULT, FONT_BOLD_COLOUR_YELLOW))
+            try:
+                arduino_serial = serial.Serial(port=serial_port, baudrate=serial_baud, \
+                        timeout=SERIAL_TIMEOUT_DEFAULT)
+            except serial.SerialException:
+                print("Serial port not found!")
+                input("Press the <ENTER> key to try again...")
+            except ValueError:
+                print("Invalid Serial Port Baudrate!")
+                input("Press the <ENTER> key to try again...")
+            else:
+                break
+
         time.sleep(1)
 
         display_options_menu(get_main_options_list())

@@ -3,7 +3,8 @@
 # make upload 2400  -   upload over hardware serial (modified bootloader)
 # make softupload   -   for uploading over software serial (modified bootloader)
 
-BOARD_TAG = mega2560
+BOARD_TAG = mega
+BOARD_SUB = atmega2560
 USER_LIB_PATH = /home/$(USER)/pyduino/arduino/libraries/
 ARDUINO_LIBS = SDI12 hydrogeolog SparkFun_MS5803_I2C Sensirion OneWire dht DallasTemperature Adafruit_SI1145_Library Wire rc-switch Adafruit_SHT31
 
@@ -16,8 +17,9 @@ ifndef MONITOR_PORT
         export MONITOR_PORT = /dev/ttySOFT0
         export AVRDUDE_ARD_BAUDRATE = 2400
     else
-        # Is hardware serial upload
-        export MONITOR_PORT = /dev/ttyS0
+        # Is hardware serial upload, serial0 reference to primary UART
+        # RPI: ttyS0, BPI: ttyS3
+        export MONITOR_PORT = /dev/serial0
         ifneq ($(filter 2400, $(MAKECMDGOALS)),)
             # If modified bootloader, modify upload baudrate
             export AVRDUDE_ARD_BAUDRATE = 2400
