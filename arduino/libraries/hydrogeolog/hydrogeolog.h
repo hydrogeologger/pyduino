@@ -21,6 +21,10 @@ extern "C"
 //#include "RCSwitch.h"
 #include <RCSwitch.h>
 
+#define HYDROGEOLOG_ERR_INVALID -1
+#define HYDROGEOLOG_ERR_EMPTY_INT -2
+
+
 class hydrogeolog
 {
   public:
@@ -29,7 +33,7 @@ class hydrogeolog
     //void print_str_ay(int number_opts);
     int split_strings(String inp2, String str_ay2[20]);
     int strcmpi(String str_source, int number_opts, String str_ay2[20]);
-    int parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20]);
+    int parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20], bool allow_empty = false);
     String parse_argument_string(String str_source, String default_values, int number_opts, String str_ay2[20]);
     char parse_argument_char(String str_source, char default_values, int number_opts, String str_ay2[20]);
     void print_str_ay(int number_opts, String str_ay2[20]);

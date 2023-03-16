@@ -1,0 +1,4 @@
+# Ignore VSCode IDE specific files
+**/.vscode/settings.json
+**/.vscode/arduino.json
+**/.vscode/*.log
