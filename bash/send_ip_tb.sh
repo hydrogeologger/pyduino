@@ -1,5 +1,5 @@
 #!/bin/bash
-sleep 20
+sleep 30
 # ADD ACCESS_TOKEN and TB_DOMAIN variables in /pyduino/credential/tb.sh
 machine_name=$(cat /etc/hostname)
 ip_address=$(hostname -I|xargs)
