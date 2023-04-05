@@ -599,8 +599,7 @@ def scan_for_ds18b20_suction(arduino_serial):
             suction_pin = input("Suction Pin, 'x' to escape: ")
             if is_escape(suction_pin):
                 return
-            elif (is_arduino_digital_pin(suction_pin) or is_arduino_sdi12(suction_pin) or \
-                    is_arduino_analog_pin(suction_pin)):
+            elif (is_arduino_digital_pin(suction_pin) or is_arduino_analog_pin(suction_pin)):
                 break
             else:
                 continue
@@ -613,7 +612,44 @@ def scan_for_ds18b20_suction(arduino_serial):
             power_pin = input("Power Pin, 'x' to escape: ")
             if is_escape(power_pin):
                 return
+            elif ((power_pin == "") or (power_pin == '-1')):
+                power_pin = -1
+                break
             elif is_arduino_switch(power_pin):
+                break
+            else:
+                continue
+        except ValueError:
+            # Prompt for pin again if incorrect input
+            continue
+
+    while True: # Number of samples per heat/cool cycle
+        try:
+            number_samples = input("Number of samples per heat/cool cycle, (Default Enter = 1): ")
+            if is_escape(number_samples):
+                return
+            elif (number_samples == ""):
+                number_samples = 1
+                break
+            number_samples = int(number_samples)
+            if number_samples >= 0:
+                break
+            else:
+                continue
+        except ValueError:
+            # Prompt for pin again if incorrect input
+            continue
+
+    while True: # Heating Interval
+        try:
+            sample_interval = input("Sample Interval in milliseconds, (Default Enter = 0): ")
+            if is_escape(sample_interval):
+                return
+            elif (sample_interval == ""):
+                sample_interval = 0
+                break
+            sample_interval = int(sample_interval)
+            if sample_interval >= 0:
                 break
             else:
                 continue
@@ -629,6 +665,7 @@ def scan_for_ds18b20_suction(arduino_serial):
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
     time.sleep(1)
+    suction_sensors = []
     while arduino_serial.inWaiting() > 0:
         message_received = arduino_serial.readline().decode()
         current_read = message_received.split(',')[0:-2]
@@ -640,10 +677,62 @@ def scan_for_ds18b20_suction(arduino_serial):
             for rom in rom_list:
                 rom_address += "{:0>2}".format(rom)
             if len(rom_address) == 16:
+                suction_sensors.append(rom_address)
                 print("Rom Address: {}".format(rom_address))
             else:
                 print("Rom Address: Failed to decipher")
         time.sleep(0.5)
+
+    # Allow testing of individual suction sensors
+    while len(suction_sensors) > 0: # Suction Sensor Index
+        try:
+            suction_index = input("Suction ROM Index, 'x' to escape: ")
+            if is_escape(suction_index):
+                return
+            suction_index = int(suction_index)
+            if (suction_index >= 0 and suction_index < len(suction_sensors)):
+                pass
+            else:
+                continue
+        except ValueError:
+            # Prompt for pin again if incorrect input
+            continue
+
+        while True: # Heater Pin
+            try:
+                heater_pin = input("Heater Pin, 'x' to escape: ")
+                if is_escape(heater_pin):
+                    return
+                elif ((heater_pin == "") or (heater_pin == '-1')):
+                    heater_pin = -1
+                    break
+                elif is_arduino_switch(heater_pin) and heater_pin != power_pin:
+                    break
+                else:
+                    continue
+            except ValueError:
+                # Prompt for pin again if incorrect input
+                continue
+        message_out = "fred,{0},dgin,{1},snpw,{2},htpw,{3},itv,{4},otno,{5}" \
+                    .format(suction_sensors[suction_index], suction_pin, power_pin, heater_pin, sample_interval, number_samples)
+        if _DEBUG_REQUEST:
+            message_out += ",debug,1"
+        if _DEBUG:
+            print("DEBUG: " + message_out)
+        arduino_serial.flushInput()
+        arduino_serial.write(message_out.encode())
+        time.sleep(2)
+        arduino_serial.timout = 2 + (sample_interval/1000)
+        while True:
+            message_received = arduino_serial.read().decode()
+            sys.stdout.write(FONT_BOLD_COLOUR_YELLOW + message_received + FONT_COLOUR_DEFAULT)
+            sys.stdout.flush()
+            if message_received == "\n" or message_received == "":
+                break
+        arduino_serial.timout = SERIAL_TIMEOUT_DEFAULT
+        if suction_index == len(suction_sensors) - 1:
+            break
+
 
 
 def serial_session(arduino_serial):
