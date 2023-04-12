@@ -69,7 +69,6 @@ function install_bontango_bpi_wiringpi2() {
 
 
 function install_rpi_gpio() {
-    install_packages "python3-dev"
     # sudo CFLAGS="-fcommon" python3 setup.py install
     local F_CFLAG
     local gcc_version
@@ -79,14 +78,17 @@ function install_rpi_gpio() {
         F_CFLAG="CFLAGS=-fcommon"
     fi
     if [ "$F_PYTHON2" ]; then
+        install_packages "python2-dev"
         eval $F_CFLAG python2 setup.py install
         eval $F_CFLAG python2 setup.py install
     fi
     if [ "$F_PYTHON3" ]; then
+        install_packages "python3-dev"
         eval $F_CFLAG python3 setup.py install
         eval $F_CFLAG python3 setup.py install
     fi
     if [ ! "$F_PYTHON2" ] && [ ! "$F_PYTHON3" ]; then
+        install_packages "python-dev"
         eval $F_CFLAG python setup.py install
         eval $F_CFLAG python setup.py install
     fi
@@ -124,17 +126,40 @@ function apply_sudo_python_gpio_fix() {
     fi
 }
 
-
+if ! get_declared_args_python_version "$@"; then
+    show_no_python_version_declared_message
+    exit 1
+fi
 apt update
-get_declared_args_python_version "$@"
 create_board_file
 configure_default_boot_overlay
 create_primary_serial_symbolic_link
-install_packages "dos2unix python-is-python3 python3-serial arduino-mk"
+install_packages "dos2unix"
+install_packages "vim git tmux autossh tightvncserver"
+install_packages "mplayer"
+if [ "$F_PYTHON2" ]; then
+    install_packages "python-is-python2 python2-pip"
+    install_packages "python-serial"
+    install_packages "python2-gpiozero"
+    pip install paho-mqtt
+fi
+if [ "$F_PYTHON3" ]; then
+    install_packages "python-is-python3 python3-pip"
+    install_packages "python3-serial"
+    install_packages "python3-gpiozero"
+    pip3 install paho-mqtt
+fi
+install_packages "arduino-mk"
 install_avrdude_rpi_autoreset
 apply_sudo_python_gpio_fix
 apply_avrdudeconf_missing_fix
 install_GrazerComputerClub_rpi_gpio_pymodule
+if [ "$F_PYTHON2" ]; then
+    install_packages "python2-gpiozero"
+fi
+if [ "$F_PYTHON3" ]; then
+    install_packages "python3-gpiozero"
+fi
 install_bontango_bpi_wiringpi2
 create_thingsboard_ip_report_credentials
 create_empty_crontab_template
