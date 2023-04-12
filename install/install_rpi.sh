@@ -36,10 +36,26 @@ function install_wiringpi() {
 }
 
 
+if ! get_declared_args_python_version "$@"; then
+    show_no_python_version_declared_message
+    exit 1
+fi
 apt update
-get_declared_args_python_version "$@"
 #TODO: configure_default_boot_overlay
-install_packages "vim git python-is-python3 python3-pip python3-serial"
+install_packages "vim git tmux autossh tightvncserver"
+install_packages "mplayer"
+if [ "$F_PYTHON2" ]; then
+    install_packages "python-is-python2 python2-pip"
+    install_packages "python-serial"
+    # install_packages "python-rpi.gpio python2-gpiozero"
+    pip install paho-mqtt
+fi
+if [ "$F_PYTHON3" ]; then
+    install_packages "python-is-python3 python3-pip"
+    install_packages "python3-serial"
+    # install_packages "python3-rpi.gpio python3-gpiozero"
+    pip3 install paho-mqtt
+fi
 # Fix arduino-mk Java Depency, Java11 only supported on ARM 7+, install java8 for ARM v6
 if grep -q "^model name\s*:\s*ARMv6" "/proc/cpuinfo"; then
     # for RPI Zero W
