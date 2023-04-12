@@ -55,9 +55,17 @@ function transfer_conf_files_from_path() {
     done
 }
 
+function show_no_python_version_declared_message() {
+    echo "No python version declared!"
+    echo "Acceptable Python Version Options:
+    Python 2: -py2 | --py2
+    Python 3: -py3 | --py3"
+}
+
 function get_declared_args_python_version() {
     local PARSED_ARGUMENTS
-    PARSED_ARGUMENTS=$(getopt -a -n install_sinovoip_rpi_gpio_pymodule -o '' --long py2,py3 -- "$@")
+    PARSED_ARGUMENTS=$(getopt --name get_declared_args_python_version \
+            --alternative --options '' --longoptions py2,py3 -- "$@")
     local valid_arguments=$?
     if [ $valid_arguments != 0 ]; then
         echo "Incorrect python version: $1 - [ -p2 | --py2 | -py3 | --py3 ]."
@@ -65,7 +73,13 @@ function get_declared_args_python_version() {
     fi
 
     # echo "PARSED_ARGUMENTS is $PARSED_ARGUMENTS"
+    # Reorder parameters
     eval set -- "$PARSED_ARGUMENTS"
+
+    # Return error when no option was given
+    if test "X$1" == "X--"; then
+        return 1
+    fi
 
     while test "X$1" != "X--"; do
         case "$1" in
@@ -77,7 +91,6 @@ function get_declared_args_python_version() {
             # which we checked as VALID_ARGUMENTS when getopt was called...
             *)
                 echo "Unexpected option: $1 - this should not happen."
-                usage
                 ;;
             esac
         shift
