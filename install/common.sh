@@ -232,6 +232,43 @@ function create_thingsboard_ip_report_credentials() {
     fi
 }
 
+function configure_vimrc() {
+    local -r VIMRC_FILE="/home/${SUDO_USER:-$USER}/.vimrc"
+    local -r SOURCE_LINE="source \$VIMRUNTIME/defaults.vim"
+    local -r DISABLE_MOUSE_Title="\" Disable mouse"
+    local -r DISABLE_MOUSE_LINE="set mouse-=a"
+
+    echo "Configuring \"$VIMRC_FILE\" ....."
+    if [ ! -f "$VIMRC_FILE" ]; then
+        # Create .vimrc
+        echo > "$VIMRC_FILE"
+        # echo -e "$SOURCE_LINE\n" > "$VIMRC_FILE"
+        # echo -e "$DISABLE_MOUSE_Title\n$DISABLE_MOUSE_LINE" >> "$VIMRC_FILE"
+
+        chown "${SUDO_USER:-$USER}":"${SUDO_USER:-$USER}" "$VIMRC_FILE"
+        chmod 600 "$VIMRC_FILE"
+    fi
+
+    # Start Editting .vimrc
+
+    # Add default .vimrc source if not found
+    if ! grep -q "$SOURCE_LINE" "$VIMRC_FILE"; then
+        sed -i "1 i\\$SOURCE_LINE" "$VIMRC_FILE"
+    fi
+
+    # Disable the mouse
+    sed -i "s/^set\s*mouse\(-=|=\)\?\s*$/$DISABLE_MOUSE_LINE/" "$VIMRC_FILE"
+    if ! grep -q "^$DISABLE_MOUSE_LINE$" "$VIMRC_FILE"; then
+        echo -e "$DISABLE_MOUSE_Title\n$DISABLE_MOUSE_LINE" >> "$VIMRC_FILE"
+    fi
+
+    # Enable Line Number
+    sed -i "s/^set\s*number\s*$/set number/" "$VIMRC_FILE"
+    if ! grep -q "^set number$" "$VIMRC_FILE"; then
+        echo -e "\" Enable Line Number\nset number" >> "$VIMRC_FILE"
+    fi
+}
+
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} \;
 # find ./install/ -type f -iname "*.sh" -exec chmod +x {} +;
 # find ./install/ -type f -exec dos2unix {} \;
