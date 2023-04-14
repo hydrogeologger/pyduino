@@ -42,7 +42,9 @@ if ! get_declared_args_python_version "$@"; then
 fi
 apt update
 #TODO: configure_default_boot_overlay
-install_packages "vim git tmux autossh tightvncserver"
+install_packages "vim"
+configure_vimrc
+install_packages "git tmux autossh tightvncserver"
 install_packages "mplayer"
 if [ "$F_PYTHON2" ]; then
     install_packages "python-is-python2 python2-pip"

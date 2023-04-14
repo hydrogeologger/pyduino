@@ -134,19 +134,19 @@ apt update
 create_board_file
 configure_default_boot_overlay
 create_primary_serial_symbolic_link
+install_packages "vim"
+configure_vimrc
 install_packages "dos2unix"
-install_packages "vim git tmux autossh tightvncserver"
+install_packages "git tmux autossh tightvncserver"
 install_packages "mplayer"
 if [ "$F_PYTHON2" ]; then
     install_packages "python-is-python2 python2-pip"
     install_packages "python-serial"
-    install_packages "python2-gpiozero"
     pip install paho-mqtt
 fi
 if [ "$F_PYTHON3" ]; then
     install_packages "python-is-python3 python3-pip"
     install_packages "python3-serial"
-    install_packages "python3-gpiozero"
     pip3 install paho-mqtt
 fi
 install_packages "arduino-mk"
@@ -154,6 +154,7 @@ install_avrdude_rpi_autoreset
 apply_sudo_python_gpio_fix
 apply_avrdudeconf_missing_fix
 install_GrazerComputerClub_rpi_gpio_pymodule
+# Install gpiozero after Rpi.GPIO
 if [ "$F_PYTHON2" ]; then
     install_packages "python2-gpiozero"
 fi
