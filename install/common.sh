@@ -211,6 +211,15 @@ function add_report_ip_to_thingsboard_to_cron() {
     # ( crontab -u ${SUDO_USER:-$USER} -l | grep -v -F "$cronjob" ) | crontab -u ${SUDO_USER:-$USER} -
 }
 
+function setup_startup_systemd_service() {
+    transfer_conf_files_from_path "$(dirname "${BASH_SOURCE[0]}")/files"
+
+    # Setup Report IP to thingsboard systemd service
+    chmod 644 /etc/systemd/system/report-ip-to-thingsboard.service
+    chown root:root /etc/systemd/system/report-ip-to-thingsboard.service
+    sed -i -e "s/^User=.*/User=${SUDO_USER:-$USER}/" /etc/systemd/system/report-ip-to-thingsboard.service
+}
+
 function add_pyduino_arduino_library_symlink() {
     # Shouldn't be needed but if want to
     # Adds a Arduino/libraries symlink to pyduino/arduino/libraries
