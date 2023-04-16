@@ -69,7 +69,9 @@ apply_avrdudeconf_missing_fix
 install_wiringpi
 create_thingsboard_ip_report_credentials
 create_empty_crontab_template
-add_report_ip_to_thingsboard_to_cron
+# add_report_ip_to_thingsboard_to_cron
+setup_startup_systemd_service
+systemctl enable report-ip-to-thingsboard.service
 # shellcheck source=/dev/null
 # Enable bluetooth as PAN
 source "$(dirname "${BASH_SOURCE[0]}")/bluetooth_pan/install.sh"
