@@ -121,6 +121,68 @@ function setup_normal_wpa() {
     ASK_TO_REBOOT=true
 }
 
+function force_wpasupplicant_connect() {
+    local IFACE="$1"
+    if [ -z "$IFACE" ]; then
+        echo "Usage: force_wpasupplicant_connect <interface> [wpa_supplicant.conf]"
+        return 1
+    fi
+
+    echo "Force current wpa_supplicant config connection..."
+
+    # Enable wlan0 interface
+    echo "Bringing up interface $IFACE..."
+    ip link set "$IFACE" up || ifconfig "$IFACE" up
+
+    # Check if NetworkManager is managing the interface
+    if command -v nmcli >/dev/null 2>&1 && nmcli device status | grep -q "^$IFACE.*connected"; then
+        echo "NetworkManager detected. Reconnecting $IFACE..."
+        nmcli device disconnect "$IFACE"
+        sleep 1
+        nmcli device connect "$IFACE"
+        return 0
+    fi
+
+    # Check if systemd service exists for this interface
+    if systemctl list-units --type=service | grep -q "wpa_supplicant@$IFACE.service"; then
+        echo "systemd-managed wpa_supplicant detected. Restarting service..."
+        systemctl restart "wpa_supplicant@$IFACE"
+    else
+        # Manual wpa_supplicant
+        echo "Manual wpa_supplicant detected. Reloading manually..."
+        # Terminate any running manual wpa_supplicant
+        wpa_cli -i "$IFACE" terminate 2>/dev/null || true
+        rm -f "/var/run/wpa_supplicant/$IFACE"
+        # Start wpa_supplicant in background with updated config
+        # sudo wpa_supplicant -B -i "$IFACE" -c "$WPA_CONF" -D nl80211
+        wpa_supplicant -B -i "$IFACE" -c "$WPA_CONF"
+    fi
+
+    # Force load new wpa_supplicant.conf for current session
+    # wpa_cli -i wlan0 terminate
+    # Optional: remove old socket file to avoid conflicts
+    # rm -f /var/run/wpa_supplicant/wlan0
+
+    # Reload wpa_supplicant config safely
+    # Option 1: Interface-specific systemd service
+    # systemctl restart wpa_supplicant@wlan0
+
+    # Option 2: Minimal disruption (if systemd-managed)
+    # wpa_cli -i wlan0 reconfigure
+
+    # Option 3: Manual, can clash with existing wpa_supplicant
+    # wpa_supplicant -B -i wlan0 -c "$WPA_CONF"
+
+    # Give it a few seconds to associate
+    sleep 3
+
+    # Force DHCP client to renew IP address
+    echo "Renewing DHCP for $IFACE..."
+    dhclient -r "$IFACE"
+    sleep 1
+    timeout 10 dhclient -1 "$IFACE" # Try once, exit if no lease, Force max 10 seconds
+}
+
 function interactive_wpasupplicant_setup() {
     echo "What are you setting up?"
     select option in "Reset" "Eduroam" "Other" "Nothing" "Exit"; do
@@ -214,4 +276,9 @@ if [ $# -eq 0 ]; then
     interactive_wpasupplicant_setup
 else
     main "$@"
+fi
+
+# Force wpa_supplicant config connect if file not sourced
+if test ${#BASH_SOURCE[@]} -eq 1; then
+    force_wpasupplicant_connect wlan0
 fi
