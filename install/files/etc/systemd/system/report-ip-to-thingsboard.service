@@ -1,0 +1,21 @@
+# /etc/systemd/system/report-ip-to-thingsboard.service
+[Unit]
+Description=Report IP to thingsboard on network up
+Wants=network-online.target
+After=network.target network-online.target nss-lookup.target
+## Since version 230
+StartLimitIntervalSec=300
+## Pre version 230
+# StartLimitInterval=300
+
+[Service]
+Type=idle
+Restart=on-failure
+RestartSec=30s
+User=pi
+# ExecStartPre=/bin/sleep 15
+# ExecStartPre=/bin/bash -c 'until host monitoring.uqgec.org; do sleep 1; done'
+ExecStart=/bin/bash -c 'exec $HOME/pyduino/bash/send_ip_tb.sh'
+
+[Install]
+WantedBy=multi-user.target
