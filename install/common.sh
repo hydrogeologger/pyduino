@@ -39,6 +39,14 @@ function install_packages() {
     # fi
 }
 
+function get_pypi_version() {
+    curl -sG -H 'Host: pypi.org' -H 'Accept: application/json' https://pypi.org/pypi/"$1"/json | awk -F "version\":\"" '{ print $2 }' | cut -d '"' -f 1
+}
+
+function get_remote_package_version() {
+    apt-cache show "$1" | grep Version | cut -d ' ' -f 2
+}
+
 function transfer_conf_files_from_path() {
     local FILE_PATH
     if [ $# -ne 1 ]; then
