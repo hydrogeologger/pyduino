@@ -105,20 +105,6 @@ function disable_network_manager_dependencies() {
     # sudo systemctl disable NetworkManager-wait-online NetworkManager-dispatcher NetworkManager
 }
 
-function wpasupplicant_connect() {
-    echo "Connecting to eduroam with wpasupplicant..."
-    # Enable wlan0 interface
-    ifconfig wlan0 up
-
-    # Force load new wpa_supplicant.conf for current session
-    # rm /var/run/wpa_supplicant/wlan0
-    wpa_cli terminate
-    systemctl restart wpa_supplicant.service
-    wpa_supplicant -B -i wlan0 -c "$WPA_CONF"
-
-    # Force DHCP client to renew IP address
-    dhclient -r wlan0
-}
 
 
 # shellcheck source=SCRIPTDIR/install.sh
@@ -126,10 +112,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/install.sh" "$@"
 # shellcheck source=/dev/null
 # source "$(dirname "$0")/install.sh"
 
-systemctl disable wpa_supplicant
+systemctl disable wpa_supplicant.service
 setup_dhcpcd_and_dependencies
 disable_network_manager_dependencies
-wpasupplicant_connect
+systemctl enable wpa_supplicant.service
+force_wpasupplicant_connect
 
 # renable bluetooth?
 # https://bbs.archlinux.org/viewtopic.php?id=171357
