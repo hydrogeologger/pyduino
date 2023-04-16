@@ -121,6 +121,21 @@ function setup_normal_wpa() {
     ASK_TO_REBOOT=true
 }
 
+function force_wpasupplicant_connect() {
+    echo "Force current wpa_supplicant config connection..."
+    # Enable wlan0 interface
+    ifconfig wlan0 up
+
+    # Force load new wpa_supplicant.conf for current session
+    # rm /var/run/wpa_supplicant/wlan0
+    wpa_cli terminate
+    systemctl restart wpa_supplicant.service
+    wpa_supplicant -B -i wlan0 -c "$WPA_CONF"
+
+    # Force DHCP client to renew IP address
+    dhclient -r wlan0
+}
+
 function interactive_wpasupplicant_setup() {
     echo "What are you setting up?"
     select option in "Reset" "Eduroam" "Other" "Nothing" "Exit"; do
@@ -214,4 +229,9 @@ if [ $# -eq 0 ]; then
     interactive_wpasupplicant_setup
 else
     main "$@"
+fi
+
+# Force wpa_supplicant config connect if file not sourced
+if test ${#BASH_SOURCE[@]} -eq 1; then
+    force_wpasupplicant_connect
 fi
