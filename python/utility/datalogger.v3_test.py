@@ -106,9 +106,13 @@ def is_arduino_switch(element):
     element = int(element)
     return element in ARDUINO_SWITCH_PINS
 
+def arduino_digital_to_analog(pin_number):
+    return pin_number - 54
 
 def is_arduino_analog_pin(element):
     element = int(element)
+    if arduino_digital_to_analog(element) >= 0:
+        element = arduino_digital_to_analog(element)
     return element in ARDUINO_ANALOG_PINS
 
 
