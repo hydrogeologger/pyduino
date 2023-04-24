@@ -320,21 +320,18 @@ void luminox_reading(int str_ay_size, int debug_sw, String command, int serial_p
     }
 }
 
-void ds18b20_search(int ds18b20_search_pin, int power_sw_pin)
-{
+void ds18b20_search(int ds18b20_search_pin, int power_sw_pin) {
     /*ds18b20 search
     ds18b20_search,13,power,42
     */
-    if ((ds18b20_search_pin != INVALID) && (power_sw_pin != INVALID))
-    {
-        digitalWrite(power_sw_pin, HIGH);
-        hydrogeolog1.print_string_delimiter_value("ds18b20_search", String(ds18b20_search_pin));
-        hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
-        delay(1000);
-        Serial.println("Starting Search");
-        hydrogeolog1.search_ds18b20(ds18b20_search_pin, power_sw_pin);
-        digitalWrite(power_sw_pin, LOW);
-    }
+    if (ds18b20_search_pin <= INVALID) return;
+    if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, HIGH);
+    hydrogeolog1.print_string_delimiter_value("ds18b20_search", String(ds18b20_search_pin));
+    hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+    delay(1000);
+    Serial.println("Starting Search");
+    hydrogeolog1.search_ds18b20(ds18b20_search_pin, power_sw_pin);
+    if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
 }
 
 void ds18b20_measurement(int str_ay_size, String thermal_suction_ds18b20, int thermal_suction_digi_pin,
@@ -389,8 +386,7 @@ void ds18b20_measurement(int str_ay_size, String thermal_suction_ds18b20, int th
 
 void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
                           int power_heating_pin, int output_temp_interval_ms, int output_number_temp,
-                          int power_sw_pin, String str_ay[])
-{
+                          int power_sw_pin, String str_ay[]) {
     /*
     fred,464CBABE,digi_inp,13,senpow,42,heatpow,35,itval,2000,opt_no,5
     fred,DE9F96DC,digi_inp,13,senpow,42,heatpow,35,itval,2000,opt_no,5
@@ -398,7 +394,7 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
 
     String fredlund_suction_ds18b20 = hydrogeolog1.parse_argument_string("fred", "", str_ay_size, str_ay);
     fredlund_suction_ds18b20 = fredlund_suction_ds18b20 == "" ? hydrogeolog1.parse_argument_string("fred9", "", str_ay_size, str_ay) : fredlund_suction_ds18b20;
-    if ((fredlund_suction_ds18b20 != "") && (power_sw_pin != INVALID)) {
+    if (fredlund_suction_ds18b20 != "") {
         hydrogeolog1.print_string_delimiter_value("fred_ds18", String(fredlund_suction_ds18b20));
 
         // Edge case limit for interval delay time to prevent mcu locking
@@ -407,8 +403,8 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
         }
 
         if (debug_sw == 1) {
-            hydrogeolog1.print_string_delimiter_value("sensor_power", String(power_sw_pin));              // "snpw"
             hydrogeolog1.print_string_delimiter_value("digital_input", String(digital_input));            // "dgin"
+            hydrogeolog1.print_string_delimiter_value("sensor_power", String(power_sw_pin));              // "snpw"
             hydrogeolog1.print_string_delimiter_value("power_heating_pin", String(power_heating_pin));    // "htpw"
             hydrogeolog1.print_string_delimiter_value("interval_ms", String(output_temp_interval_ms));    // "itv"
             hydrogeolog1.print_string_delimiter_value("output_number", String(output_number_temp));       // "otno"
@@ -428,21 +424,21 @@ void fredlund_measurement(int str_ay_size, int debug_sw, int digital_input,
             }
             Serial.print(DELIMITER);
 
-            digitalWrite(power_sw_pin,HIGH);
+            if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, HIGH);
             delay(1000);
             hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
-            digitalWrite(power_heating_pin,HIGH);
+            if (power_heating_pin > INVALID) digitalWrite(power_heating_pin, HIGH);
             for(int i=0;i<output_number_temp;i++) {
                 delay(output_temp_interval_ms);
                 hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
             }
-            digitalWrite(power_heating_pin,LOW);
+            if (power_heating_pin > INVALID) digitalWrite(power_heating_pin, LOW);
             for(int i=0;i<output_number_temp;i++) {
                 delay(output_temp_interval_ms);
                 hydrogeolog1.read_DS18B20_by_addr(heat_suction_sensor_addr,digital_input) ;
             }
             Serial.println();
-            digitalWrite(power_sw_pin,LOW);
+            if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
 
             }  //fredlund_suction_ds18b20.length else
     }  //((fredlund_suction_ds18b20 != "") && (power_sw_pin != INVALID))
