@@ -283,7 +283,7 @@ void luminox_reading(int str_ay_size, int debug_sw, String command, int serial_p
                 return;
         }
         mySerial->begin(9600);
-        mySerial->setTimeout(1000); // Set timeout for readStringUntil()
+        // mySerial->setTimeout(1000); // Set timeout for readStringUntil()
         delay(800); // Wait for serial to initialize and stabilize
 
         mySerial->print("M 1\r\n"); // Send command to initiate polling mode
@@ -294,13 +294,23 @@ void luminox_reading(int str_ay_size, int debug_sw, String command, int serial_p
         }
         mySerial->print(command);
         mySerial->print("\r\n");
-        // delay(measure_time_interval_ms);
-        String luminoReply = mySerial->readStringUntil('\n');
+        delay(measure_time_interval_ms);
+        // String luminoReply = mySerial->readStringUntil('\n');
+        String luminoReply = "";
+        uint8_t inChar;
+        while (mySerial->available()) {
+            inChar = mySerial->read();
+            if (inChar >= 32 && inChar <= 126) {
+                luminoReply += (char)inChar;
+            } else if (inChar == '\n') {
+                break;
+            }
+        }
 
         if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
         mySerial->end();
-        luminoReply.trim();
-        if (luminoReply != command) {
+        // luminoReply.trim();
+        if (luminoReply != "" && luminoReply.length() > 2) {
             Serial.print("result");
             Serial.print(DELIMITER);
             Serial.println(luminoReply);
