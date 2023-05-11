@@ -18,7 +18,7 @@ if sys.version_info >= (3,0):
     long = int
 
 # Module Info
-__version__ = "1.0"
+__version__ = "1.0.1"
 __all__ = [
     "is_json_string", "update_json_mqtt_queue",
     "save_json_mqtt_queue", "package_thingsboard_payload",
@@ -129,7 +129,7 @@ def package_thingsboard_payload(payload, ts=None):
         ts: (Optional) Timestamp in milliseconds from epoch, Default - None, ommits timestamp
 
     Returns:
-        JSON payload for thingsboard
+        Dictionary of JSON payload for thingsboard
 
     Raises:
         ValueError: Invalid payload format.
@@ -284,7 +284,7 @@ def publish_to_thingsboard(client, payload, ts=None,
     current_json_data = package_thingsboard_payload(payload=payload, ts=ts)
 
     if display_payload:
-        print(current_json_data)
+        print(json.dumps(current_json_data))
 
     publish_result = publish_mqtt_queue(client=client, topic="v1/devices/me/telemetry",
             json_payload=current_json_data, timeout=timeout,
