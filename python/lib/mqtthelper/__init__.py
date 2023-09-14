@@ -12,8 +12,11 @@ json
 # Module Info
 __version__ = "1.0.1"
 __all__ = [
+    "generate_filename",
+    "is_json_object",
     "is_json_string",
-    "update_json_mqtt_queue",
+    "load_queue_from_file",
+    "append_payload_to_queue",
     "save_json_mqtt_queue",
     "package_thingsboard_payload",
     "publish_mqtt_queue",
@@ -49,6 +52,35 @@ MQTTHELPER_NETTY_MAX_PAYLOAD_SIZE = 65536
 MQTTHELPER_ERR_EDGE = -2
 
 
+def generate_filename(filename=None):
+    """
+    Generate the filename for queue storage, file extension is not required.
+
+    Args:
+        filename (str, optional): Filename including file extension. Defaults to None.
+
+    Returns:
+        str: Filename including json extension. i.e filename.json
+    """
+    if filename is not None:
+        filename = filename.strip()
+    if filename is None or filename == "":
+        # parent_filename = os.path.basename(main.__file__).rsplit('.', 1)[0]
+        parent_filename = os.path.basename(__main__.__file__).rsplit('.', 1)[0]
+        filename = "mqtt_queue_%s.json" % parent_filename
+    return filename
+
+
+def is_json_object(_object):
+    """
+    Check if object is of type dictionary or list of dictionary.
+    """
+    if (isinstance(_object, dict)
+            or (isinstance(_object, list) and all(isinstance(item, dict) for item in _object))):
+        return True
+    return False
+
+
 # def is_json(text: str) -> bool:
 def is_json_string(text):
     """
@@ -61,12 +93,6 @@ def is_json_string(text):
     Returns:
         True/False for string containing json document
     """
-    # Python2 Support for json parsing
-    # try:
-    #     json.decoder.JSONDecodeError
-    # except AttributeError:  # Python 2
-    #     json.decoder.JSONDecodeError = ValueError
-
     if not isinstance(text, (str, bytes, bytearray)):
         return False
     if not text:
@@ -76,7 +102,8 @@ def is_json_string(text):
         if text[0] in {'{', '['} and text[-1] in {'}', ']'}:
             try:
                 json.loads(text)
-            except (ValueError, TypeError, json.decoder.JSONDecodeError):
+            except (ValueError, TypeError):
+                # json.decoder.JSONDecodeError inherits from ValueError
                 return False
             else:
                 return True
@@ -85,41 +112,51 @@ def is_json_string(text):
     return False
 
 
-def update_json_mqtt_queue(filename, payload):
+def load_queue_from_file(filename):
     """
-    Get the json mqtt queue data from file including current payload.
+    Load json queue from file.
 
     Args:
-        filename: Name of JSON queue file archive, must include extension in filename, Default - None
-        payload: JSON payload for appending to queue
+        filename (str): Filename containing json queue
 
     Returns:
-        List of mqtt json dictionary items.
-
-    Raises:
-        ValueError: Invalid payload format.
+        list: JSON array
     """
-
     # Read backup JSON Data from previous failed uploads
-    json_data = []
     if os.path.isfile(filename):
         with open(filename, "r", encoding='utf-8') as json_file:
             try:
-                json_data = json.load(json_file)
+                json_queue = json.load(json_file)
+                if isinstance(json_queue, dict):
+                    return [json_queue]
+                return json_queue
                 # json_data_payload_size = len(json.dumps(json_data).encode("utf-8"))
             except ValueError:
                 pass # JSON file is empty
+    return []
 
-    # try:
-    if isinstance(payload, (dict, list)):
-        json_data.append(payload)
+
+def append_payload_to_queue(payload, queue):
+    """
+    Append json object to queue
+
+    Args:
+        payload (dict/list/str): JSON object to append to queue
+        queue (list): List containing json data
+
+    Raises:
+        ValueError: If payload format is not dict, list or stri
+    """
+    if isinstance(payload, dict):
+        queue.append(payload)
+    elif is_json_object(payload):
+        # Expect a list of dictionary items
+        queue.extend(payload)
     elif is_json_string(payload):
-        json_data.append(json.loads(payload))
+        queue.append(json.loads(payload))
     else:
         raise ValueError("json payload format is invalid.")
-    # except ValueError:
-    #     raise ValueError("json payload format is invalid.")
-    return json_data
+
 
 # def save_json_mqtt_queue(filename, json_data, payload_index=None):
 def save_json_mqtt_queue(filename, json_data, start=None, end=None):
@@ -192,15 +229,11 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0, fifo=True,
     """
     timeout = max(timeout, 1.0)
 
-    if filename is not None:
-        json_filename = filename.strip()
-    if filename is None or filename == "":
-        # parent_filename = os.path.basename(main.__file__).rsplit('.', 1)[0]
-        parent_filename = os.path.basename(__main__.__file__).rsplit('.', 1)[0]
-        json_filename = "mqtt_queue_%s.json" % parent_filename
+    json_filename = generate_filename(filename=filename)
 
     # Read backup JSON Data from previous failed uploads
-    json_data = update_json_mqtt_queue(filename=json_filename, payload=json_payload)
+    json_data = load_queue_from_file(filename=json_filename)
+    append_payload_to_queue(queue=json_data, payload=json_payload)
 
     # Loop through json data for publishing
     json_start = 0
@@ -247,7 +280,8 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0, fifo=True,
             break # Escape loop on error
         except Exception as error:
             print("MQTT Publish Error! PayloadIndex: [{0}, {1}] {2} {3}".format(json_start, json_end, type(error), error))
-            break # Escape loop on error
+            # break # Escape loop on error
+            raise  # Reraise error, unfortunately does not save to file queue
         else:
             publish_success = True
             ## Start iterate to next batch
@@ -274,8 +308,8 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0, fifo=True,
     # Process remaining items into file queue
     if publish_success and json_data_remain <= 0:
         # Clear the queue as all payloads was successfully published
-        # Do nothing, empty the file
-        open(json_filename, 'w', encoding='utf-8')
+        with open(filename, 'w', encoding='utf-8'):
+            pass  # Do nothing, empty the file
     elif not publish_success:
         # Archive unsent data to file queue for sending later
         if fifo:
@@ -324,69 +358,3 @@ def publish_to_thingsboard(client, payload, ts=None, fifo=False,
                                         json_payload=current_json_data, timeout=timeout, fifo=fifo,
                                         filename=filename, debug=debug)
     return publish_result
-
-
-# def publish_thingsboard(client, json_filename, milliseconds_since_epoch, data_collected,
-#                         screen_display=True, debug=False):
-#     '''
-#     paho.mqtt.client publish to thingsboard wrapper with data queue.
-#     '''
-#     from os import path
-#     import json
-#     import paho.mqtt.client as mqtt
-
-#     # JSON_FILENAME = "tsqueue_ewatering_sa1.json"
-#     json_data = []
-
-#     # Create JSON data with time stamp
-#     current_json_data = {"ts":milliseconds_since_epoch, "values": data_collected}
-#     # json_data = data_collected
-#     if debug:
-#         print(current_json_data)
-
-#     # Read backup JSON Data from previous failed uploads
-#     if path.isfile(json_filename):
-#         with open(json_filename) as json_file:
-#             try:
-#                 json_data = json.load(json_file)
-#             except ValueError:
-#                 pass # Empty json file
-
-#     json_data.append(current_json_data)
-
-#     # Loop through json data for publishing
-#     payload_index = 0
-#     for payload_index, json_payload in enumerate(json_data):
-#         try:
-#             # Result is in tuple (rc, mid) of MQTTMessageInfo class
-#             publish_result = client.publish(topic='v1/devices/me/telemetry', payload=json.dumps(json_payload), qos=1)
-#         except (ValueError, RuntimeError) as error:
-#             if screen_display:
-#                 print "PayloadIndex:", payload_index, type(error), error
-#                 break # Escape loop on error
-#         except Exception as error:
-#             print "TS Publish Error! PayloadIndex:", payload_index, type(error), error
-#             break # Escape loop on error
-
-#         # if debug:
-#         #     print publish_result, json_payload
-#         if publish_result.rc != mqtt.MQTT_ERR_SUCCESS:
-#             break # Escape publishing loop on publish failure
-
-#     # If payload index and publish_result.mid does not match then there was a failure in publishing
-#     if publish_result.rc != mqtt.MQTT_ERR_SUCCESS:
-#         # Archive data to send later
-#         with open(json_filename, 'w') as json_file:
-#             json.dump(json_data[payload_index:], json_file, indent=4, separators=(",", ": "))
-#     elif (publish_result.rc == mqtt.MQTT_ERR_SUCCESS and \
-#             len(json_data) > 1 and \
-#             (payload_index + 1) == len(json_data)):
-#         with open(json_filename, 'w') as json_file:
-#             pass #empty the file
-
-#     # Tidy up publishing memory use
-#     json_data = []
-
-#     if screen_display:
-#         print(publish_result) # Display the last publish result
-#     return publish_result
