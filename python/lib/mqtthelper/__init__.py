@@ -49,7 +49,12 @@ MQTTHELPER_NETTY_MAX_PAYLOAD_SIZE = 65536
 
 
 # Error Code
+MQTTHELPER_ERR_INVALID = 0
 MQTTHELPER_ERR_EDGE = -2
+
+# JSON Type
+MQTTHELPER_JSON_DICT = 1
+MQTTHELPER_JSON_ARRAY = 2
 
 
 def generate_filename(filename=None):
@@ -74,11 +79,19 @@ def generate_filename(filename=None):
 def is_json_object(_object):
     """
     Check if object is of type dictionary or list of dictionary.
+
+    Args:
+        _object (any): Python object
+
+    Returns:
+        Literal[1, 2, 0]: Invalid - Zero Value. Dict - MQTTHELPER_JSON_DICT. \
+            List of dictionary - MQTTHELPER_JSON_ARRAY
     """
-    if (isinstance(_object, dict)
-            or (isinstance(_object, list) and all(isinstance(item, dict) for item in _object))):
-        return True
-    return False
+    if isinstance(_object, dict):
+        return MQTTHELPER_JSON_DICT
+    if (isinstance(_object, list) and all(isinstance(item, dict) for item in _object)):
+        return MQTTHELPER_JSON_ARRAY
+    return MQTTHELPER_ERR_INVALID
 
 
 # def is_json(text: str) -> bool:
@@ -88,28 +101,22 @@ def is_json_string(text):
     Does not check if json document has valid structure.
 
     Args:
-        text: String to test for json document
+        text (str): String to test for json document
 
     Returns:
-        True/False for string containing json document
+        Literal[1, 2, 0]: Invalid - Zero Value. Dict - MQTTHELPER_JSON_DICT. \
+            List of dictionary - MQTTHELPER_JSON_ARRAY
     """
-    if not isinstance(text, (str, bytes, bytearray)):
-        return False
-    if not text:
-        return False
+    if not text or not isinstance(text, (str, bytes, bytearray)):
+        return MQTTHELPER_ERR_INVALID
     text = text.strip()
-    if text:
-        if text[0] in {'{', '['} and text[-1] in {'}', ']'}:
-            try:
-                json.loads(text)
-            except (ValueError, TypeError):
-                # json.decoder.JSONDecodeError inherits from ValueError
-                return False
-            else:
-                return True
-        else:
-            return False
-    return False
+    if text and (text[0] in {'{', '['} and text[-1] in {'}', ']'}):
+        try:
+            return (is_json_object(json.loads(text)))
+        except (ValueError, TypeError):
+            # json.decoder.JSONDecodeError inherits from ValueError
+            return MQTTHELPER_ERR_INVALID
+    return MQTTHELPER_ERR_INVALID
 
 
 def load_queue_from_file(filename):
@@ -136,26 +143,33 @@ def load_queue_from_file(filename):
     return []
 
 
-def append_payload_to_queue(payload, queue):
+def append_payload_to_queue(payload, json_queue):
     """
-    Append json object to queue
+    Append json object to queue, modifies json_queue.
 
     Args:
-        payload (dict/list/str): JSON object to append to queue
+        payload (dict | list | str): JSON object to append to queue
         queue (list): List containing json data
 
     Raises:
-        ValueError: If payload format is not dict, list or stri
+        ValueError: If payload format is not dict, list[dict] \
+                    or json string format
     """
-    if isinstance(payload, dict):
-        queue.append(payload)
-    elif is_json_object(payload):
+    json_type = is_json_object(payload)
+    if MQTTHELPER_JSON_DICT == json_type:
+        json_queue.append(payload)
+    elif MQTTHELPER_JSON_ARRAY == json_type:
         # Expect a list of dictionary items
-        queue.extend(payload)
-    elif is_json_string(payload):
-        queue.append(json.loads(payload))
+        json_queue.extend(payload)
     else:
-        raise ValueError("json payload format is invalid.")
+        json_type = is_json_string(payload)
+        if MQTTHELPER_JSON_DICT == json_type:
+            json_queue.append(json.loads(payload))
+        elif MQTTHELPER_JSON_ARRAY == json_type:
+            # Expect a list of dictionary items
+            json_queue.extend(json.loads(payload))
+        else:
+            raise ValueError("json payload format is invalid.")
 
 
 # def save_json_mqtt_queue(filename, json_data, payload_index=None):
@@ -179,14 +193,15 @@ def package_thingsboard_payload(data, ts=None):
 
     Args:
         data: JSON data for repackaging
-        ts: (Optional) Timestamp in milliseconds from epoch, Default - None, ommits timestamp
-
-    Returns:
-        Dictionary of JSON payload for thingsboard
+        ts (int, optional): Timestamp in milliseconds since epoch. \
+                            Defaults to None - ommits timestamp.
 
     Raises:
-        ValueError: Invalid payload format.
         TypeError: Timestamp not of numeric type.
+        ValueError: Invalid payload format.
+
+    Returns:
+        dict: JSON payload with or without timestamp for thingsboard.
     """
     if ts is None:
         json_payload = data
@@ -233,7 +248,7 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0, fifo=True,
 
     # Read backup JSON Data from previous failed uploads
     json_data = load_queue_from_file(filename=json_filename)
-    append_payload_to_queue(queue=json_data, payload=json_payload)
+    append_payload_to_queue(payload=json_payload, json_queue=json_data)
 
     # Loop through json data for publishing
     json_start = 0
