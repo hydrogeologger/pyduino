@@ -17,7 +17,7 @@ __all__ = [
     "is_json_string",
     "load_queue_from_file",
     "append_payload_to_queue",
-    "save_json_mqtt_queue",
+    "save_queue_to_file",
     "package_thingsboard_payload",
     "publish_mqtt_queue",
     "publish_to_thingsboard"
@@ -173,18 +173,29 @@ def append_payload_to_queue(payload, json_queue):
 
 
 # def save_json_mqtt_queue(filename, json_data, payload_index=None):
-def save_json_mqtt_queue(filename, json_data, start=None, end=None):
+def save_queue_to_file(filename, json_queue, start=None, end=None):
     """
     Saves json mqtt queue to file.
 
     Args:
-        filename: Name of JSON queue file archive, must include extension in filename, Default - None
-        json_data: list of json data
-        start_index: (Optional) List index to start saving from. Default: None
-        end_index: (Optional) List index end to save to. Default: None
+        filename (str): Name of JSON queue file archive, must include \
+                        extension in filename.
+        json_queue (list): List of json data.
+        start (int, optional): List index to start saving from.. Defaults to None.
+        end (int, optional): List index end to save to. Defaults to None.
+
+    Raises:
+        TypeError: json_queue not an array of json (key: value) data.
     """
-    with open(filename, 'w', encoding='utf-8') as json_file:
-        json.dump(json_data[start:end], json_file, indent=4, separators=(",", ": "))
+    if not is_json_object(json_queue):
+        raise RuntimeError("Expect json_queue to be of dict|list|list[dict] type")
+    if not json_queue:
+        # Clear queue from file
+        with open(filename, "w", encoding="utf-8"):
+            pass  # Do nothing, empty the file
+    else:
+        with open(filename, "w", encoding="utf-8") as json_file:
+            json.dump(json_queue[start:end], json_file, indent=4, separators=(",", ": "))
 
 
 def package_thingsboard_payload(data, ts=None):
@@ -201,118 +212,133 @@ def package_thingsboard_payload(data, ts=None):
         ValueError: Invalid payload format.
 
     Returns:
-        dict: JSON payload with or without timestamp for thingsboard.
+        dict|None: JSON payload with or without timestamp for thingsboard. \
+            Returns None if no data was attempted to be packaged.
     """
-    if ts is None:
-        json_payload = data
-    elif not isinstance(ts, (int, float)):
+    if not data:
+        return None
+
+    if not ts is None and not isinstance(ts, (int, float)):
         raise TypeError("Expect ts to be of numeric type, received %s" % type(ts))
-    else:
-        if isinstance(data, dict):
-            json_payload = {"ts":ts, "values": data}
-        elif is_json_string(data):
-            json_payload = {"ts":ts, "values": json.loads(data)}
-        else:
-            raise ValueError("json payload format is invalid.")
 
-    return json_payload
+    if isinstance(data, dict):
+        if ts is None:
+            return data
+        return {"ts": ts, "values": data}
+    if is_json_string(data) == MQTTHELPER_JSON_DICT:
+        if ts is None:
+            return json.loads(data)
+        return {"ts": ts, "values": json.loads(data)}
+    raise ValueError("JSON data format is invalid.")
 
 
-# def publish_mqtt_queue(client: paho.mqtt.client, topic: str, json_payload: json doc,
-#                       timeout: float, filename: str | None = None, debug=False) -> paho.mqtt.client.MQTTMessageInfo:
-def publish_mqtt_queue(client, topic, json_payload, timeout=1.0, fifo=True,
-                       filename=None, debug=False):
+def publish_mqtt_queue(client, topic, json_queue,
+                       timeout=1.0, fifo=True, debug=False):
     """
     paho.mqtt.client.publish() helper to publish json payload with a qos=1 from
-    a FIFO queue.
-    Archived queue is stored in a json document file.
+    a queue.
+    Calling publish_mqtt_queue will modify json_queue.
 
     Args:
-        client: Connected paho.mqtt.client.Client()
-        topic: Topic to publish to
-        json_payload: JSON payload for appending to queue
-        timeout: (Optional) Timeout to wait for publish ack in seconds, (Default - min of 1 second)
-        fifo: (Optional) Declare behavior of queue, True (FIFO), FALSE (FILO) (Default - True)
-        filename: (Optional) Name of JSON queue file archive, must include extension in filename, Default - None
-        debug: (Optional) Flag to print each payload being published, Default - False
-
-    Returns:
-        paho.mqtt.client.MQTTMessageInfo of paho.mqtt.client.publish call
+        client (paho.mqtt.client.Client): MQTT Client
+        topic (str): MQTT Topic to publish to
+        json_queue (list[dict]): JSON array queue for publishing, will be modified.
+        timeout (float|int, optional): Timeout to wait for publish ack in \
+                                       seconds. Defaults to 1.0.
+        fifo (bool, optional): Declare behavior of queue, \
+                               True (FIFO), FALSE (FILO). Defaults to True.
+        debug (bool, optional): Flag to print each payload being published. \
+                                Defaults to False.
 
     Raises:
-        ValueError: Invalid payload format.
+        RuntimeError: General exception.
+
+    Returns:
+        paho.mqtt.client.MQTTMessageInfo: Publish result
     """
+    # No need to publish anything if queue is empty
+    if not json_queue:
+        return paho.mqtt.client.MQTTMessageInfo(0)
     timeout = max(timeout, 1.0)
 
-    json_filename = generate_filename(filename=filename)
+    # Initializing baseline values
+    json_data_len_init = len(json_queue)
+    json_start = 0
+    json_data_remain = json_end = subset_count = json_data_len_init
 
-    # Read backup JSON Data from previous failed uploads
-    json_data = load_queue_from_file(filename=json_filename)
-    append_payload_to_queue(payload=json_payload, json_queue=json_data)
+    # Check size of payload to be published and set publishing group
+    while (len(json.dumps(json_queue[json_start:json_end]).encode("utf-8"))
+            >= MQTTHELPER_NETTY_MAX_PAYLOAD_SIZE):
+        # Split payload in half until it fits
+        subset_count = subset_count >> 1
+
+        # Unable to find a payload size that fits
+        if subset_count == 0:
+            json_start = 0
+            json_end = json_data_len_init
+            raise RuntimeError(paho.mqtt.client.error_string(
+                    paho.mqtt.client.MQTT_ERR_PAYLOAD_SIZE))
+
+        # Set correct index for subset group
+        if fifo:
+            json_end = json_start + subset_count
+        else:
+            json_start = json_end - subset_count
+    if debug:
+        print("Subset_Count: {0} of {1} ({2})".format(subset_count, json_data_len_init,
+                                                  "FIFO" if fifo else "FILO"))
 
     # Loop through json data for publishing
-    json_start = 0
-    json_end = json_data_remain = subset_count = json_data_total_len = len(json_data)
-
-    # print ("{0} {1} {2}".format(json_start, json_end, len(json.dumps(json_data[json_start:json_end]).encode("utf-8"))))
     while json_data_remain > 0:
         publish_success = False
         try:
-            while len(json.dumps(json_data[json_start:json_end]).encode("utf-8")) > MQTTHELPER_NETTY_MAX_PAYLOAD_SIZE:
-                # Split payload in half until it fits
-                subset_count = subset_count >> 1
-
-                if debug:
-                    print("Subset_Count: {0}".format(subset_count))
-
-                # Unable to find a payload size that fits
-                if subset_count == 0:
-                    json_start = 0
-                    json_end = json_data_total_len
-                    raise RuntimeError(paho.mqtt.client.error_string(paho.mqtt.client.MQTT_ERR_PAYLOAD_SIZE))
-
-                # Set correct index for subset group
-                if fifo:
-                    json_end = json_start + subset_count
-                else:
-                    json_start = json_end - subset_count
-
             # Result is in tuple (rc, mid) of MQTTMessageInfo class
-            publish_result = client.publish(topic=topic, payload=json.dumps(json_data[json_start:json_end]), qos=1)
+            publish_result = client.publish(topic=topic,
+                                            payload=json.dumps(json_queue[json_start:json_end]),
+                                            qos=1)
             # publish_result = paho.mqtt.client.MQTTMessageInfo
             publish_result.wait_for_publish(timeout=timeout)
 
             if debug:
-                print("PayloadIndex: [{0}, {1}]".format(json_start, json_end))
-                print("{0} {1}".format(publish_result, json_data[json_start:json_end]))
-            # if publish_result.rc != paho.mqtt.client.MQTT_ERR_SUCCESS or not publish_result._published:
+                print("{0} PayloadIndex: [{1:>3},{2:>3}] Size: {3}" \
+                        .format(publish_result,
+                               json_start,
+                               json_end,
+                               len(json.dumps(json_queue[json_start:json_end]).encode("utf-8")),
+                        )
+                )
+            # if debug:
+            #     print("{0} {1}".format(publish_result, json_queue[json_start:json_end]))
+            # if publish_result.rc != paho.mqtt.client.MQTT_ERR_SUCCESS \
+            #         or not publish_result._published:
             #     break # Escape publishing loop on publish failure
             if not publish_result.is_published():
-                break # Escape publishing loop on publish failure
+                break  # Escape publishing loop on publish failure
 
         except (ValueError, RuntimeError) as error:
-            print("PayloadIndex: [{0}, {1}] {2} {3}".format(json_start, json_end, type(error), error))
-            break # Escape loop on error
+            print("PayloadIndex: [{0:>3},{1:>3}] {2} {3}".format(
+                    json_start, json_end, type(error), error))
+            break  # Escape loop on error
         except Exception as error:
-            print("MQTT Publish Error! PayloadIndex: [{0}, {1}] {2} {3}".format(json_start, json_end, type(error), error))
+            print("MQTT Publish Error! PayloadIndex: [{0:>3},{1:>3}] {2} {3}".format(
+                    json_start, json_end, type(error), error))
             # break # Escape loop on error
             raise  # Reraise error, unfortunately does not save to file queue
         else:
             publish_success = True
-            ## Start iterate to next batch
             json_data_remain -= subset_count
-            if debug:
-                print("{0} {1} {2} {3}".format(json_start, json_end, json_data_remain, len(json.dumps(json_data[json_start:json_end]).encode("utf-8"))))
+            # Set queue index to the next batch for iteration
             if fifo:
                 json_start = json_end
-                json_end = min(json_end + subset_count, json_data_total_len)
+                json_end = min(json_end + subset_count, json_data_len_init)
             else:
                 json_end = json_start
                 json_start = max(json_start - subset_count, 0)
 
     # Test for edge case where published failed and info.rc returns success
     try:
-        if not publish_success and publish_result.rc == paho.mqtt.client.MQTT_ERR_SUCCESS:
+        if (not publish_success \
+                and publish_result.rc == paho.mqtt.client.MQTT_ERR_SUCCESS):
             # publish_result.rc = paho.mqtt.client.MQTT_ERR_UNKNOWN
             publish_result.rc = MQTTHELPER_ERR_EDGE
     except NameError:
@@ -320,56 +346,79 @@ def publish_mqtt_queue(client, topic, json_payload, timeout=1.0, fifo=True,
         publish_result = paho.mqtt.client.MQTTMessageInfo(0)
         publish_result.rc = paho.mqtt.client.MQTT_ERR_AGAIN
 
-    # Process remaining items into file queue
     if publish_success and json_data_remain <= 0:
         # Clear the queue as all payloads was successfully published
-        with open(filename, 'w', encoding='utf-8'):
-            pass  # Do nothing, empty the file
-    elif not publish_success:
-        # Archive unsent data to file queue for sending later
+        if json_data_len_init > 1:
+            print("Clearing Queue: All")
+        del json_queue[:]
+    elif not publish_success and json_data_len_init > json_data_remain:
+        # Remove items from queue which has been published
         if fifo:
-            print("Save fifo queue indexed [{0}:{1}]".format(json_start, None))
-            save_json_mqtt_queue(filename=json_filename, json_data=json_data, start=json_start, end=None)
+            print("Clearing FIFO queue: [{0}:{1}] of {2}".format(
+                    0, json_start, json_data_len_init))
+            del json_queue[None:json_start]
         else:
-            print("Save filo queue indexed [{0}:{1}]".format(None, json_end))
-            save_json_mqtt_queue(filename=json_filename, json_data=json_data, start=None, end=json_end)
+            print("Clearing FILO queue: [{0}:{1}] of {1}".format(
+                    json_end, json_data_len_init))
+            del json_queue[json_end:None]
 
     return publish_result
 
-# publish_to_thingsboard: (client: paho.mqtt.client.Client(), payload: str,
-#                           ts: int | None = None, timeout: float = 1,
-#                           filename: str | None = None, display_payload: bool = False,
-#                           debug: bool = False) -> paho.mqtt.client.MQTTMessageInfo:
-def publish_to_thingsboard(client, payload, ts=None, fifo=False,
-                           timeout=1.0, filename=None, display_payload=False, debug=False):
+
+def publish_to_thingsboard(client, payload, ts=None,
+                           fifo=False,
+                           timeout=3.0,
+                           filename=None,
+                           display_payload=False,
+                           debug=False):
     """
     paho.mqtt.client.publish() helper to publish to thingsboard using
-    publish_mqtt_queue() helper function.
+    publish_mqtt_queue() helper function
     Implements payload archiving queue.
 
     Args:
-        client: Connected paho.mqtt.client.Client()
-        payload: JSON payload for appending to queue
-        ts: (Optional) Timestamp in milliseconds from epoch, Default - None, ommits timestamp
-        timeout: (Optional) Timeout to wait for publish ack in seconds, (Default - min of 1 second)
-        fifo: (Optional) Declare behavior of queue, True (FIFO), FALSE (FILO) (Default - False)
-        filename: (Optional) Name of JSON queue file archive, must include extension in filename, Default - None
-        display_payload: (Optional) Displays the current payload to be appended, Default - False
-        debug: (Optional) Flag to print each payload being published, Default - False
-
-    Returns:
-        paho.mqtt.client.MQTTMessageInfo of paho.mqtt.client.publish call
+        client (paho.mqtt.client.Client()): MQTT client
+        payload (dict): JSON payload for appending to queue
+        ts (int, optional): Timestamp in milliseconds from epoch. \
+            Default - None, ommits timestamp
+        fifo (bool, optional):  Declare behavior of queue, \
+            True (FIFO), False (FILO). Defaults to False.
+        timeout (float, optional): Timeout to wait for publish ack in seconds. \
+            Defaults to 3.0.
+        filename (str, optional): _description_. Defaults to None.
+        display_payload (bool, optional): Name of JSON queue file archive, \
+            must include extension in filename. Defaults to False.
+        debug (bool, optional): Flag to print each payload being published. \
+            Defaults to False.
 
     Raises:
         ValueError: Invalid payload format.
         TypeError: Timestamp not of numeric type.
+
+    Returns:
+        paho.mqtt.client.MQTTMessageInfo: Publish result
     """
+    json_filename = generate_filename(filename=filename)
+
+    # Read backup JSON data queue from previous failed uploads
+    json_queue = load_queue_from_file(filename=json_filename)
+    file_queue_size = len(json_queue)
+
     current_json_data = package_thingsboard_payload(data=payload, ts=ts)
+    if current_json_data:
+        if display_payload:
+            print(json.dumps(current_json_data))
+        append_payload_to_queue(json_queue=json_queue, payload=current_json_data)
 
-    if display_payload:
-        print(json.dumps(current_json_data))
+    publish_result = publish_mqtt_queue(
+        client=client,
+        topic="v1/devices/me/telemetry",
+        json_queue=json_queue,
+        timeout=timeout,
+        fifo=fifo,
+        debug=debug
+    )
 
-    publish_result = publish_mqtt_queue(client=client, topic="v1/devices/me/telemetry",
-                                        json_payload=current_json_data, timeout=timeout, fifo=fifo,
-                                        filename=filename, debug=debug)
+    if json_queue or file_queue_size:
+        save_queue_to_file(filename=json_filename, json_queue=json_queue)
     return publish_result
