@@ -282,9 +282,9 @@ def publish_mqtt_queue(client, topic, json_queue,
     timeout = max(timeout, 1.0)
 
     # Initializing baseline values
-    json_data_len_init = len(json_queue)
-    json_start = 0
-    json_data_remain = json_end = subset_count = json_data_len_init
+    json_data_remain = subset_count = len(json_queue)
+    json_start = None
+    json_end = None
 
     # Check size of payload to be published and set publishing group
     while (len(json.dumps(json_queue[json_start:json_end]).encode("utf-8"))
@@ -294,22 +294,20 @@ def publish_mqtt_queue(client, topic, json_queue,
 
         # Unable to find a payload size that fits
         if subset_count == 0:
-            json_start = 0
-            json_end = json_data_len_init
             raise RuntimeError(paho.mqtt.client.error_string(
                     paho.mqtt.client.MQTT_ERR_PAYLOAD_SIZE))
 
         # Set correct index for subset group
         if fifo:
-            json_end = json_start + subset_count
+            json_end = subset_count
         else:
-            json_start = json_end - subset_count
+            json_start = -subset_count
     if debug:
-        print("Subset_Count: {0} of {1} ({2})".format(subset_count, json_data_len_init,
-                                                  "FIFO" if fifo else "FILO"))
+        print("Subset_Count: {0} of {1} ({2})".format(subset_count, json_data_remain,
+                                                    "FIFO" if fifo else "FILO"))
 
     # Loop through json data for publishing
-    while json_data_remain > 0:
+    while json_queue:
         publish_success = False
         try:
             # Result is in tuple (rc, mid) of MQTTMessageInfo class
@@ -320,11 +318,11 @@ def publish_mqtt_queue(client, topic, json_queue,
             publish_result.wait_for_publish(timeout=timeout)
 
             if debug:
-                print("{0} PayloadIndex: [{1:>3},{2:>3}] Size: {3}" \
+                print("{0} Size: {1} [{2} of {3}]" \
                         .format(publish_result,
-                               json_start,
-                               json_end,
-                               len(json.dumps(json_queue[json_start:json_end]).encode("utf-8")),
+                                len(json.dumps(json_queue[json_start:json_end]).encode("utf-8")),
+                                subset_count,
+                                json_data_remain
                         )
                 )
             # if debug:
@@ -336,24 +334,18 @@ def publish_mqtt_queue(client, topic, json_queue,
                 break  # Escape publishing loop on publish failure
 
         except (ValueError, RuntimeError) as error:
-            print("PayloadIndex: [{0:>3},{1:>3}] {2} {3}".format(
+            print("PayloadIndex: [{0},{1}] {2} {3}".format(
                     json_start, json_end, type(error), error))
             break  # Escape loop on error
         except Exception as error:
-            print("MQTT Publish Error! PayloadIndex: [{0:>3},{1:>3}] {2} {3}".format(
+            print("MQTT Publish Error! PayloadIndex: [{0},{1}] {2} {3}".format(
                     json_start, json_end, type(error), error))
             # break # Escape loop on error
             raise  # Reraise error, unfortunately does not save to file queue
         else:
             publish_success = True
-            json_data_remain -= subset_count
-            # Set queue index to the next batch for iteration
-            if fifo:
-                json_start = json_end
-                json_end = min(json_end + subset_count, json_data_len_init)
-            else:
-                json_end = json_start
-                json_start = max(json_start - subset_count, 0)
+            json_data_remain = max(json_data_remain - subset_count, 0)
+            del json_queue[json_start:json_end]
 
     # Test for edge case where published failed and info.rc returns success
     try:
@@ -365,22 +357,6 @@ def publish_mqtt_queue(client, topic, json_queue,
         # publish_success = False
         publish_result = paho.mqtt.client.MQTTMessageInfo(0)
         publish_result.rc = paho.mqtt.client.MQTT_ERR_AGAIN
-
-    if publish_success and json_data_remain <= 0:
-        # Clear the queue as all payloads was successfully published
-        if json_data_len_init > 1:
-            print("Clearing Queue: All")
-        del json_queue[:]
-    elif not publish_success and json_data_len_init > json_data_remain:
-        # Remove items from queue which has been published
-        if fifo:
-            print("Clearing FIFO queue: [{0}:{1}] of {2}".format(
-                    0, json_start, json_data_len_init))
-            del json_queue[None:json_start]
-        else:
-            print("Clearing FILO queue: [{0}:{1}] of {1}".format(
-                    json_end, json_data_len_init))
-            del json_queue[json_end:None]
 
     return publish_result
 
