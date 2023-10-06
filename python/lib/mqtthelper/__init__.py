@@ -26,21 +26,42 @@ __all__ = [
 
 # Standard Imports
 import os
+import sys
 import json
 
 ## Python 2/3 compatilibity standard imports
-# int subclass of long on Py2, therefore int = long and short
-# Allow encoding parameter in open()
-from builtins import int, open
+# from builtins import int, open
 
 # Third party imports
 import paho.mqtt.client
 # import __main__ as main
 import __main__
 
-## Python 2/3 compatibility imports
+
+## Python 2/3 Compatibility Support
+# The long builtin no longer exists in Python3.
+if sys.version_info >= (3,0):
+    long = int
+
 # To print multiple strings, import print_function to prevent Py2 from interpreting it as a tuple:
 # from __future__ import print_function
+# Allow encoding parameter in open()
+def do_open(file, mode, encoding, *args, **kwargs):
+    """Wrapper for builtin python open() compatibility between python2 and python3.
+    Removes encoding argument from open() for python2
+
+    Args:
+        file (FileDescriptorOrPath): File descriptor or path
+        mode (str): File open mode
+
+    Returns:
+        fileobject: File objet
+    """
+    if sys.version_info.major >= 3:
+        return open(file, mode, *args, encoding = encoding, **kwargs)
+    if "encoding" in kwargs:
+        del kwargs["encoding"]
+    return open(file, mode, *args, **kwargs)  # pylint: disable=unspecified-encoding
 
 
 # Globals
@@ -70,7 +91,6 @@ def generate_filename(filename=None):
     if filename is not None:
         filename = filename.strip()
     if filename is None or filename == "":
-        # parent_filename = os.path.basename(main.__file__).rsplit('.', 1)[0]
         parent_filename = os.path.basename(__main__.__file__).rsplit('.', 1)[0]
         filename = "mqtt_queue_%s.json" % parent_filename
     return filename
@@ -131,7 +151,7 @@ def load_queue_from_file(filename):
     """
     # Read backup JSON Data from previous failed uploads
     if os.path.isfile(filename):
-        with open(filename, "r", encoding='utf-8') as json_file:
+        with do_open(filename, "r", encoding='utf-8') as json_file:
             try:
                 json_queue = json.load(json_file)
                 if isinstance(json_queue, dict):
@@ -191,10 +211,10 @@ def save_queue_to_file(filename, json_queue, start=None, end=None):
         raise RuntimeError("Expect json_queue to be of dict|list|list[dict] type")
     if not json_queue:
         # Clear queue from file
-        with open(filename, "w", encoding="utf-8"):
+        with do_open(filename, "w", encoding="utf-8"):
             pass  # Do nothing, empty the file
     else:
-        with open(filename, "w", encoding="utf-8") as json_file:
+        with do_open(filename, "w", encoding="utf-8") as json_file:
             json.dump(json_queue[start:end], json_file, indent=4, separators=(",", ": "))
 
 
@@ -218,7 +238,7 @@ def package_thingsboard_payload(data, ts=None):
     if not data:
         return None
 
-    if not ts is None and not isinstance(ts, (int, float)):
+    if not ts is None and not isinstance(ts, (int, float, long)):
         raise TypeError("Expect ts to be of numeric type, received %s" % type(ts))
 
     if isinstance(data, dict):
