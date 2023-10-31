@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 This is an MQTT client publishing helper module. Contains support and wrapper
 functions for MQTT publishing.
@@ -34,14 +33,13 @@ import json
 
 # Third party imports
 import paho.mqtt.client
-# import __main__ as main
-import __main__
+from __main__ import __file__ as main_script_path
 
 
 ## Python 2/3 Compatibility Support
 # The long builtin no longer exists in Python3.
 if sys.version_info >= (3,0):
-    long = int
+    long = int  # pylint: disable=invalid-name
 
 # To print multiple strings, import print_function to prevent Py2 from interpreting it as a tuple:
 # from __future__ import print_function
@@ -91,7 +89,7 @@ def generate_filename(filename=None):
     if filename is not None:
         filename = filename.strip()
     if filename is None or filename == "":
-        parent_filename = os.path.basename(__main__.__file__).rsplit('.', 1)[0]
+        parent_filename = os.path.basename(main_script_path).rsplit('.', 1)[0]
         filename = "mqtt_queue_%s.json" % parent_filename
     return filename
 
