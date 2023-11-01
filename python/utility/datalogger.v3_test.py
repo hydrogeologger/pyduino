@@ -2,10 +2,10 @@
 import sys
 import traceback
 import time
-import serial
-import RPi.GPIO as GPIO            # import RPi.GPIO module
 from textwrap import fill
 from collections import OrderedDict
+import serial
+import RPi.GPIO as GPIO            # import RPi.GPIO module
 # from time import sleep,localtime,strftime
 # import json
 # from phant import Phant
@@ -14,17 +14,14 @@ from collections import OrderedDict
 
 
 #-------------------- Check Python Version For Compatibility ------------------
-if sys.version_info.major >= 3:
-    pass
-elif sys.version_info.major == 2:
+# from builtins import input
+if sys.version_info.major <= 2:
     try:
         # Introduce Compatibility for input() and raw_input() between python2 and python3
-        input = raw_input
+        input = raw_input # pylint: disable=redefined-builtin # type: ignore
     except NameError:
         pass
     # in_waiting = inWaiting
-else:
-    print ("Unknown python version - some functions may not function appropriately")
 
 
 #------------------- Constants and Ports Information---------------------------
@@ -51,13 +48,15 @@ A14 = 68
 A15 = 69
 
 # RPI pins uses GPIO numbering (BCM)
-RPI_DIGITAL_PINS = (3, 18, 9, 8, 12, 19, 20, 2, 17, 10, 11, 7, 13, 16, 21) # Pins in physical board order, bottom tier -> top tier
+RPI_DIGITAL_PINS = (3, 18, 9, 8, 12, 19, 20, # Pins in physical board order, bottom tier -> top tier
+                    2, 17, 10, 11, 7, 13, 16, 21)
 # RPI_DIGITAL_PINS = (2, 3, 7, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21)
 RPI_SWITCH_PINS = (4, 5, 6, 22, 23, 24, 25, 26)
 ARDUINO_SWITCH_PINS = (8, 9, 10, 11, 12, 13, 22, 23, 24, 25, 26, 27, 28, \
         29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, \
         47, 48, 49)
-ARDUINO_ANALOG_PINS = (1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 14) # Pins in physical order, bottom tier -> top tier
+ARDUINO_ANALOG_PINS = (1, 3, 5, 7, 9, 11, 13, 15, # Pins in physical order, bottom tier -> top tier
+                       0, 2, 4, 6, 8, 10, 12, 14)
 # ARDUINO_ANALOG_PINS = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 ARDUINO_UART_PINS = (15, 16, 17, 18, 19)
 ARDUINO_PWM_PINS = (3, 4, 5)
@@ -68,8 +67,11 @@ ARDUINO_SDI12_PINS = (50, 51, 52, 53, \
 ARDUINO_ANALOG_SDI12_PINS = (8, 9, 10, 11, 12, 13, 14, 15)
 
 ## Debugging flag
-_DEBUG = False
-_DEBUG_REQUEST = True
+class Debug:
+    """Class for keeping track of debug states."""
+    flag = True # Serial debug flag
+    show = False # Show command being sent
+_DEBUG = Debug()
 
 #---------------------------- Functions Definition -----------------------------
 def index_containing_substring(the_list, substring):
@@ -80,18 +82,16 @@ def index_containing_substring(the_list, substring):
 
 
 def set_debug(debug):
-    global _DEBUG
-    _DEBUG = debug
-    print("DEBUG Mode: " + str(_DEBUG))
-    return _DEBUG
+    _DEBUG.show = debug
+    print("DEBUG Mode: " + str(_DEBUG.show))
+    return _DEBUG.show
 
 def set_serial_debug(debug):
-    global _DEBUG_REQUEST
-    _DEBUG_REQUEST = debug
-    print("Serial Receive Debug Mode: " + str(_DEBUG_REQUEST))
-    if _DEBUG_REQUEST:
+    _DEBUG.flag = debug
+    print("Serial Receive Debug Mode: " + str(_DEBUG.flag))
+    if _DEBUG.flag:
         print("\"debug,1\" flag sent with message")
-    return _DEBUG_REQUEST
+    return _DEBUG.flag
 
 def is_rpi_digital_pin(element):
     element = int(element)
@@ -137,7 +137,7 @@ def is_escape(value):
 
 def perform_handshake(arduino_serial):
     message_out = "abc"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -163,7 +163,7 @@ def reset_arduino(pin=RPI_RESET_PIN, sleep_duration=5):
 
 def reset_rpi_by_arduino(arduino_serial):
     message_out = "RESET"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -175,9 +175,9 @@ def reset_rpi_by_arduino(arduino_serial):
 def onboard_dht22_test(arduino_serial):
     # try:
     message_out = "dht22,54,power,2,points,2,dummies,1,interval_mm,200"
-    if _DEBUG_REQUEST:
+    if _DEBUG.flag:
         message_out += ",debug,1"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -241,12 +241,14 @@ def rpi_digital_output_test():
 
                 GPIO.setup(gpio_pin, GPIO.OUT)
                 GPIO.output(gpio_pin, GPIO.HIGH)
-                print(FONT_BOLD_COLOUR_YELLOW + "GPIO #" + str(gpio_pin) + ": HIGH" + FONT_COLOUR_DEFAULT)
+                print(FONT_BOLD_COLOUR_YELLOW + "GPIO #" + str(gpio_pin) + \
+                      ": HIGH" + FONT_COLOUR_DEFAULT)
 
                 time.sleep(user_timer)
 
                 GPIO.output(gpio_pin, GPIO.LOW)
-                print(FONT_BOLD_COLOUR_YELLOW + "GPIO #" + str(gpio_pin) + ": LOW" + FONT_COLOUR_DEFAULT)
+                print(FONT_BOLD_COLOUR_YELLOW + "GPIO #" + str(gpio_pin) + \
+                      ": LOW" + FONT_COLOUR_DEFAULT)
                 index = index + 1
 
             except ValueError:
@@ -297,12 +299,14 @@ def rpi_switches_test():
 
                 GPIO.setup(power_pin, GPIO.OUT)
                 GPIO.output(power_pin, GPIO.HIGH)
-                print(FONT_BOLD_COLOUR_YELLOW + "Switch #" + str(power_pin) + ": ON" + FONT_COLOUR_DEFAULT)
+                print(FONT_BOLD_COLOUR_YELLOW + "Switch #" + str(power_pin) + \
+                      ": ON" + FONT_COLOUR_DEFAULT)
 
                 time.sleep(user_timer)
 
                 GPIO.output(power_pin, GPIO.LOW)
-                print(FONT_BOLD_COLOUR_YELLOW + "Switch #" + str(power_pin) + ": OFF" + FONT_COLOUR_DEFAULT)
+                print(FONT_BOLD_COLOUR_YELLOW + "Switch #" + str(power_pin) + \
+                      ": OFF" + FONT_COLOUR_DEFAULT)
                 index = index + 1
 
             except ValueError:
@@ -351,9 +355,9 @@ def sdi12_sensor_test(arduino_serial):
 
     try:
         message_out = "SDI-12,{0},power,{1},default_cmd,read".format(sdi12_pin, power_pin)
-        if _DEBUG_REQUEST:
+        if _DEBUG.flag:
             message_out += ",debug,1"
-        if _DEBUG:
+        if _DEBUG.show:
             print("DEBUG: " + message_out)
         arduino_serial.flushInput()
         arduino_serial.write(message_out.encode())
@@ -407,7 +411,7 @@ def arduino_switches_test(arduino_serial):
 
             # message_out = "power,{0},analog,9,point,3,interval_mm,200,debug,1".format(power_pin)
             message_out = "power_switch,{0},power_switch_status,1".format(power_pin)
-            if _DEBUG:
+            if _DEBUG.show:
                 print("DEBUG: " + message_out)
             arduino_serial.flushInput()
             arduino_serial.write(message_out.encode())
@@ -418,7 +422,7 @@ def arduino_switches_test(arduino_serial):
             time.sleep(user_timer)
 
             message_out = "power_switch,{0},power_switch_status,0".format(power_pin)
-            if _DEBUG:
+            if _DEBUG.show:
                 print("DEBUG: " + message_out)
             arduino_serial.flushInput()
             arduino_serial.write(message_out.encode())
@@ -467,9 +471,9 @@ def arduino_analog_test(arduino_serial):
 
             message_out = "analog,{0},power,{1},points,3,dummies,1,interval_mm,100" \
                     .format(analog_pin, power_pin)
-            if _DEBUG_REQUEST:
+            if _DEBUG.flag:
                 message_out += ",debug,1"
-            if _DEBUG:
+            if _DEBUG.show:
                 print("DEBUG: " + message_out)
             arduino_serial.flushInput()
             arduino_serial.write(message_out.encode())
@@ -521,9 +525,9 @@ def vsense_adc_check(arduino_serial):
             continue
 
     message_out = "analog,15,power,9,points,3,dummies,1,interval_mm,200"
-    if _DEBUG_REQUEST:
+    if _DEBUG.flag:
         message_out += ",debug,1"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -539,7 +543,7 @@ def vsense_adc_check(arduino_serial):
 
 def check_arduino_runtime_since_last_comm(arduino_serial):
     message_out = "check_millis"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -567,14 +571,14 @@ def scan_i2c_multiplexer(arduino_serial):
 
     if is_arduino_switch(power_pin):
         message_out = "power_switch,{0},power_switch_status,1".format(power_pin)
-        if _DEBUG:
+        if _DEBUG.show:
             print("DEBUG: " + message_out)
         arduino_serial.write(message_out.encode())
         time.sleep(1)
         arduino_serial.flushInput()
 
     message_out = "9548_search"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -586,7 +590,7 @@ def scan_i2c_multiplexer(arduino_serial):
 
     if is_arduino_switch(power_pin):
         message_out = "power_switch,{0},power_switch_status,0".format(power_pin)
-        if _DEBUG:
+        if _DEBUG.show:
             print("DEBUG: " + message_out)
         arduino_serial.write(message_out.encode())
         time.sleep(1)
@@ -625,11 +629,11 @@ def scan_for_ds18b20_suction(arduino_serial):
 
     while True: # Number of samples per heat/cool cycle
         try:
-            number_samples = input("Number of samples per heat/cool cycle, (Default Enter = 1): ")
+            number_samples = input("Number of samples per heat/cool cycle, (Default Enter = 3): ")
             if is_escape(number_samples):
                 return
-            elif (number_samples == ""):
-                number_samples = 1
+            elif number_samples == "":
+                number_samples = 3
                 break
             number_samples = int(number_samples)
             if number_samples >= 0:
@@ -642,25 +646,24 @@ def scan_for_ds18b20_suction(arduino_serial):
 
     while True: # Heating Interval
         try:
-            sample_interval = input("Sample Interval in milliseconds, (Default Enter = 0): ")
+            sample_interval = input("Sample Interval in seconds, (Default Enter = 3): ")
             if is_escape(sample_interval):
                 return
-            elif (sample_interval == ""):
-                sample_interval = 0
+            if sample_interval == "":
+                sample_interval = 3000
                 break
-            sample_interval = int(sample_interval)
+            sample_interval = int(sample_interval) * 1000
             if sample_interval >= 0:
                 break
-            else:
-                continue
+            continue
         except ValueError:
             # Prompt for pin again if incorrect input
             continue
 
     message_out = "ds18b20_search,{0},power,{1}".format(suction_pin, power_pin)
-    if _DEBUG_REQUEST:
+    if _DEBUG.flag:
         message_out += ",debug,1"
-    if _DEBUG:
+    if _DEBUG.show:
         print("DEBUG: " + message_out)
     arduino_serial.flushInput()
     arduino_serial.write(message_out.encode())
@@ -714,10 +717,11 @@ def scan_for_ds18b20_suction(arduino_serial):
                 # Prompt for pin again if incorrect input
                 continue
         message_out = "fred,{0},dgin,{1},snpw,{2},htpw,{3},itv,{4},otno,{5}" \
-                    .format(suction_sensors[suction_index], suction_pin, power_pin, heater_pin, sample_interval, number_samples)
-        if _DEBUG_REQUEST:
+                    .format(suction_sensors[suction_index], suction_pin, \
+                            power_pin, heater_pin, sample_interval, number_samples)
+        if _DEBUG.flag:
             message_out += ",debug,1"
-        if _DEBUG:
+        if _DEBUG.show:
             print("DEBUG: " + message_out)
         arduino_serial.flushInput()
         arduino_serial.write(message_out.encode())
@@ -763,29 +767,29 @@ def serial_session(arduino_serial):
             sys.stdout.flush()
 
 
-def desc(desc, indent, total_length):
+def print_desc(desc, indent, total_length):
     return fill(desc, width=total_length-indent, subsequent_indent=' '*indent)
 
 
 def display_options_menu(mode_list):
     # from textwrap import fill
-    WIDTH = 70
-    LEFT_LEN = 7
-    PAD = 2
-    INDENT = LEFT_LEN + PAD + 1
+    index_width = 6
+    desc_width = 70
+    pad_size = 2
+    indent = index_width + pad_size + 1
 
     mode = OrderedDict(mode_list)
 
     print("Select the following options for [" + HARDWARE_NAME + "] testing:\n")
     for key, value in mode.items():
-        print("{2:>{0}}:{1}{3}".format(LEFT_LEN, ' '*PAD, key, desc(value, INDENT, WIDTH)))
+        print(" {2:>{0}}:{1}{3}".format(
+                index_width, ' '*pad_size, key, print_desc(value, indent, desc_width)))
 
 def general_callback(arduino_serial, user_option):
-    global _DEBUG, _DEBUG_REQUEST
     if user_option == "debug":
-        _DEBUG = set_debug(not _DEBUG)
+        _DEBUG.show = set_debug(not _DEBUG.show)
     elif user_option == "debug0":
-        _DEBUG_REQUEST = set_serial_debug(not _DEBUG_REQUEST)
+        _DEBUG.flag = set_serial_debug(not _DEBUG.flag)
     elif user_option == "serial":
         serial_session(arduino_serial)
 
