@@ -1207,13 +1207,13 @@ def chebfit(fun, n=10, a=-1, b=1, trace=False):
     ...                   0.7380008479667991, 3.072523445141935, 3.4415238691253354])
     True
 
-    >>> import matplotlib.pyplot as plt
-    >>> h = plt.plot(x, np.exp(x), 'r', label='exp')
-    >>> h1 = plt.plot(x, wp.chebval(x, ck7, a, b), 'g.', label='ck7')
-    >>> h2 = plt.plot(x, wp.chebval(x, ck9, a, b), 'b.', label='ck9')
-    >>> h3 = plt.legend()
+    import matplotlib.pyplot as plt
+    h = plt.plot(x, np.exp(x), 'r', label='exp')
+    h1 = plt.plot(x, wp.chebval(x, ck7, a, b), 'g.', label='ck7')
+    h2 = plt.plot(x, wp.chebval(x, ck9, a, b), 'b.', label='ck9')
+    h3 = plt.legend()
 
-    >>> plt.close()
+    plt.close()
 
     See also
     --------
@@ -1311,15 +1311,15 @@ def chebfit_dct(f, n=(10, ), domain=None, args=()):
     ...                   7.38000848e-01,   3.07252345e+00,   3.44152387e+00])
     True
 
-    >>> import matplotlib.pyplot as plt
-    >>> x = np.linspace(0, 4)
-    >>> xn = wp.map_from_interval(x, *domain)
-    >>> h0 = plt.plot(x, np.exp(x), 'r', label='exp')
-    >>> h1 = plt.plot(x, wp.chebvalnd(ck7, xn), 'g.', label='ck7')
-    >>> h2 = plt.plot(x, wp.chebval(xn, ck9),'b.', label='ck9')
-    >>> h3 = plt.legend()
+    import matplotlib.pyplot as plt
+    x = np.linspace(0, 4)
+    xn = wp.map_from_interval(x, *domain)
+    h0 = plt.plot(x, np.exp(x), 'r', label='exp')
+    h1 = plt.plot(x, wp.chebvalnd(ck7, xn), 'g.', label='ck7')
+    h2 = plt.plot(x, wp.chebval(xn, ck9),'b.', label='ck9')
+    h3 = plt.legend()
 
-    >>> plt.close()
+    plt.close()
 
     See also
     --------
@@ -1540,17 +1540,17 @@ def chebval(x, ck, a=-1, b=1, kind=1, fill=None):
     >>> ck = np.zeros(5); ck[-1]=1
     >>> y = wp.chebval(x, ck)
 
-    >>> import matplotlib.pyplot as plt
-    >>> h = plt.plot(x, y, x, wp.chebpoly(4, x),'.')
-    >>> plt.close()
+    import matplotlib.pyplot as plt
+    h = plt.plot(x, y, x, wp.chebpoly(4, x),'.')
+    plt.close()
 
     Fit exponential function:
     >>> ck = wp.chebfit(np.exp,7,0,2)
     >>> x = np.linspace(0,4);
     >>> y2 = wp.chebval(x,ck,0,2)
 
-    >>> h = plt.plot(x, y2, 'g', x, np.exp(x))
-    >>> plt.close()
+    h = plt.plot(x, y2, 'g', x, np.exp(x))
+    plt.close()
 
     See also
     --------
@@ -1594,13 +1594,13 @@ def chebder(ck, a=-1, b=1):
     --------
 
     Fit exponential function:
-    >>> import matplotlib.pyplot as plt
     >>> import polynomial as wp
     >>> ck = wp.chebfit(np.exp,7,0,2)
     >>> x = np.linspace(0,4)
     >>> ck2 = wp.chebder(ck,0,2)
     >>> y = wp.chebval(x,ck2,0,2)
 
+    import matplotlib.pyplot as plt
     h = plt.plot(x, y, 'g', x, np.exp(x), 'r')
     plt.close()
 
@@ -1648,13 +1648,13 @@ def chebint(ck, a=-1, b=1):
     Examples
     --------
     Fit exponential function:
-    >>> import matplotlib.pyplot as plt
     >>> import polynomial as wp
     >>> ck = wp.chebfit(np.exp, 7, 0, 2)
     >>> x = np.linspace(0,4)
     >>> ck2 = wp.chebint(ck, 0, 2);
     >>> y = wp.chebval(x, ck2, 0, 2)
 
+    import matplotlib.pyplot as plt
     h = plt.plot(x, y, 'g', x, np.exp(x), 'r.')
     plt.close()
 
@@ -1883,10 +1883,10 @@ def padefit(c, m=None):
     >>> np.allclose(q, [ 0.03333333, -0.33333333,  1.        ])
     True
 
-    >>> import matplotlib.pyplot as plt
-    >>> x = np.linspace(0,4)
-    >>> h = plt.plot(x, c(x), x, p(x)/q(x), 'g-', x,np.exp(x), 'r.')
-    >>> plt.close()
+    import matplotlib.pyplot as plt
+    x = np.linspace(0,4)
+    h = plt.plot(x, c(x), x, p(x)/q(x), 'g-', x,np.exp(x), 'r.')
+    plt.close()
 
     See also
     --------
@@ -1956,10 +1956,10 @@ def padefitlsq(fun, m, k, a=-1, b=1, trace=False, x=None, end_points=True):
     >>> np.allclose(c2, [-0.0049658 ,  0.07610473, -0.44716929,  1.        ])
     True
 
-    >>> import matplotlib.pyplot as plt
-    >>> x = np.linspace(0,4)
-    >>> h = plt.plot(x, wp.polyval(c1,x)/wp.polyval(c2,x),'g')
-    >>> h = plt.plot(x, np.exp(x), 'r')
+    import matplotlib.pyplot as plt
+    x = np.linspace(0,4)
+    h = plt.plot(x, wp.polyval(c1,x)/wp.polyval(c2,x),'g')
+    h = plt.plot(x, np.exp(x), 'r')
 
     See also
     --------
