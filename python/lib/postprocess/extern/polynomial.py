@@ -22,20 +22,21 @@ from __future__ import absolute_import, division, print_function
 import warnings  # @UnusedImport
 from functools import reduce
 from numpy.polynomial import polyutils as pu
-from matplotlib import pyplot as plt  # modified by Bo Zhang
 import numpy as np
 from numpy import (newaxis, arange, pi)
-from scipy.fftpack import dct, idct as _idct
-from numpy.lib.polynomial import *  # @UnusedWildImport
+from numpy.lib.polynomial import (poly, polyadd, polymul, polyval, poly1d, polyfit)
 from numpy.polynomial.chebyshev import chebpts1
+from scipy.fftpack import dct, idct as _idct
 try:
     from scipy.interpolate import pade  # pade has moved to scipy.interpolate in scipy 1.0.0
 except ImportError:
     from scipy.misc import pade  # @UnresolvedImport
-__all__ = np.lib.polynomial.__all__
-__all__ = __all__ + ['pade', 'padefit', 'polyreloc', 'polyrescl', 'polytrim',
+from matplotlib import pyplot as plt  # modified by Bo Zhang
+
+# __all__ = np.lib.polynomial.__all__
+__all__ = ['pade', 'padefit', 'polyreloc', 'polyrescl', 'polytrim',
                      'poly2hstr', 'poly2str', 'polyshift', 'polyishift',
-                     'map_from_intervall', 'map_to_intervall', 'cheb2poly',
+                     'cheb2poly',
                      'chebextr', 'chebroot', 'chebpoly', 'chebfit', 'chebval',
                      'chebder', 'chebint', 'Cheb1d', 'dct', 'idct',
                      'chebfitnd', 'chebvalnd']
@@ -43,6 +44,7 @@ __all__ = __all__ + ['pade', 'padefit', 'polyreloc', 'polyrescl', 'polytrim',
 
 def polyint(p, m=1, k=None):
     """
+    Modified slightly from numpy.lib.polynomial.polyint()
     Return an antiderivative (indefinite integral) of a polynomial.
 
     The returned order `m` antiderivative `P` of polynomial `p` satisfies
@@ -156,6 +158,7 @@ def polyint(p, m=1, k=None):
 
 def polyder(p, m=1):
     """
+    Modified slightly from numpy.lib.polynomial.polyder()
     Return the derivative of the specified order of a polynomial.
 
     Parameters
@@ -1715,7 +1718,7 @@ class Cheb1d(object):
             for key in ck.__dict__:
                 self.__dict__[key] = ck.__dict__[key]
             return
-        cki = trim_zeros(np.atleast_1d(ck), 'b')
+        cki = np.trim_zeros(np.atleast_1d(ck), 'b')
         if len(cki.shape) > 1:
             raise ValueError("Polynomial must be 1d only.")
         self.__dict__['coeffs'] = cki
@@ -2180,7 +2183,7 @@ def chebfitnd(xi, f, deg, rcond=None, full=False, w=None):
         deficient. The warning is only raised if `full` = False.  The
         warnings can be turned off by
         >>> import warnings
-        >>> warnings.simplefilter('ignore', RankWarning)
+        >>> warnings.simplefilter('ignore', pu.RankWarning)
 
     See Also
     --------
