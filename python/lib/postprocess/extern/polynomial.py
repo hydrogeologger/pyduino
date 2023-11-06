@@ -2411,12 +2411,12 @@ def test_chebfit1d():
     zi1 = np.polynomial.chebyshev.chebval(xi, c1)
 
     # plt.plot(xi, zi,'.', xi, f(xi))
-    plt.semilogy(xi, np.abs(zi - f(xi)), label=f'dct T={time_dct:.5f} sec')
-    plt.semilogy(xi, np.abs(zi1 - f(xi)), label=f'vander T={time_interp:.5f} sec')
+    plt.semilogy(xi, np.abs(zi - f(xi)), label='dct T={time_dct:.5f} sec'.format(time_dct = time_dct))
+    plt.semilogy(xi, np.abs(zi1 - f(xi)), label='vander T={time_interp:.5f} sec'.format(time_interp = time_interp))
     plt.grid(True, which='both')
     plt.xlabel('x')
     plt.ylabel('Interpolation error')
-    plt.title(f'chebinterpolate deg={n-1}')
+    plt.title('chebinterpolate deg={0}'.format(n - 1))
     plt.legend()
     plt.show()
 
@@ -2465,7 +2465,7 @@ def test_interpolate():
     for deg in range(0, 10):
         for p in range(0, deg + 1):
             c = chebfit_dct(powxy, n=(deg+1, deg+1), args=(p,))
-            print(f'Error deg={deg}, p={p}', np.abs(cheb.chebval2d(x1, x2, c)-powxy(x1, x2, p)).max())
+            print('Error deg={deg}, p={p}'.format(deg=deg, p=p), np.abs(cheb.chebval2d(x1, x2, c)-powxy(x1, x2, p)).max())
 
 
 def main():
