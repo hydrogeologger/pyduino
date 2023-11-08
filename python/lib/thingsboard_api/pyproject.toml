@@ -1,0 +1,34 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thingsboard_api"
+authors = [
+    {name = "Lieven Tan"}
+    ]
+dynamic = ["version", "description"]
+requires-python = ">=2.7"
+dependencies = [
+    "pandas>=0.24.2",
+    "requests"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hydrogeologger/pyduino"
+"Bug Tracker" = "https://github.com/hydrogeologger/pyduino/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "thingsboard_api.__version__"}
+
+[tool.setuptools.packages.find]
+# Flat layout default
+where = ["."]
+include = ["thingsboard_api*"]
+exclude = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
