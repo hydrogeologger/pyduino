@@ -1,0 +1,55 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = [
+    "setuptools >= 40.9.0", # PEP 517
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "postprocess"
+description = "Hydrogeologger/Pyduino postprocessing helper package"
+authors = [
+    { name = "Lieven Tan" },
+    { name = "Chenming Zhang" }
+]
+dynamic = ["version"]
+requires-python = ">=2.7"
+keywords = ["hydrogeologger", "postprocess", "pandas"]
+classifiers = [
+    # Project maturity
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 3 - Alpha",
+
+    # Python version support
+    "Programming Language :: Python"
+]
+dependencies = [
+    "pandas>=0.24.2",
+    "matplotlib",
+    "numpy",
+    "scipy"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hydrogeologger/pyduino"
+"Bug Tracker" = "https://github.com/hydrogeologger/pyduino/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "postprocess.__version__" }
+
+[tool.setuptools.package-dir] # Directory containing packages
+"" = "."
+
+[tool.setuptools.packages.find]
+where = ["."] # list of folders that contain the packages (["."] by default)
+include = [
+    "postprocess*"
+] # package names should match these glob patterns (["*"] by default)
+exclude = [] # exclude packages matching these glob patterns (empty by default)
