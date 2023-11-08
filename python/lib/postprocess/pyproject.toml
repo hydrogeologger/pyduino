@@ -1,0 +1,35 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "postprocess"
+authors = [
+    {name = "Lieven Tan"},
+    {name = "Chenming Zhang"}
+    ]
+dynamic = ["version", "description"]
+requires-python = ">=2.7"
+dependencies = [
+    "pandas>=0.24.2",
+    "numpy"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hydrogeologger/pyduino"
+"Bug Tracker" = "https://github.com/hydrogeologger/pyduino/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "postprocess.__version__"}
+
+[tool.setuptools.packages.find]
+# Flat layout default
+where = ["."]
+include = ["postprocess*"]
+exclude = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
