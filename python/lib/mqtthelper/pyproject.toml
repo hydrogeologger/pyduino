@@ -1,0 +1,33 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mqtthelper"
+dynamic = ["version", "description"]
+authors = [
+    {name = "Lieven Tan"}
+]
+requires-python = ">=2.7.18"
+dependencies = [
+    "paho-mqtt >= 1.6.1"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hydrogeologger/pyduino"
+"Bug Tracker" = "https://github.com/hydrogeologger/pyduino/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "mqtthelper.__version__"}
+
+[tool.setuptools.packages.find]
+# Flat layout default
+where = ["."]
+include = ["mqtthelper*"]
+exclude = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
