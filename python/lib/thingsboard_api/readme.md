@@ -10,8 +10,9 @@ Reference: https://thingsboard.io/docs/api/
 
 # Usage and API
 ```python
-import thingsboard_api
-import thingsboard_api.tb_pandas # Include only if require dataframe
+# Import only any one.
+import thingsboard_api # If not planning to use pandas DataFrame
+import thingsboard_api.tb_pandas # Planning to use pandas DataFrame
 ```
 
 ## Account
@@ -28,7 +29,7 @@ Account class to authenticate with thingsboard server. General usage flow is as 
 Account(url)
 ```
 #### Params
-* `url` - the full url path to thingsboard server including http/https and port number
+* `url` - the full url path to thingsboard server including http/https and port (if required) number
 
 #### Attributes
 Same as [params](#Params)
@@ -94,12 +95,13 @@ Device(account, name, device_id)
 
 #### Params
 * `account` - Reference to Account() object
-* `name` - Verbose device name
-* `device_id` - ID of device as from thingsboard
+* `name` - Verbose device name (user given)
+* `device_id` - Device ID as used by thingsboard
 
 ### Attributes
+* `account` - Account associated with device
 * `name` - Verbose device name
-* `device_id` - ID of device as from thingsboard
+* `device_id` - Device ID as used by thingsboard
 * `keys` - Available keys from thingsboard as obtained from [get_keys()](#get_keys())
 
 
@@ -107,87 +109,95 @@ Device(account, name, device_id)
 ```python
 get_keys()
 ```
-Retrieves and returns the keys used by the thingsboard device
+Retrieve and returns telemetry keys belonging to device.
 
 
 ### get_data()
 ```python
-get_data(startTs, endTs, keys=None, limit=100000, interval=None, agg=None)
+get_data(startTs, endTs, keys=None, limit=None, interval=None, agg=None)
 ```
-Sends a post request to thingsboard telemetry to extract device data. Returns dictionary of
-timeseries telemetry data.
+Retrieves timeseries data from device. Returns JSON object with devices keys as
+json key and values containing list of timeseries and values.
 
 #### Params
-* `startTs` - Unix timestamp that identifies the start of the interval in milliseconds
-* `endTs` - Unix timestamp that identifies the end of the interval in milliseconds
-* `keys` - List of telemetry keys to fetch, If not provided, must have called [get_keys()](#get_keys())
-* `limit` - Max amount of data points to return or intervals to process, default=100000
-* `interval` - Aggregation interval, in milliseconds
-* `agg` - Aggregation function, one of MIN, MAX, AVG, SUM, COUNT
+* `startTs` (datetime|int|float) - Start of time interval. \
+        Either datetime object or Unix timestamp in milliseconds.
+* `endTs` (datetime|int|float) - End of time interval, not inclusive.\
+        Either datetime object or Unix timestamp in milliseconds.
+* `keys` (tuple|list, optional) - Limit data to specified telemetry keys only. \
+        Defaults to None.[get_keys()](#get_keys())
+* `limit` (int, optional) - Max amount of data points to return. Defaults to None.
+* `interval` (timedelta|int, optional) - Aggregation interval, in milliseconds. \
+        Also accept timedelta object. Defaults to None.
+* `agg` (str, optional) - Aggregation function. \
+        Accepts (MIN, MAX, AVG, SUM, COUNT, NONE). Defaults to None.
+* `tz_offset1` (float, optional): Timezone offset in hours. Defaults to 0.
 
-Raises `ValueError` when keys is empty.
+Raises `ValueError` when keys is empty or when `agg` function is not one of allowed types.
 
 
-### get_data2()
+# thingsboard_api.tb_pandas module
+Extends [thingsboard_api](#thingsboard_api-module) base module, with pandas data processing wrapper functions.
+
+## convert_to_dataframes()
 ```python
-get_data2(self, start_time, end_time, keys=None, limit=100000, interval=None, agg=None, tz_offset=10):
+convert_to_dataframes(data, keys=None, debug=False)
 ```
-Alternate to [get_data()](#get_data), get_data2() requires a datetime time interval and allows
-time zone hour offset calculation, returns dictionary of timeseries telemetry data.
+Convert JSON object of telemetry data into a dictionary collection of pandas.DataFrame objects. Setting timeseries "ts" as dataframe index.
+i.e. Each telemetry key in own dataframe. See [convert_to_dataframe()](#convert_to_dataframe()) to convert telemetry data to a single dataframe containing all telemetry keys.
 
-#### Params
-* `start_time` - Date and time that identifies the start of the interval
-* `end_time` - Date and time that identifies the end of the interval
-* `keys` - List of telemetry keys to fetch, if ommited must have called [get_keys()](#get_keys())
-* `limit` - Max amount of data points to return or intervals to process, default=100000
-* `interval` - Aggregation interval, in milliseconds
-* `agg` - Aggregation function, one of MIN, MAX, AVG, SUM, COUNT
-* `tz_offset` - Timezone hour offset for thingsboard server, defaults to +10 hours
+### Params
+* `data` - JSON object data to convert
+* `keys` - List of keys to limit subset of data converted
+* `debug` - Show original "ts". Defaults to False.
 
-Raises `ValueError` when keys is empty.
+See:
 
-
-## tb_pandas.Device
-Child class of thingsboard_api.Device class object. Extends [Device Class](#Device),
-with pandas data processing wrapper functions.
-Use as per `Device` class object, will store device data telemetry in object.
-
-### get_data (Override)
-Overrides [get_data()](#get_data()) to store timeseries telemetry data in object.
+* [get_data()](#get_data())
+* [convert_to_dataframe()](#convert_to_dataframe())
 
 
-### get_dataframe()
+## convert_to_dataframe()
 ```python
-get_dataframe(keys=None, tz_offset=10)
+convert_to_dataframe(data, keys=None, debug=False)
 ```
-Construct a Pandas.DataFrame object from device timeseries telemetry
+Construct a Pandas.DataFrame object telemetry data with all telemetry keys. See [convert_to_dataframes()](#convert_to_dataframes()) to convert each key into it's own dataframe.
 
-#### Params
-* `keys` - List of telemetry keys to limit for data frame
-* `tz_offset` - Timezone hour offset for thingsboard server, defaults to +10 hours
+### Params
+* `data` - JSON object data to convert
+* `keys` - List of keys to limit subset of data converted
+* `debug` - Show original "ts". Defaults to False
+
+See:
+
+* [get_data()](#get_data())
+* [convert_to_dataframes()](#convert_to_dataframes())
 
 
 # Examples:
 ```python
-import thingsboard_api
+import datetime
 import thingsboard_api.tb_pandas as tb_pandas
 
-account = thingsboard_api.Account(url="http://thingsboard.url")
+account = tb_pandas.Account(url="http://thingsboard.url")
 account.authenticate(username="user@user.com", password="password")
 
 # Normal, without manually requesting keys
-device = thingsboard_api.Device(account, name="DeviceName", device_id="55f0d405-248d-eb11-8a6b-9b13d3e7fe2e")
-device.get_keys()
-result = device.get_data2(start_time=datetime.datetime(2022,6,1), end_time=datetime.datetime.now(), keys=None, limit=1000, tz_offset=10)
-
-# Normal with requesting for specific keys
-device = thingsboard_api.Device(account, name="DeviceName", device_id="55f0d405-248d-eb11-8a6b-9b13d3e7fe2e")
-result = device.get_data2(start_time=datetime.datetime(2022,6,1), end_time=datetime.datetime.now(), keys=['a', 'b'], limit=1000, tz_offset=10)
-
-# With thingsboard_api.tb_pandas, specific keys for data frame
 device = tb_pandas.Device(account, name="DeviceName", device_id="55f0d405-248d-eb11-8a6b-9b13d3e7fe2e")
 device.get_keys()
-result = device.get_data2(start_time=datetime.datetime(2022,6,1), end_time=datetime.datetime.now(), keys=None, limit=1000, tz_offset=10)
+result = device.get_data(start_time=datetime.datetime(2022,6,1), end_time=datetime.datetime.now(), keys=None, limit=1000, tz_offset=10)
 
-result_df = device.get_dataframe(keys=['a','b'], tz_offset=10)
+# Normal with requesting for specific keys
+device = tb_pandas.Device(account, name="DeviceName", device_id="55f0d405-248d-eb11-8a6b-9b13d3e7fe2e")
+result = device.get_data(start_time=datetime.datetime(2022,6,1), end_time=datetime.datetime.now(), keys=['a', 'b'], limit=1000, tz_offset=10)
+
+# With thingsboard_api.tb_pandas, key subset not specified
+device = tb_pandas.Device(account, name="DeviceName", device_id="55f0d405-248d-eb11-8a6b-9b13d3e7fe2e")
+device.get_keys()
+data = device.get_data(start_time=datetime.datetime(2022,6,1), end_time=datetime.datetime.now(), keys=None, limit=1000, tz_offset=10)
+
+# Each telemetry key in own dataframe
+data_frames = tb_pandas.convert_to_dataframes(data)
+# Collate all telemetry key into single dataframe
+data_frame = tb_pandas.convert_to_dataframe(data)
 ```
