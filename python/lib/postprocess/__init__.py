@@ -9,4 +9,9 @@ Dependencies:
 # Module Info
 __version__ = "0.1.0"
 
+from .transformation import (
+    normalise,
+    calculate_delta,
+)
+
 from .interpolation import Interpolation
