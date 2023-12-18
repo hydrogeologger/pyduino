@@ -10,3 +10,7 @@ Dependencies:
 __version__ = "0.1.0"
 
 from .interpolation import Interpolation
+from .transformation import (
+    calculate_delta,
+    normalise,
+)
