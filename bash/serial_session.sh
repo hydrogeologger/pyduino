@@ -52,8 +52,8 @@ printf "\n"
 # Read commands from user, send them to device $1
 while [ "$cmd" != "exit" ]
 do
-   read cmd
-   echo -n $cmd > /dev/ttyS0
+   read -r cmd
+   echo -ne $cmd > /dev/ttyS0
 done
 
 # Terminate background read process
