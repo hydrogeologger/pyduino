@@ -24,7 +24,7 @@ void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
     Serial.print(DELIMITER);
 
     if (cmd == "read") {
-        sdi12_loop();
+        sdi12_loop_get_measurements();
     } else if (cmd == "change") {
         if (sensors != 1 || sensors < 1) {
             Serial.print("Expect only ONE sensor connected! => ABORT!");
@@ -146,7 +146,7 @@ void sdi12_send_command(String cmd, boolean read) {
 /*
 looping to read SDI-12 sensor
 */
-void sdi12_loop()
+void sdi12_loop_get_measurements()
 {
     // scan address space 0-9
     for (uint8_t i = 0; i < MAX_NUM_ADDR; i++)
@@ -370,6 +370,58 @@ void printInfo(char i)
             count++;
         }
         delay(5);
+    }
+}
+
+void sdi12_loop(void) {
+    String myCommand = "";
+    String sdiResponse = "";
+    char c;
+
+    while (true) {
+        if (mySDI12.available() < 0) { mySDI12.clearBuffer(); }
+
+        while (Serial.available() > 0) {
+            c = Serial.read();
+            if ((c != '\n') && (c != '\r')) {  // read all values entered in terminal window before enter
+                myCommand += String(c);
+            }
+            delay(10);  // 1 character ~ 7.5ms
+        }
+
+        if (myCommand == "SDIPASSEXIT" || millis() > 300000ul) {
+            Serial.println("SDIPASS,END!");
+            return;
+        }
+
+        if (c == '\n' || myCommand.length() > 0 || c == '\r') {
+            mySDI12.sendCommand(myCommand);
+            // mySDI12.flush();
+            mySDI12.clearBuffer();
+            mySDI12.forceListen();
+            myCommand = "";
+            c = '\0';
+            reset_timer();
+            for (int i=0; i < 5000; i++) {
+                delay(1);
+                if (mySDI12.available()) { break; }
+            }
+        }
+
+        while(mySDI12.available()) {
+            c = mySDI12.read();
+            if ((c != '\n') && (c != '\r')) {
+                sdiResponse += String(c);
+            }
+            delay(10);  // 1 character ~ 7.5ms
+        }
+
+        if (c == '\n' || sdiResponse.length() > 0 || c == '\r') {
+            c = '\0';
+            Serial.println(sdiResponse);  // write the response to the screen
+            Serial.flush();
+            sdiResponse = "";
+        }
     }
 }
 
