@@ -24,7 +24,7 @@ void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
     Serial.print(DELIMITER);
 
     if (cmd == "read") {
-        sdi12_loop();
+        sdi12_loop_get_measurements();
     } else if (cmd == "change") {
         if (sensors != 1 || sensors < 1) {
             Serial.print("Expect only ONE sensor connected! => ABORT!");
@@ -146,7 +146,7 @@ void sdi12_send_command(String cmd, boolean read) {
 /*
 looping to read SDI-12 sensor
 */
-void sdi12_loop()
+void sdi12_loop_get_measurements()
 {
     // scan address space 0-9
     for (uint8_t i = 0; i < MAX_NUM_ADDR; i++)
@@ -370,6 +370,61 @@ void printInfo(char i)
             count++;
         }
         delay(5);
+    }
+}
+
+void sdi12_loop(void) {
+    String myCommand = "";
+    String sdiResponse = "";
+    char c;
+
+    while (true) {
+        // SDI12 buffer overflow, clear buffer
+        if (mySDI12.available() < 0) { mySDI12.clearBuffer(); }
+        while (Serial.available() > 0) {
+            // Read all characters
+            c = Serial.read();
+            myCommand += String(c);
+            delay(2);  // 1 character ~ 1.04 ms @ 9600 baud
+        }
+
+        // Pass through mode escape
+        if (myCommand == "SDIPASSEXIT" || millis() > 300000ul) {
+            Serial.println("SDIPASS,END!");
+            return;
+        }
+
+        if (myCommand.length() > 0 || c == '\n' || c == '\r') {
+            reset_timer();  // Reset timer for pass through time limit
+            mySDI12.clearBuffer();
+            mySDI12.sendCommand(myCommand);
+            myCommand = "";
+            c = '\0';
+
+            // Wait for maximum duration for reply
+            for (uint16_t i = 0; i < 5000u; i++) {
+                delay(1);
+                if (mySDI12.available()) {
+                    break;
+                }
+            }
+        }
+
+        while (mySDI12.available() > 0) {
+            c = mySDI12.read();
+            if (c == '\r' || c == '\n') {
+                Serial.println(sdiResponse);  // write the response to the screen
+                Serial.flush();
+                sdiResponse = "";
+                c = '\0';
+                mySDI12.clearBuffer();
+                mySDI12.forceListen();
+                break;
+            } else if (c >= 32 && c <= 126) {
+                sdiResponse += String(c);
+            }
+            delay(10);  // 1 character ~ 8.33 ms @ 1200 baud
+        }
     }
 }
 
