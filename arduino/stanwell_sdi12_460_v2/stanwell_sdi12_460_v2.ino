@@ -739,6 +739,38 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     Serial.println();
 }
 
+void SDI12PassThroughMode(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay[]) {
+    // SDIPASS,<sdi_pin>,power,<powerPin>
+    //// to exit SDI-12 passthrough mode
+    // SDIPASSEXIT
+    int sdi12_pin_input = hydrogeolog1.parse_argument("SDIPASS", INVALID, str_ay_size, str_ay);
+    if (sdi12_pin_input == INVALID) { return; }
+
+    int8_t sdi12_pin = analogInputToDigitalPin(sdi12_pin_input);
+    if (sdi12_pin > -1) {
+        // Display analog pin number if used
+        hydrogeolog1.print_string_delimiter_value("SDIPASS", String(sdi12_pin_input));
+    } else {
+        // Display digital pin number, including if digital of analog used
+        sdi12_pin = sdi12_pin_input;
+        hydrogeolog1.print_string_delimiter_value("SDIPASS", String(sdi12_pin));
+    }
+    hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+
+    if (!sdi12_check_pin(sdi12_pin)) { Serial.println("Invalid Port"); return; }
+    if (power_sw_pin != INVALID) { digitalWrite(power_sw_pin, HIGH); }
+
+    if (sdi12_init(sdi12_pin)) {
+        Serial.println();
+        sdi12_loop();
+        sdi12_end();
+    }
+
+    if (power_sw_pin != INVALID) {
+        digitalWrite(power_sw_pin, LOW);
+    }
+}
+
 void check_serial(String content)
     /*
      if input abc in serial, arduino will return abc
@@ -836,6 +868,7 @@ void loop()
                           hydrogeolog1.parse_argument("clk", INVALID, str_ay_size, str_ay),
                           power_sw_pin, str_ay);
         SDI12_sensor(str_ay_size, debug_sw, power_sw_pin, str_ay);
+        SDI12PassThroughMode(str_ay_size, debug_sw, power_sw_pin, str_ay);
     }//communication
 } //loop
 /*===========================================================================*/
