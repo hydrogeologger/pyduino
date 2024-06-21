@@ -18,7 +18,7 @@ int8_t sdi12_scan(void);
 void sdi12_end(void);
 void sdi12_loop();
 void takeMeasurement_sdi12(char i);
-void printBufferToScreen();
+uint8_t printBufferToScreen(void);
 boolean checkActive(char i);
 uint8_t convert_char_to_bit_number(char c);
 char convert_bit_number_to_char(uint8_t bit);

@@ -330,11 +330,9 @@ def sdi12_sensor_test(arduino_serial):
                 return
             elif is_arduino_sdi12(sdi12_pin):
                 break
-
         except ValueError:
             # Try again if user input is not an sdi12 pin or x
             continue
-
 
     while True:
         try:
@@ -348,13 +346,29 @@ def sdi12_sensor_test(arduino_serial):
                 break
             else:
                 continue
-
         except ValueError:
             # Prompt for pin again if incorrect input
             continue
 
+    while True:
+        try:
+            power_delay = 0 # Default value
+            power_delay = input("Delay (power lead) time (seconds), default = " +
+                    str(power_delay) + ": ") or power_delay
+            if is_escape(power_delay):
+                return
+            power_delay = float(power_delay)
+            if power_delay >= 0:
+                break
+        except ValueError:
+            # Prompt again if incorrect input
+            continue
+
     try:
-        message_out = "SDI-12,{0},power,{1},default_cmd,read".format(sdi12_pin, power_pin)
+        message_out = "SDI-12,{0},power,{1},delay,{2},default_cmd,read".format(
+                sdi12_pin,
+                power_pin,
+                power_delay * 1000)
         if _DEBUG.flag:
             message_out += ",debug,1"
         if _DEBUG.show:
@@ -362,14 +376,13 @@ def sdi12_sensor_test(arduino_serial):
         arduino_serial.flushInput()
         arduino_serial.write(message_out.encode())
         # SDI-12 takes roughly 13 seconds to scan for all SDI12 devices
-        time.sleep(4) # Pad defualt 10sec timeout with 4sec
+        time.sleep(4 + power_delay) # Pad defualt 10sec timeout with 4sec
         while True:
             message_received = arduino_serial.read().decode()
             if message_received == "":
                 break
             sys.stdout.write(FONT_BOLD_COLOUR_YELLOW + message_received + FONT_COLOUR_DEFAULT)
             sys.stdout.flush()
-
     except Exception as error:
         print('SDI12 sensor reading failed')
         print(type(error))

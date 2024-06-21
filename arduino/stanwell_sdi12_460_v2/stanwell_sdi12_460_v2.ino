@@ -661,6 +661,13 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
         return;
     }
 
+    int power_delay_millis = hydrogeolog1.parse_argument("delay", 0, str_ay_size, str_ay);
+    if (power_delay_millis < 0) power_delay_millis = 0;
+    if (power_sw_pin != INVALID) {
+        digitalWrite(power_sw_pin, HIGH);
+        if (power_delay_millis > 0) delay(power_delay_millis);
+    }
+
     String new_addr = "";
     int power_off = hydrogeolog1.parse_argument("power_off", 1, str_ay_size, str_ay);
     String sdi12_parsed_command = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
@@ -683,6 +690,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
 
     if (debug_sw == 1) {
         hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+        if (power_delay_millis > 0) hydrogeolog1.print_string_delimiter_value("delay", String(power_delay_millis));
         hydrogeolog1.print_string_delimiter_value("power_off", String(power_off));
         if (sdi12_parsed_command != "") {
             if (start_index_custom_cmd == -1) {
@@ -697,10 +705,6 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
                 hydrogeolog1.print_string_delimiter_value("custom_cmd", "\"" + sdi12_parsed_command + "\"");
             }
         }
-    }
-
-    if (power_sw_pin != INVALID) {
-        digitalWrite(power_sw_pin, HIGH);
     }
 
     if (!sdi12_init(sdi12_pin)) {
