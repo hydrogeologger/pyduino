@@ -1,0 +1,100 @@
+# Basic .gitattributes for git-config files
+# =========================================
+# These files are text and should be normalized (Convert crlf => lf)
+*.gitattributes text eol=lf
+.gitignore      text eol=lf
+
+# Exclude files from exporting
+.gitattributes  export-ignore
+.gitignore      export-ignore
+
+# Enable syntax highlighting for files with `.gitattributes` extensions.
+*.gitattributes linguist-language=gitattributes
+*.gitattributes linguist-detectable=true
+*.gitattributes linguist-documentation=false
+
+
+# Basic .gitattributes repo.
+# ======================================
+*.txt   text
+*.csv   text
+*.md    text eol=lf diff=markdown
+*.md    linguist-detectable
+*.json  text diff=json
+
+
+# Basic .gitattributes for a UNIX repo.
+# ======================================
+# Shell Scripts, require LF
+*.sh    text eol=lf
+
+
+# Basic .gitattributes for a python repo.
+# ======================================
+
+# Python Source files
+*.py     text eol=lf diff=python
+*.py3    text eol=lf diff=python
+*.pyw    text diff=python
+*.pxd    text diff=python
+*.pyx    text diff=python
+*.pyz    text diff=python
+*.pyi    text diff=python
+
+# Python Binary files
+*.db     binary
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
+
+# Jupyter notebook
+*.ipynb  text eol=lf
+
+# Note: .db, .p, and .pkl files are associated
+# with the python modules ``pickle``, ``dbm.*``,
+# ``shelve``, ``marshal``, ``anydbm``, & ``bsddb``
+# (among others).
+
+# Basic .gitattributes for a C++/Arduino repo.
+# ======================================
+# C++/Arduino Sources
+*.c     text diff=cpp
+*.cc    text diff=cpp
+*.cxx   text diff=cpp
+*.cpp   text diff=cpp
+*.cpi   text diff=cpp
+*.c++   text diff=cpp
+*.hpp   text diff=cpp
+*.h     text diff=cpp
+*.h++   text diff=cpp
+*.hh    text diff=cpp
+*.ino   text diff=cpp
+
+# Compiled Object files
+*.slo   binary
+*.lo    binary
+*.o     binary
+*.obj   binary
+
+# Precompiled Headers
+*.gch   binary
+*.pch   binary
+
+# Compiled Dynamic libraries
+*.so    binary
+*.dylib binary
+*.dll   binary
+
+# Compiled Static libraries
+*.lai   binary
+*.la    binary
+*.a     binary
+*.lib   binary
+
+# Executables
+*.exe   binary
+*.out   binary
+*.app   binary
