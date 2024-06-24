@@ -36,7 +36,7 @@ if __name__ == "__main__":
     if sys.version_info < (3, 0):
         setup(
             version=get_version(
-                os.path.join("pyduino_sensor", "__init__.py")
+                os.path.join("src", "pyduino_sensor", "__init__.py")
             ),
             # install_requires = [
             # "pandas >= 0.24.2",
