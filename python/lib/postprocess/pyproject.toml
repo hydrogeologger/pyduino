@@ -45,10 +45,10 @@ dev = [
 version = { attr = "postprocess.__version__" }
 
 [tool.setuptools.package-dir] # Directory containing packages
-"" = "."
+"" = "src"
 
 [tool.setuptools.packages.find]
-where = ["."] # list of folders that contain the packages (["."] by default)
+where = ["src"] # list of folders that contain the packages (["."] by default)
 include = [
     "postprocess*"
 ] # package names should match these glob patterns (["*"] by default)
