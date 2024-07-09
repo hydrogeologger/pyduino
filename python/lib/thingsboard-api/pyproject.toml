@@ -1,0 +1,52 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = [
+    "setuptools >= 40.9.0", # PEP 517
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thingsboard-api"
+description = "Hydrogeologger/Pyduino python package partially implementing thingsboard rest api and some pandas helper functions"
+authors = [
+    { name = "Lieven Tan" }
+]
+dynamic = ["version"]
+requires-python = ">=2.7"
+keywords = ["thingsboard"]
+classifiers = [
+    # Project maturity
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 3 - Alpha",
+
+    # Python version support
+    "Programming Language :: Python"
+]
+dependencies = [
+    "pandas>=0.24.2",
+    "requests"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hydrogeologger/pyduino"
+"Bug Tracker" = "https://github.com/hydrogeologger/pyduino/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "thingsboard_api.__version__" }
+
+[tool.setuptools.package-dir] # Directory containing packages
+"" = "."
+
+[tool.setuptools.packages.find]
+where = ["."] # list of folders that contain the packages (["."] by default)
+include = [
+    "thingsboard_api*"
+] # package names should match these glob patterns (["*"] by default)
+exclude = [] # exclude packages matching these glob patterns (empty by default)
