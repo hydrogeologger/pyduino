@@ -24,7 +24,14 @@ from functools import reduce
 from numpy.polynomial import polyutils as pu
 import numpy as np
 from numpy import (newaxis, arange, pi)
-from numpy.lib.polynomial import (poly, polyadd, polymul, polyval, poly1d, polyfit)
+try:
+    from numpy import (poly, polyadd, polymul, polyval, poly1d, polyfit)
+except ImportError:
+    # Numpy>=2 has made np.lib.polynomial and np.lib.npyio modules private
+    # Available in main namespace, https://github.com/numpy/numpy/pull/24578
+    # pylint: disable-next=disable=import-error
+    from numpy.lib.polynomial import (
+        poly, polyadd, polymul, polyval, poly1d, polyfit)
 from numpy.polynomial.chebyshev import chebpts1
 from scipy.fftpack import dct, idct as _idct
 try:
