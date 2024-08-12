@@ -11,3 +11,4 @@ __version__ = "0.1.0"
 
 from .common import *
 from .interpolation import *
+from .pandas_ext import *

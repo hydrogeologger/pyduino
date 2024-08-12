@@ -15,11 +15,13 @@ __all__ = ["Interpolation"]
 # TypeHinting
 from datetime import datetime as _datetime
 from datetime import timedelta as _timedelta
+from warnings import warn as _warn
 
 import matplotlib.pyplot as _plt
 import pandas as _pd
 
 # Package modules
+from . import pandas_ext as _pandas_ext
 from .extern import interpolate as _wf
 
 # Python 2 Compatibility
@@ -200,13 +202,17 @@ class Interpolation():
             _plt.show(block=False)
 
     def swap_index(self):
-        """Swap DataFrame index between "date_time" and "time_days"."""
-        if "time_days" in self.df.columns:
-            key_name = "time_days"
-        elif "date_time" in self.df.columns:
-            key_name = "date_time"
-        else:
-            print("Interpolationg Index Swap: No swappable index and columns identified.")
-            return
-        self.df.reset_index(inplace=True, drop=False)
-        self.df.set_index(keys=key_name, inplace=True, drop=True)
+        # type: (...) -> (str|bool)
+        """Swap DataFrame index between "date_time" and "time_days".
+
+        Returns:
+            str or bool: Returns new index key name. False otherwise.
+        """
+        if _pandas_ext.swap_index(self.df, keys="time_days"):
+            return "time_days"
+        if _pandas_ext.swap_index(self.df, keys="date_time"):
+            return "date_time"
+
+        _warn("Interpolationg Index Swap: No swappable index and columns identified.",
+              category=RuntimeWarning)
+        return False
