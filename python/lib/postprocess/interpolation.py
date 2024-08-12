@@ -21,6 +21,7 @@ import numpy as _np
 import pandas as _pd
 
 # Package modules
+from . import pandas_utils as _pandas_utils
 from .extern import interpolate as _wf
 
 if TYPE_CHECKING:
@@ -246,13 +247,19 @@ class Interpolation():
             _plt.show(block=False)
 
     def swap_index(self):
-        """Swap DataFrame index between "date_time" and "time_days"."""
-        if "time_days" in self.df.columns:
-            key_name = "time_days"
-        elif "date_time" in self.df.columns:
-            key_name = "date_time"
-        else:
-            print("Interpolationg Index Swap: No swappable index and columns identified.")
-            return
-        self.df.reset_index(inplace=True, drop=False)
-        self.df.set_index(keys=key_name, inplace=True, drop=True)
+        # type: (...) -> (str|bool)
+        """Swap DataFrame index between "date_time" and "time_days".
+
+        Returns:
+            str or bool: Returns new index key name. False otherwise.
+        """
+        if _pandas_utils.swap_index(self.df, keys="time_days"):
+            return "time_days"
+        if _pandas_utils.swap_index(self.df, keys="date_time"):
+            return "date_time"
+
+        _warnings.warn(
+            "Interpolationg Index Swap: No swappable index and columns identified.",
+            category=RuntimeWarning
+        )
+        return False
