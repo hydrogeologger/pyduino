@@ -9,6 +9,13 @@ Dependencies:
 # Module Info
 __version__ = "0.1.0"
 
+from .pandas_utils import (
+    unique_index_levels_only,
+    insert_index_level,
+    flatten_column_headers,
+    swap_index,
+)
+
 from .transformation import (
     normalise,
     calculate_delta,
