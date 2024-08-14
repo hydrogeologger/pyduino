@@ -42,10 +42,10 @@ Documentation = "https://github.com/hydrogeologger/pyduino/tree/master/python/li
 version = { attr = "mqtthelper.__version__" }
 
 [tool.setuptools.package-dir] # Directory containing packages
-"" = "."
+"" = "src"
 
 [tool.setuptools.packages.find]
-where = ["."] # list of folders that contain the packages (["."] by default)
+where = ["src"] # list of folders that contain the packages (["."] by default)
 include = [
     "mqtthelper*"
 ] # package names should match these glob patterns (["*"] by default)
