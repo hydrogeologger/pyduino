@@ -748,6 +748,8 @@ void check_serial(String content)
 }
 
 void vwp_read(int8_t analog_pin) {
+    // https://doi.org/10.7939/r3-sbyg-s946
+    // https://doi.org/10.7939/r3-3krw-vw66
 #include <pins_arduino.h>
 #define VWP_PIN A1
 #define VWP_NUMBER_SAMPLES 256  //Must be a power of 2 (for FFT algorithm)
