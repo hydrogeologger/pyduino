@@ -9,6 +9,7 @@ place new libraries in this location and include as
 #include <SDI12.h>
 #include <hydrogeolog.h>
 #include <Wire.h>
+#include <ModbusMaster.h>
 #include "timing.h"
 #include "common.h"
 #include "SDI12_function.h"
@@ -739,6 +740,56 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     Serial.println();
 }
 
+void modbus_rtu(int str_ay_size, int debug_sw, uint8_t slave_id, int serial_pin, int power_sw_pin, String str_ay[]) {
+    // modbus
+    // modbus,<server_id>,power,<powerPin>,serial,<serialPort>
+
+    if (serial_pin != INVALID) {
+        hydrogeolog1.print_string_delimiter_value("modbus", String(slave_id));
+        hydrogeolog1.print_string_delimiter_value("pow", String(power_sw_pin));
+        hydrogeolog1.print_string_delimiter_value("serial", String(serial_pin));
+
+        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, HIGH);
+        HardwareSerial *mySerial;
+        switch (serial_pin) {
+            case 1:
+                mySerial = &Serial1;
+                break;
+            case 2:
+                mySerial = &Serial2;
+                break;
+            case 3:
+                mySerial = &Serial3;
+                break;
+            default:
+                Serial.println("Invalid serial port");
+                if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+                return;
+        }
+
+        ModbusMaster modbus;
+        mySerial->begin(9600);
+        modbus.begin(slave_id, *mySerial);
+
+        uint8_t result = modbus.readHoldingRegisters(0x100, 1);
+
+        mySerial->end();
+        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+
+        if (result == modbus.ku8MBSuccess) {
+            Serial.print("result");
+            Serial.print(DELIMITER);
+            Serial.println(modbus.getResponseBuffer(0));
+            modbus.clearResponseBuffer();
+            modbus.clearTransmitBuffer();
+        } else {
+            Serial.print("error");
+            Serial.print(DELIMITER);
+            Serial.println(result);
+        }
+    }
+}
+
 void check_serial(String content)
     /*
      if input abc in serial, arduino will return abc
@@ -815,6 +866,11 @@ void loop()
                              hydrogeolog1.parse_argument("otno", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);
+
+        modbus_rtu(str_ay_size, debug_sw,
+                   hydrogeolog1.parse_argument("modbus", 1, str_ay_size, str_ay),
+                   hydrogeolog1.parse_argument("serial", INVALID, str_ay_size, str_ay),
+                   power_sw_pin, str_ay);
 
         multiplexer_i2c_reset(hydrogeolog1.parse_argument("9548_reset", INVALID, str_ay_size, str_ay, true));
 
