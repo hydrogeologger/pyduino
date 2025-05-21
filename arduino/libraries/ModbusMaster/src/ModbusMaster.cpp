@@ -851,7 +851,13 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
           _u8ResponseBufferLength = i + 1;
         }
         break;
-        
+      case ku8MBWriteSingleCoil:
+      case ku8MBWriteMultipleCoils:
+      case ku8MBWriteSingleRegister:
+        // load bytes into word; response bytes are ordered H, L
+        _u16ResponseBuffer[0] = word(u8ModbusADU[4], u8ModbusADU[5]);
+        _u8ResponseBufferLength = 0;
+        break;
       case ku8MBReadInputRegisters:
       case ku8MBReadHoldingRegisters:
       case ku8MBReadWriteMultipleRegisters:
