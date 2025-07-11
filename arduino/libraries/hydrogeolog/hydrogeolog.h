@@ -32,8 +32,9 @@ class hydrogeolog
     //int split_strings(String inp);
     //void print_str_ay(int number_opts);
     int split_strings(String inp2, String str_ay2[20]);
+    static unsigned long str2ul(String str_source);
     int strcmpi(String str_source, int number_opts, String str_ay2[20]);
-    long parse_argument(String str_source, long default_values, int number_opts, String str_ay2[20], bool allow_empty = false);
+    long parse_argument(String str_source, long default_values, int number_opts, String str_ay2[20], bool allow_empty = false, int* const start_index = nullptr);
     String parse_argument_string(String str_source, String default_values, int number_opts, String str_ay2[20]);
     char parse_argument_char(String str_source, char default_values, int number_opts, String str_ay2[20]);
     void print_str_ay(int number_opts, String str_ay2[20]);

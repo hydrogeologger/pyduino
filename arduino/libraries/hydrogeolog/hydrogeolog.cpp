@@ -41,6 +41,15 @@ void hydrogeolog::print_str_ay(int number_opts, String str_ay2[20])
     Serial.println();
 } //print_str_ay
 
+unsigned long hydrogeolog::str2ul(String str_source) {
+    if (str_source.startsWith("0x")) {
+        return strtoul(str_source.c_str() + 2, nullptr, HEX);
+    } else if (str_source.startsWith("0b")) {
+        return strtoul(str_source.c_str() + 2, nullptr, BIN);
+    }
+    return strtoul(str_source.c_str(), nullptr, DEC);
+}
+
 int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
 /* string match */
 {
@@ -56,13 +65,14 @@ int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
     return str_index;
 } //strcmpi
 
-long hydrogeolog::parse_argument(String str_source, long default_values, int number_opts, String str_ay2[20], bool allow_empty)
+long hydrogeolog::parse_argument(String str_source, long default_values, int number_opts, String str_ay2[20], bool allow_empty, int* const start_index)
 /* parse argument */
 {
     //strcmpi(str_source,number_opts,str_ay2[20]);
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
     long str_value = default_values;
     if (str_idx != HYDROGEOLOG_ERR_INVALID) {
+        if (start_index != nullptr) *start_index = str_idx;
         str_ay2[str_idx + 1].trim(); // Remove leading, trailing spaces
         // Test for empty string
         if (str_ay2[str_idx + 1] == "") {
