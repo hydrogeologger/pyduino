@@ -788,10 +788,23 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
         hydrogeolog1.print_string_delimiter_value("reg", register_, HEX);
     
         uint8_t qty_ = hydrogeolog1.parse_argument("count", 1, str_ay_size, str_ay);
-        uint16_t value = hydrogeolog1.parse_argument("value", 0, str_ay_size, str_ay);
+        int value_index = INVALID;
+        uint16_t value = hydrogeolog1.parse_argument("value", 0, str_ay_size, str_ay, false, &value_index);
         if (debug_sw && modbus_function >= 0x05) {
             // Output value if modbus_function is write type
-            hydrogeolog1.print_string_delimiter_value("value", value);
+            hydrogeolog1.print_key_delimiter("value");
+            for (uint8_t i = 0; i < qty_; i++) {
+                uint8_t base = DEC;
+                if (str_ay[value_index + 1 + i].startsWith("0x")) {
+                    base = HEX;
+                    Serial.print("0x");
+                } else if (str_ay[value_index + 1 + i].startsWith("0b")) {
+                    base = BIN;
+                    Serial.print("0b");
+                }
+                Serial.print((uint16_t) hydrogeolog::str2ul(str_ay[value_index + 1 + i]), base);
+                Serial.print(DELIMITER);
+            }
         }
         
         switch (modbus_function) {
@@ -817,6 +830,11 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
                 result = modbus.writeMultipleCoils(register_, value);
                 break;
             case 0x10:  // Write Multiple Registers
+                for (int8_t i = 0; i < qty_; i++) {
+                    modbus.setTransmitBuffer(i, hydrogeolog::str2ul(str_ay[value_index + 1 + i]));
+                }
+                result = modbus.writeMultipleRegisters(register_, qty_);
+                break;
             case 0x16:  // Write Masked Register Write
             case 0x17:  // Read & Write multiple registers
                 // Currently Not supported
@@ -827,21 +845,35 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
         if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
 
         if (result == modbus.ku8MBSuccess) {
-            hydrogeolog1.print_string_delimiter_value("count", qty_);
-            hydrogeolog1.print_key_delimiter("result");
-            for (uint8_t i = 0; i < qty_; i++) {
-                if (i == qty_ - 1) {
-                    Serial.println(modbus.getResponseBuffer(i));
+            switch (modbus_function) {
+                case 0x05:  // Write Single Coil
+                case 0x06:  // Write Single Register
+                case 0x0F:  // Write Multiple Coils
+                    qty_ = 1;
+                case 0x01:    // Read Coils
+                case 0x02:    // Read Discreet Inputs
+                case 0x03:    // Read Holding Registers, Default
+                case 0x04: {  // Read Input Registers
+                    hydrogeolog1.print_string_delimiter_value("count", qty_);
+                    hydrogeolog1.print_key_delimiter("result");
+                    for (uint8_t i = 0; i < qty_; i++) {
+                        Serial.print(modbus.getResponseBuffer(i));
+                        if (i + 1 < qty_) Serial.print(DELIMITER);
+                    }
+                } break;
+                case 0x10:  // Write Multiple Registers
+                    hydrogeolog1.print_string_delimiter_value("result", qty_, true);
                     break;
-                }
-                hydrogeolog1.print_key_delimiter(modbus.getResponseBuffer(i));
+                default:
+                    Serial.print("success");
+                    break;
             }
-            modbus.clearResponseBuffer();
-            modbus.clearTransmitBuffer();
         } else {
-            hydrogeolog1.print_string_delimiter_value("error", result, HEX);
-            Serial.println();
+            hydrogeolog1.print_string_delimiter_value("error", result, HEX, true);
         }
+        Serial.println();
+        modbus.clearTransmitBuffer();
+        modbus.clearResponseBuffer();
     }
 }
 
