@@ -751,12 +751,20 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
     if (serial_pin != INVALID) {
         long baud = hydrogeolog1.parse_argument("baud", 9600, str_ay_size, str_ay);
         hydrogeolog1.print_string_delimiter_value("modbus", serial_pin);
+
+        int power_delay_millis = 0;
+        if (power_sw_pin != INVALID) {
+            digitalWrite(power_sw_pin, HIGH);
+            power_delay_millis = hydrogeolog1.parse_argument("delay", 0, str_ay_size, str_ay);
+            if (power_delay_millis > 0) delay(power_delay_millis);
+        }
+
         if (debug_sw) {
             hydrogeolog1.print_string_delimiter_value("baud", baud);
             hydrogeolog1.print_string_delimiter_value("power", power_sw_pin);
+            hydrogeolog1.print_string_delimiter_value("delay", power_delay_millis);
         }
 
-        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, HIGH);
         HardwareSerial *mySerial;
         switch (serial_pin) {
             case 1:
@@ -779,7 +787,7 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
         uint16_t register_ = hydrogeolog1.parse_argument("reg", 0x00, str_ay_size, str_ay);
 
         ModbusMaster modbus;
-        uint8_t result = modbus.ku8MBIllegalFunction;
+        uint8_t result = ModbusMaster::ku8MBIllegalFunction;
         mySerial->begin(baud);
         modbus.begin(slave_id, *mySerial);
 
@@ -844,7 +852,7 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
         mySerial->end();
         if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
 
-        if (result == modbus.ku8MBSuccess) {
+        if (result == ModbusMaster::ku8MBSuccess) {
             switch (modbus_function) {
                 case 0x05:  // Write Single Coil
                 case 0x06:  // Write Single Register
@@ -869,7 +877,37 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
                     break;
             }
         } else {
-            hydrogeolog1.print_string_delimiter_value("error", result, HEX, true);
+            // Print error
+            hydrogeolog1.print_key_delimiter("error");
+            switch (result) {
+                case ModbusMaster::ku8MBInvalidSlaveID:
+                    Serial.print("Received mismatched slave ID");
+                    break;
+                case ModbusMaster:: ku8MBInvalidFunction:
+                    Serial.print("Received mismatched function");
+                    break;
+                case ModbusMaster::ku8MBResponseTimedOut:
+                    Serial.print("Reponse timed out");
+                    break;
+                case ModbusMaster::ku8MBInvalidCRC:
+                    Serial.print("Received invalid CRC");
+                    break;
+                case ModbusMaster::ku8MBIllegalFunction:
+                    Serial.print("Illegal function");
+                    break;
+                case ModbusMaster::ku8MBIllegalDataAddress:
+                    Serial.print("Illegal data address");
+                    break;
+                case ModbusMaster::ku8MBIllegalDataValue:
+                    Serial.print("Illegal data value");
+                    break;
+                case ModbusMaster::ku8MBSlaveDeviceFailure:
+                    Serial.print("Slave device failure");
+                    break;
+                default:
+                    Serial.print(result, HEX);
+                    break;
+            }
         }
         Serial.println();
         modbus.clearTransmitBuffer();
