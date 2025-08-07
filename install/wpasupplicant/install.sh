@@ -62,8 +62,12 @@ function setup_eduroam_wpa() {
 
     # Convert password to utf16 little endian hashed password
     # https://wiki.archlinux.org/title/Wpa_supplicant#802.1x/radius
-    # TODO: consider using wpa_passphrase
-    eduroam_hashed_password=$(echo -n "${eduroam_password}" | iconv -t utf16le | openssl dgst -md4 -provider legacy)
+    # As of openssl 3.x.x, md4 provider moved to legacy, Attempt to use MD4 with the legacy provider
+    if openssl dgst -md4 -provider legacy /dev/null &>/dev/null; then
+        eduroam_hashed_password=$(echo -n "${eduroam_password}" | iconv -t utf16le | openssl dgst -md4 -provider legacy)
+    else
+        eduroam_hashed_password=$(echo -n "${eduroam_password}" | iconv -t utf16le | openssl md4)
+    fi
     eduroam_hashed_password=${eduroam_hashed_password#"(stdin)= "}
 
 
@@ -80,9 +84,9 @@ function setup_eduroam_wpa() {
     # Change network priority
     # sed -i "s/priority=[0-9]*/priority=1/" $CONF
     # priority for normal APN
-    sed -i "/^\s*ssid=\"eduroam\"/{n; s/\(\s*\).*/\1priority=1/}" $WPA_CONF
+    # sed -i "/^\s*ssid=\"eduroam\"/{n; s/\(\s*\).*/\1priority=1/}" $WPA_CONF
     # Priority for eduroam
-    sed -i "/ssid=\"[^e][^d][^u][^r][^o][^a][^m]\"/ n; {n; s/\(\s*\)priority=[0-9]*/\1priority=0/}" $WPA_CONF
+    # sed -i "/ssid=\"[^e][^d][^u][^r][^o][^a][^m]\"/ n; {n; s/\(\s*\)priority=[0-9]*/\1priority=0/}" $WPA_CONF
 
     ASK_TO_REBOOT=true
 }
@@ -90,28 +94,48 @@ function setup_eduroam_wpa() {
 function setup_normal_wpa() {
     local ssid_name
     local ssid_psk
+    local ssid_psk2
+    local wpa_passphrase_output
+    local show_raw_psk
 
     if [ $# -eq 2 ]; then
         ssid_name="$1"
         ssid_psk="$2"
     else
-        # Request SSID from user
-        read -r -p "Enter SSID Name: " ssid_name
+        while true; do
+            # Request SSID from user
+            read -r -p "Enter SSID Name: " ssid_name
 
-        # Request SSID password from user, echo turned off
-        read -s -r -p "Enter password for $ssid_name: " ssid_psk
-        echo # Turn echo back on
+            # Request SSID password from user, echo turned off
+            read -s -r -p "Enter password for $ssid_name: " ssid_psk
+            echo
+            read -s -r -p "Repeat password for $ssid_name: " ssid_psk2
+            echo # Turn it back on
+            [ "$ssid_psk" = "$ssid_psk2" ] && break
+            echo "Please try again."
+        done
     fi
 
     # Update ssid, Skip line matching ssid="eduroam"
     sed -i "/ssid=\"eduroam\"/ n; s/ssid=\".*\"/ssid=\"$ssid_name\"/" $WPA_CONF
 
     # Update psk for ssid
-    sed -i "/^\s*psk=\".*\"/s/psk=\"<psk>\"$/psk=\"$ssid_psk\"/" $WPA_CONF
+    read -r -p "Store unhashed password in wpa_supplicant? [Y/N] " show_raw_psk
+    if printf "%s\n" "$show_raw_psk" | grep -Eq "$(locale yesexpr)"; then
+        sed -i "/^\s*#psk=\".*\"/s/psk=.*$/psk=\"$ssid_psk\"/" $WPA_CONF
+    else
+        sed -i "/^\s*#psk=\".*\"/s/psk=.*$/psk=\"apn_password\"/" $WPA_CONF
+    fi
+    wpa_passphrase_output=$(wpa_passphrase "$ssid_name" "$ssid_psk")
+    # echo -e "$wpa_passphrase_output"
+    ssid_psk=${wpa_passphrase_output/*psk=/}
+    ssid_psk=${ssid_psk/?\}/}
+    # echo "\"$ssid_psk\""
+    sed -i "/^\s*psk=.*/s/psk=.*$/psk=$ssid_psk/" $WPA_CONF
 
     # Change network priority
-    sed -i "/^\s*ssid=\"$ssid_name\"/{n; s/\(\s*\).*/\1priority=1/}" $WPA_CONF
-    sed -i "/^\s*ssid=\"eduroam\"/{n; s/\(\s*\).*/\1priority=0/}" $WPA_CONF
+    # sed -i "/^\s*ssid=\"$ssid_name\"/{n; s/\(\s*\).*/\1priority=1/}" $WPA_CONF
+    # sed -i "/^\s*ssid=\"eduroam\"/{n; s/\(\s*\).*/\1priority=0/}" $WPA_CONF
 
     # sed "/^\s*ssid=\"$ssid_name\"/{ n; s/\(\s*priority\)\=.*/\1=2/; t; /a priority=2 }" $WPA_CONF
     # sed "/Line1/{N; /\nString$/b; s/\n/\nString\n/}" file
@@ -128,7 +152,7 @@ function force_wpasupplicant_connect() {
 
     # Force load new wpa_supplicant.conf for current session
     # rm /var/run/wpa_supplicant/wlan0
-    wpa_cli terminate
+    wpa_cli -i wlan0 terminate
     systemctl restart wpa_supplicant.service
     wpa_supplicant -B -i wlan0 -c "$WPA_CONF"
 
