@@ -145,6 +145,40 @@ function setup_normal_wpa() {
     ASK_TO_REBOOT=true
 }
 
+function setup_temporary_normal_wpa() {
+    local ssid_name
+    local ssid_psk
+    local ssid_psk2
+    local wpa_passphrase_output
+    local show_raw_psk
+    local network_id
+
+    while true; do
+        # Request SSID from user
+        read -r -p "Enter SSID Name: " ssid_name
+
+        # Request SSID password from user, echo turned off
+        read -s -r -p "Enter password for $ssid_name: " ssid_psk
+        echo
+        read -s -r -p "Repeat password for $ssid_name: " ssid_psk2
+        echo # Turn it back on
+        [ "$ssid_psk" = "$ssid_psk2" ] && break
+        echo "Please try again."
+    done
+
+    # Get hashed psk
+    wpa_passphrase_output=$(wpa_passphrase "$ssid_name" "$ssid_psk")
+    ssid_psk="${wpa_passphrase_output/*psk=/}"
+    ssid_psk="${ssid_psk/?\}/}"
+
+    network_id=$(wpa_cli -i wlan0 add_network)
+    wpa_cli -i wlan0 set_network "$network_id" ssid "\"$ssid_name\""
+    wpa_cli -i wlan0 set_network "$network_id" psk "$ssid_psk"
+    wpa_cli -i wlan0 enable_network "$network_id"
+
+    WPA_CONN_TEMPORARY=true
+}
+
 function force_wpasupplicant_connect() {
     local IFACE="$1"
     if [ -z "$IFACE" ]; then
@@ -209,11 +243,14 @@ function force_wpasupplicant_connect() {
 
 function interactive_wpasupplicant_setup() {
     echo "What are you setting up?"
-    select option in "Reset" "Eduroam" "Other" "Nothing" "Exit"; do
+    select option in "Reset" "Eduroam" "Other" "Other-Temporary" "Nothing" "Exit"; do
         case $option in
             Reset ) reset_wpa_supplicant_file;;
             Eduroam ) setup_eduroam_wpa; break;;
             Other ) setup_normal_wpa; break;;
+            "Other-Temporary" )
+                setup_temporary_normal_wpa;
+                break;;
             Nothing ) break;;
             Exit ) exit 0;;
         esac
@@ -302,7 +339,7 @@ else
     main "$@"
 fi
 
-# Force wpa_supplicant config connect if file not sourced
-if test ${#BASH_SOURCE[@]} -eq 1; then
+# Force wpa_supplicant config connect if file not sourced and not requesting temporary connection
+if [ ${#BASH_SOURCE[@]} -eq 1 ] && [ -z "$WPA_CONN_TEMPORARY" ]; then
     force_wpasupplicant_connect wlan0
 fi
