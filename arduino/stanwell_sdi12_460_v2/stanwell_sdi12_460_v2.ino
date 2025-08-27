@@ -679,12 +679,15 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
         new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
     } else if (start_index_custom_cmd > -1) {
         // Construct custom sdi12 message string, allowing for delimiter use
-        for (int i = start_index_custom_cmd + 1; i < str_ay_size; i++) {
+        for (int i = (start_index_custom_cmd + 1); i < str_ay_size; i++) {
+            // Prevent uncessary trailing delimiter
+            if (i > (start_index_custom_cmd + 1)) {
+                sdi12_parsed_command.concat(DELIMITER);
+            }
             sdi12_parsed_command.concat(str_ay[i]);
             if (str_ay[i].lastIndexOf("!") > -1) {
                 break;
             }
-            sdi12_parsed_command.concat(DELIMITER);
         }
     }
 
