@@ -56,7 +56,7 @@ int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
     return str_index;
 } //strcmpi
 
-int hydrogeolog::parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20], bool allow_empty = false)
+int hydrogeolog::parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20], bool allow_empty)
 /* parse argument */
 {
     //strcmpi(str_source,number_opts,str_ay2[20]);
@@ -98,12 +98,10 @@ char hydrogeolog::parse_argument_char(String str_source, char default_values, in
 /* parse argument */
 {
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
-    char str_value = default_values;
-    if (str_idx != HYDROGEOLOG_ERR_INVALID)
-    {
-        str_value = str_ay2[str_idx + 1][0];
+    if (str_idx == HYDROGEOLOG_ERR_INVALID || str_ay2[str_idx + 1].length() > 1) {
+        return default_values;
     }
-    return str_value;
+    return str_ay2[str_idx + 1][0];
 } //parse_argument
 
 void hydrogeolog::analog_excite_read(int power_sw_idx, int analog_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval)
