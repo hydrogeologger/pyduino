@@ -274,29 +274,24 @@ uint8_t printBufferToScreen(void) {
 
 // this checks for activity at a particular address
 // expects a char, '0'-'9', 'a'-'z', or 'A'-'Z'
-boolean checkActive(char i)
-{
-    String myCommand = "";
-    myCommand = "";
-    myCommand += (char)i; // sends basic 'acknowledge' command [address][!]
-    myCommand += "!";
+boolean checkActive(char addr) {
+    char myCommand[2+1];
 
-    for (int j = 0; j < 3; j++)
-    { // goes through three rapid contact attempts
+    // sends basic 'acknowledge' command [address][!]
+    sprintf(myCommand, "%c!", addr); // sends basic 'acknowledge' command [address][!]
+    mySDI12.clearBuffer();
+
+    for (int i = 0; i < 3; i++) {  // goes through three rapid contact attempts
         mySDI12.sendCommand(myCommand);
-        if (mySDI12.available() > 1)
+        delay(20);
+        if (mySDI12.available() >= 1)
             break;
-        delay(30);
     }
-    if (mySDI12.available() > 2)
-    { // if it hears anything it assumes the address is occupied
+    if (mySDI12.read() == addr) {  // if it hears anything it assumes the address is occupied
         mySDI12.clearBuffer();
         return true;
     }
-    else
-    { // otherwise it is vacant.
-        mySDI12.clearBuffer();
-    }
+    // otherwise it is vacant.
     return false;
 }
 
