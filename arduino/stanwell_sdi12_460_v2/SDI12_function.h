@@ -11,7 +11,7 @@ static volatile uint32_t addressSpace[2] = {(uint32_t)0x00, (uint32_t)0x00};
 static SDI12 mySDI12(0);
 
 
-void process_command(String cmd, int sensors, String new_addr, boolean isCustom);
+void process_command(String cmd, char new_addr);
 boolean sdi12_check_pin(int sdi12_data);
 boolean sdi12_init(int sdi12_pin);
 int8_t sdi12_scan(void);
