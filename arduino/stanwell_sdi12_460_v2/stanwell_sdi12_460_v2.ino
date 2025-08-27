@@ -668,7 +668,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
         if (power_delay_millis > 0) delay(power_delay_millis);
     }
 
-    String new_addr = "";
+    char new_addr = '\0';
     int power_off = hydrogeolog1.parse_argument("power_off", 1, str_ay_size, str_ay);
     String sdi12_parsed_command = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
     int start_index_custom_cmd = hydrogeolog1.strcmpi("custom_cmd", str_ay_size, str_ay);
@@ -676,7 +676,9 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     // String custom_cmd = "";
 
     if (sdi12_parsed_command == "change") {
-        new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
+        new_addr = hydrogeolog1.parse_argument_char("change", '\0', str_ay_size, str_ay);
+    } else if (sdi12_parsed_command == "read") {
+        new_addr = hydrogeolog1.parse_argument_char("read", '\0', str_ay_size, str_ay);
     } else if (start_index_custom_cmd > -1) {
         // Construct custom sdi12 message string, allowing for delimiter use
         for (int i = (start_index_custom_cmd + 1); i < str_ay_size; i++) {

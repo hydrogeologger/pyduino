@@ -3,16 +3,13 @@
 #include "timing.h"
 
 
-boolean check_new_addr(String new_addr) {
-    if (new_addr.length() != 1)
-        return false;
-    char c = new_addr.charAt(0);
-    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+boolean is_valid_addr(char c) {
+    if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') )
         return true;
     return false;
 }
 
-void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
+void process_command(String cmd, int sensors, char new_addr, boolean isCustom)
 {
     if (isCustom) {
         sdi12_send_command(cmd, true);
@@ -24,15 +21,20 @@ void process_command(String cmd, int sensors, String new_addr, boolean isCustom)
     Serial.print(DELIMITER);
 
     if (cmd == "read") {
-        sdi12_loop_get_measurements();
+        if (is_valid_addr(new_addr)) {
+            printInfo(new_addr);
+            takeMeasurement_sdi12(new_addr);
+        } else {
+            sdi12_loop_get_measurements();
+        }
     } else if (cmd == "change") {
         if (sensors != 1 || sensors < 1) {
             Serial.print("Expect only ONE sensor connected! => ABORT!");
         } else {
-            if (check_new_addr(new_addr) == false) {
+            if (is_valid_addr(new_addr) == false) {
                 Serial.print("Invalid new addr => ABORT!");
             } else {
-                sdi12_change(new_addr.charAt(0));
+                sdi12_change(new_addr);
             }
         }
     } else {
