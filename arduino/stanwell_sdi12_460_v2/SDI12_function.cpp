@@ -9,26 +9,30 @@ boolean is_valid_addr(char c) {
     return false;
 }
 
-void process_command(String cmd, int sensors, char new_addr, boolean isCustom)
-{
-    if (isCustom) {
-        sdi12_send_command(cmd, true);
-        return;
-    }
+void process_command(String cmd, char new_addr) {
+    uint8_t num_sensors = 0;
 
-    Serial.print("no_sensors,");
-    Serial.print(sensors);
-    Serial.print(DELIMITER);
+    if (!is_valid_addr(new_addr)) {
+        num_sensors = sdi12_scan();
+        if (num_sensors <= 0) {
+            Serial.print("No Sensors found!");
+            return;
+        }
+        Serial.print("no_sensors,");
+        Serial.print(num_sensors);
+        Serial.print(DELIMITER);
+    }
 
     if (cmd == "read") {
         if (is_valid_addr(new_addr)) {
             printInfo(new_addr);
+            Serial.print(DELIMITER);
             takeMeasurement_sdi12(new_addr);
         } else {
             sdi12_loop_get_measurements();
         }
     } else if (cmd == "change") {
-        if (sensors != 1 || sensors < 1) {
+        if (num_sensors != 1) {
             Serial.print("Expect only ONE sensor connected! => ABORT!");
         } else {
             if (is_valid_addr(new_addr) == false) {
@@ -57,10 +61,10 @@ boolean sdi12_check_pin(int sdi12_data)
 /**
  * @brief Counts the number of connected active SDI-12 devices.
  *
- * @return int8_t Number of unique SDI-12 sensor address
+ * @return uint8_t Number of unique SDI-12 sensor address
  */
-int8_t sdi12_scan(void) {
-    int count = 0;
+uint8_t sdi12_scan(void) {
+    uint8_t count = 0;
     //scan the pin for all avaliable sensors
     for (uint8_t i = 0; i < MAX_NUM_ADDR; i++) {
         char c = convert_bit_number_to_char(i);
@@ -177,11 +181,13 @@ void takeMeasurement_sdi12(char address) {
     char command[4+1];
     uint8_t received_count = 0;
 
+    mySDI12.clearBuffer();
+
     // SDI-12 measurement command format  [address]['M'][!]
     sprintf(command, "%cM!", address);
     mySDI12.sendCommand(command);
-    // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
 
+    // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
     String sdiResponse = "";
     delay(30);
     // build response string
@@ -193,44 +199,39 @@ void takeMeasurement_sdi12(char address) {
             delay(5);
         }
     }
-    mySDI12.clearBuffer();
 
     // find out how long we have to wait (in seconds).
-    unsigned int wait = 0;
+    unsigned int wait = 1;
     wait = sdiResponse.substring(1, 4).toInt();
+    if (wait <= 0) { wait = 1; }
 
     // Set up the number of results to expect
-
     int expected_count = sdiResponse.substring(4, 5).toInt();
-    //Serial.print(DELIMITER);
     Serial.print("points");
     Serial.print(DELIMITER);
     Serial.print(expected_count);
     Serial.print(DELIMITER);
 
-    unsigned long timerStart = millis();
-    while ((millis() - timerStart) < (1000 * wait)) {
-        // sensor can interrupt us to let us know it is done early
+    // Wait for maximum duration for reply
+    for (uint16_t i = 0; i < (1000u * wait); i++) {
+        delay(1);
         if (mySDI12.available()) {
-            mySDI12.clearBuffer();
             break;
         }
     }
-    // Wait for anything else and clear it out
-    delay(30);
-    mySDI12.clearBuffer();
 
     // Start requesting data
+    mySDI12.clearBuffer();
     for (uint8_t i = 0; received_count < expected_count && i <= 9; i++) {
         // SDI-12 command to get data [address][D][dataOption][!]
         sprintf(command, "%cD%d!", address, i);
         mySDI12.sendCommand(command);
-        mySDI12.flush();
-        while ((!mySDI12.available()) > 1);  // wait for acknowlegement
-        delay(300);                          // wait for the data to transfer
+        // wait for acknowlegement
+        while (mySDI12.available() < 1) {
+            delay(20);
+        }
         received_count += printBufferToScreen();
     }
-    mySDI12.clearBuffer();
 }
 
 uint8_t printBufferToScreen(void) {
@@ -239,7 +240,7 @@ uint8_t printBufferToScreen(void) {
     String buffer = "";
 
     mySDI12.read();  // consume address
-    while (mySDI12.available()) {
+    while (mySDI12.available() > 0) {
         char c = mySDI12.read();
         // Add to buffer for printable characters only
         if (c >= 32 && c <= 126) {
@@ -258,7 +259,7 @@ uint8_t printBufferToScreen(void) {
         } else if (c == '\n') {
             buffer += DELIMITER; // Replace newline with delimiter
         }
-        delay(100);
+        delay(20);
     }
     Serial.print(buffer);
     return received_count;

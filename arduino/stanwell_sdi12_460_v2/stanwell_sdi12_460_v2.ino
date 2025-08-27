@@ -701,7 +701,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
             if (start_index_custom_cmd == -1) {
                 // Default command set
                 hydrogeolog1.print_string_delimiter_value("default_cmd", sdi12_parsed_command);
-                if (sdi12_parsed_command == "change") {
+                if (new_addr) {
                     Serial.print(new_addr);
                     Serial.print(DELIMITER);
                 }
@@ -721,15 +721,10 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
 
     if (start_index_custom_cmd > -1) {
         // Custom command
-        process_command(sdi12_parsed_command, 0, new_addr, true);
+        sdi12_send_command(sdi12_parsed_command, true);
     } else {
         // Default command set
-        int8_t num_sensors = sdi12_scan();
-        if (num_sensors > 0) {
-            process_command(sdi12_parsed_command, num_sensors, new_addr, false);
-        } else {
-            Serial.print("No Sensors found!");
-        }
+        process_command(sdi12_parsed_command, new_addr);
     }
 
     sdi12_end();
