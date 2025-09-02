@@ -32,8 +32,9 @@ class hydrogeolog
     //int split_strings(String inp);
     //void print_str_ay(int number_opts);
     int split_strings(String inp2, String str_ay2[20]);
+    static unsigned long str2ul(String str_source);
     int strcmpi(String str_source, int number_opts, String str_ay2[20]);
-    int parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20], bool allow_empty = false);
+    long parse_argument(String str_source, long default_values, int number_opts, String str_ay2[20], bool allow_empty = false, int* const start_index = nullptr);
     String parse_argument_string(String str_source, String default_values, int number_opts, String str_ay2[20]);
     char parse_argument_char(String str_source, char default_values, int number_opts, String str_ay2[20]);
     void print_str_ay(int number_opts, String str_ay2[20]);
@@ -43,7 +44,6 @@ class hydrogeolog
     void switch_power(int power_sw_idx, int status);
     void dht22_excite_read(int power_sw_idx, int digi_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval);
     void dht22_read(int digi_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval);
-    void print_string_delimiter_value(String string_input, String value);
     void search_ds18b20(int digi_pin, int power_switch);
     void read_DS18B20_by_addr(byte addr[8], int digi_pin);
     void ms5803(int number_of_dummies, int number_of_measurements, int measure_time_interval_ms, int debug_sw, int tca9548_channel);
@@ -63,6 +63,38 @@ class hydrogeolog
     //above for rc_switch
     void si1145(int number_of_dummies, int number_of_measurements, int measurement_time_interval, int debug_sw, int tca9548_channel);
     void search_9548_channels();
+
+    // Implicit Templates for delimiter printing
+    template <typename str_T> void print_key_delimiter(str_T string_input) {
+      Serial.print(string_input);
+      Serial.print(delimiter);
+    }
+    template <typename str_T, typename val_T> void print_string_delimiter_value(str_T string_input, val_T value, bool last = false) {
+      print_key_delimiter(string_input);
+      Serial.print(value);
+      if (!last) Serial.print(delimiter);
+    }
+    template <typename str_T> void print_string_delimiter_value(str_T string_input, double value, int digits, bool last = false) {
+      print_key_delimiter(string_input);
+      Serial.print(value, digits);
+      if (!last) Serial.print(delimiter);
+    }
+    template <typename str_T, typename val_T> void print_string_delimiter_value(str_T string_input, val_T value, int base, bool last = false) {
+      print_key_delimiter(string_input);
+      switch (base) {
+        case BIN:
+          Serial.print("0b");
+          break;
+        case HEX:
+          Serial.print("0x");
+          break;
+        case OCT:
+          Serial.print("0");
+          break;
+      }
+      Serial.print(value, base);
+      if (!last) Serial.print(delimiter);
+    }
 
   private:
     int _pin;

@@ -41,6 +41,15 @@ void hydrogeolog::print_str_ay(int number_opts, String str_ay2[20])
     Serial.println();
 } //print_str_ay
 
+unsigned long hydrogeolog::str2ul(String str_source) {
+    if (str_source.startsWith("0x")) {
+        return strtoul(str_source.c_str() + 2, nullptr, HEX);
+    } else if (str_source.startsWith("0b")) {
+        return strtoul(str_source.c_str() + 2, nullptr, BIN);
+    }
+    return strtoul(str_source.c_str(), nullptr, DEC);
+}
+
 int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
 /* string match */
 {
@@ -56,13 +65,14 @@ int hydrogeolog::strcmpi(String str_source, int number_opts, String str_ay2[20])
     return str_index;
 } //strcmpi
 
-int hydrogeolog::parse_argument(String str_source, int default_values, int number_opts, String str_ay2[20], bool allow_empty = false)
+long hydrogeolog::parse_argument(String str_source, long default_values, int number_opts, String str_ay2[20], bool allow_empty, int* const start_index)
 /* parse argument */
 {
     //strcmpi(str_source,number_opts,str_ay2[20]);
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
-    int str_value = default_values;
+    long str_value = default_values;
     if (str_idx != HYDROGEOLOG_ERR_INVALID) {
+        if (start_index != nullptr) *start_index = str_idx;
         str_ay2[str_idx + 1].trim(); // Remove leading, trailing spaces
         // Test for empty string
         if (str_ay2[str_idx + 1] == "") {
@@ -73,7 +83,13 @@ int hydrogeolog::parse_argument(String str_source, int default_values, int numbe
             }
         }
         
-        str_value = str_ay2[str_idx + 1].toInt();
+        if (str_ay2[str_idx + 1].startsWith("0x")) {
+            str_value = strtoul(str_ay2[str_idx + 1].c_str() + 2, NULL, HEX);
+        } else if (str_ay2[str_idx + 1].startsWith("0b")) {
+            str_value = strtoul(str_ay2[str_idx + 1].c_str() + 2, NULL, BIN);
+        } else {
+            str_value = str_ay2[str_idx + 1].toInt();
+        }
         // Test for edge case if toInt returns 0 and string is not "0"
         if (strcmp("0", str_ay2[str_idx + 1].c_str()) != 0 && str_value == 0) {
             return default_values;
@@ -98,12 +114,10 @@ char hydrogeolog::parse_argument_char(String str_source, char default_values, in
 /* parse argument */
 {
     int str_idx = strcmpi(str_source, number_opts, str_ay2);
-    char str_value = default_values;
-    if (str_idx != HYDROGEOLOG_ERR_INVALID)
-    {
-        str_value = str_ay2[str_idx + 1][0];
+    if (str_idx == HYDROGEOLOG_ERR_INVALID || str_ay2[str_idx + 1].length() > 1) {
+        return default_values;
     }
-    return str_value;
+    return str_ay2[str_idx + 1][0];
 } //parse_argument
 
 void hydrogeolog::analog_excite_read(int power_sw_idx, int analog_idx, int number_of_dummies, int number_of_measurements, int measure_time_interval)
@@ -213,13 +227,6 @@ void hydrogeolog::dht22_read(int digi_idx, int number_of_dummies, int number_of_
     Serial.print(delimiter);
 } // dht_read
 
-void hydrogeolog::print_string_delimiter_value(String string_input, String value)
-{
-    Serial.print(string_input);
-    Serial.print(delimiter);
-    Serial.print(value);
-    Serial.print(delimiter);
-}
 
 void hydrogeolog::search_ds18b20(int digi_pin, int power_switch)
 {
