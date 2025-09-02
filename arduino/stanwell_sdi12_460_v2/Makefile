@@ -5,6 +5,14 @@
 
 BOARD_TAG = mega
 BOARD_SUB = atmega2560
+# Workaround for Arduino-IDE < v1.5, board.txt different format
+# https://github.com/sudar/Arduino-Makefile/blob/master/arduino-mk-vars.md#board_sub
+VERSION_FILE := /usr/share/arduino/lib/version.txt
+ifeq ($(shell expr $(shell [ -e $(VERSION_FILE) ] && cat $(VERSION_FILE) | sed -e 's/^[0-9]://g' -e 's/[.]//g' -e 's/\+.*//g' | head -c5) '<' 150), 1)
+    BOARD_TAG := mega2560
+    undefine BOARD_SUB
+endif
+
 USER_LIB_PATH = /home/$(USER)/pyduino/arduino/libraries/
 ARDUINO_LIBS = SDI12 hydrogeolog SparkFun_MS5803_I2C Sensirion OneWire dht DallasTemperature Adafruit_SI1145_Library Wire rc-switch Adafruit_SHT31
 
