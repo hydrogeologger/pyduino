@@ -791,27 +791,39 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
         hydrogeolog1.print_string_delimiter_value("addr", slave_id);
         hydrogeolog1.print_string_delimiter_value("func", modbus_function, HEX);
         hydrogeolog1.print_string_delimiter_value("reg", register_, HEX);
-    
-        uint8_t qty_ = hydrogeolog1.parse_argument("count", 1, str_ay_size, str_ay);
-        int value_index = INVALID;
-        uint16_t value = hydrogeolog1.parse_argument("value", 0, str_ay_size, str_ay, false, &value_index);
-        if (debug_sw && modbus_function >= 0x05) {
-            // Output value if modbus_function is write type
-            hydrogeolog1.print_key_delimiter("value");
+        hydrogeolog1.print_string_delimiter_value("count", qty_);
+        if (modbus_function >= 0x05) {
+            // Check if value for writing is valid
             for (uint8_t i = 0; i < qty_; i++) {
-                uint8_t base = DEC;
-                if (str_ay[value_index + 1 + i].startsWith("0x")) {
-                    base = HEX;
-                    Serial.print("0x");
-                } else if (str_ay[value_index + 1 + i].startsWith("0b")) {
-                    base = BIN;
-                    Serial.print("0b");
+                if (str_ay[value_index + 1 + i][0] < '0' || str_ay[value_index + 1 + i][0] > '9') {
+                    Serial.println("Invalid expected value counts");
+                    if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+                    return;
                 }
-                Serial.print((uint16_t) hydrogeolog::str2ul(str_ay[value_index + 1 + i]), base);
-                Serial.print(DELIMITER);
+            }
+            if (debug_sw) {
+                // Output value if modbus_function is write type
+                hydrogeolog1.print_key_delimiter("value");
+                for (uint8_t i = 0; i < qty_; i++) {
+                    uint8_t base = DEC;
+                    if (str_ay[value_index + 1 + i].startsWith("0x")) {
+                        base = HEX;
+                        Serial.print("0x");
+                    } else if (str_ay[value_index + 1 + i].startsWith("0b")) {
+                        base = BIN;
+                        Serial.print("0b");
+                    }
+                    Serial.print((uint16_t) hydrogeolog::str2ul(str_ay[value_index + 1 + i]), base);
+                    Serial.print(DELIMITER);
+                }
             }
         }
-        
+
+        ModbusMaster modbus;
+        uint8_t result = ModbusMaster::ku8MBIllegalFunction;
+        mySerial->begin(baud);
+        modbus.begin(slave_id, *mySerial);
+
         switch (modbus_function) {
             case 0x01:  // Read Coils
                 result = modbus.readCoils(register_, qty_);
