@@ -668,7 +668,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
         if (power_delay_millis > 0) delay(power_delay_millis);
     }
 
-    String new_addr = "";
+    char new_addr = '\0';
     int power_off = hydrogeolog1.parse_argument("power_off", 1, str_ay_size, str_ay);
     String sdi12_parsed_command = hydrogeolog1.parse_argument_string("default_cmd", "", str_ay_size, str_ay);
     int start_index_custom_cmd = hydrogeolog1.strcmpi("custom_cmd", str_ay_size, str_ay);
@@ -676,7 +676,9 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     // String custom_cmd = "";
 
     if (sdi12_parsed_command == "change") {
-        new_addr = hydrogeolog1.parse_argument_string("change", "", str_ay_size, str_ay);
+        new_addr = hydrogeolog1.parse_argument_char("change", '\0', str_ay_size, str_ay);
+    } else if (sdi12_parsed_command == "read") {
+        new_addr = hydrogeolog1.parse_argument_char("read", '\0', str_ay_size, str_ay);
     } else if (start_index_custom_cmd > -1) {
         // Construct custom sdi12 message string, allowing for delimiter use
         for (int i = (start_index_custom_cmd + 1); i < str_ay_size; i++) {
@@ -699,7 +701,7 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
             if (start_index_custom_cmd == -1) {
                 // Default command set
                 hydrogeolog1.print_string_delimiter_value("default_cmd", sdi12_parsed_command);
-                if (sdi12_parsed_command == "change") {
+                if (new_addr) {
                     Serial.print(new_addr);
                     Serial.print(DELIMITER);
                 }
@@ -719,15 +721,10 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
 
     if (start_index_custom_cmd > -1) {
         // Custom command
-        process_command(sdi12_parsed_command, 0, new_addr, true);
+        sdi12_send_command(sdi12_parsed_command, true);
     } else {
         // Default command set
-        int8_t num_sensors = sdi12_scan();
-        if (num_sensors > 0) {
-            process_command(sdi12_parsed_command, num_sensors, new_addr, false);
-        } else {
-            Serial.print("No Sensors found!");
-        }
+        process_command(sdi12_parsed_command, new_addr);
     }
 
     sdi12_end();
@@ -737,6 +734,38 @@ void SDI12_sensor(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay
     }
 
     Serial.println();
+}
+
+void SDI12PassThroughMode(int str_ay_size, int debug_sw, int power_sw_pin, String str_ay[]) {
+    // SDIPASS,<sdi_pin>,power,<powerPin>
+    //// to exit SDI-12 passthrough mode
+    // SDIPASSEXIT
+    int sdi12_pin_input = hydrogeolog1.parse_argument("SDIPASS", INVALID, str_ay_size, str_ay);
+    if (sdi12_pin_input == INVALID) { return; }
+
+    int8_t sdi12_pin = analogInputToDigitalPin(sdi12_pin_input);
+    if (sdi12_pin > -1) {
+        // Display analog pin number if used
+        hydrogeolog1.print_string_delimiter_value("SDIPASS", String(sdi12_pin_input));
+    } else {
+        // Display digital pin number, including if digital of analog used
+        sdi12_pin = sdi12_pin_input;
+        hydrogeolog1.print_string_delimiter_value("SDIPASS", String(sdi12_pin));
+    }
+    hydrogeolog1.print_string_delimiter_value("power", String(power_sw_pin));
+
+    if (!sdi12_check_pin(sdi12_pin)) { Serial.println("Invalid Port"); return; }
+    if (power_sw_pin != INVALID) { digitalWrite(power_sw_pin, HIGH); }
+
+    if (sdi12_init(sdi12_pin)) {
+        Serial.println();
+        sdi12_loop();
+        sdi12_end();
+    }
+
+    if (power_sw_pin != INVALID) {
+        digitalWrite(power_sw_pin, LOW);
+    }
 }
 
 void check_serial(String content)
@@ -836,6 +865,7 @@ void loop()
                           hydrogeolog1.parse_argument("clk", INVALID, str_ay_size, str_ay),
                           power_sw_pin, str_ay);
         SDI12_sensor(str_ay_size, debug_sw, power_sw_pin, str_ay);
+        SDI12PassThroughMode(str_ay_size, debug_sw, power_sw_pin, str_ay);
     }//communication
 } //loop
 /*===========================================================================*/
