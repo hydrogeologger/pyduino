@@ -14,7 +14,7 @@ ifeq ($(shell expr $(shell [ -e $(VERSION_FILE) ] && cat $(VERSION_FILE) | sed -
 endif
 
 USER_LIB_PATH = /home/$(USER)/pyduino/arduino/libraries/
-ARDUINO_LIBS = SDI12 hydrogeolog SparkFun_MS5803_I2C Sensirion OneWire dht DallasTemperature Adafruit_SI1145_Library Wire rc-switch Adafruit_SHT31
+ARDUINO_LIBS = SDI12 hydrogeolog SparkFun_MS5803_I2C Sensirion OneWire dht DallasTemperature Adafruit_SI1145_Library Wire rc-switch Adafruit_SHT31 ModbusMaster
 
 .PHONY: softupload 2400
 

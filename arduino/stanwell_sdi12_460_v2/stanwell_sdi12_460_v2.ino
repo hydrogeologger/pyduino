@@ -9,6 +9,7 @@ place new libraries in this location and include as
 #include <SDI12.h>
 #include <hydrogeolog.h>
 #include <Wire.h>
+#include <ModbusMaster.h>
 #include "timing.h"
 #include "common.h"
 #include "SDI12_function.h"
@@ -768,6 +769,201 @@ void SDI12PassThroughMode(int str_ay_size, int debug_sw, int power_sw_pin, Strin
     }
 }
 
+void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_pin, String str_ay[]) {
+    // modbus
+    // modbus,<serialPort>,power,<powerPin>,addr,<serverID>,func,<functionCode>,reg,<registerAddr>
+    // Optional Parameters:
+    // baud (optional): Default to 9600.
+    // count (optional): Number of registers. Default to 1.
+    // value (optional): Required if function code is write type. Default to 0.
+
+    if (serial_pin != INVALID) {
+        hydrogeolog1.print_string_delimiter_value("modbus", serial_pin);
+
+        HardwareSerial *mySerial;
+        switch (serial_pin) {
+            case 1:
+                mySerial = &Serial1;
+                break;
+            case 2:
+                mySerial = &Serial2;
+                break;
+            case 3:
+                mySerial = &Serial3;
+                break;
+            default:
+                Serial.println("Invalid serial port");
+                return;
+        }
+
+        long baud = hydrogeolog1.parse_argument("baud", 9600, str_ay_size, str_ay);
+        if (debug_sw) {
+            hydrogeolog1.print_string_delimiter_value("baud", baud);
+            hydrogeolog1.print_string_delimiter_value("power", power_sw_pin);
+        }
+
+        if (power_sw_pin != INVALID) {
+            digitalWrite(power_sw_pin, HIGH);
+            int power_delay_millis = hydrogeolog1.parse_argument("delay", 0, str_ay_size, str_ay);
+            if (debug_sw) {
+                hydrogeolog1.print_string_delimiter_value("delay", power_delay_millis);
+            }
+            if (power_delay_millis > 0) delay(power_delay_millis);
+        }
+
+        uint8_t slave_id = hydrogeolog1.parse_argument("addr", 1, str_ay_size, str_ay);
+        uint8_t modbus_function = hydrogeolog1.parse_argument("func", 0x03, str_ay_size, str_ay);
+        uint16_t register_ = hydrogeolog1.parse_argument("reg", 0x00, str_ay_size, str_ay);
+
+        uint8_t qty_ = hydrogeolog1.parse_argument("count", 1, str_ay_size, str_ay);
+        int value_index = INVALID;
+        uint16_t value = hydrogeolog1.parse_argument("value", 0, str_ay_size, str_ay, false, &value_index);
+        // Overwrite qty for single write modbus function
+        switch (modbus_function) {
+            case 0x05:  // Write Single Coil
+            case 0x06:  // Write Single Register
+            case 0x0F:  // Write Multiple Coils
+                qty_ = 1;
+            default:
+                if (qty_ <= 0) {qty_ = 1;}
+                break;
+        }
+
+        hydrogeolog1.print_string_delimiter_value("addr", slave_id);
+        hydrogeolog1.print_string_delimiter_value("func", modbus_function, HEX);
+        hydrogeolog1.print_string_delimiter_value("reg", register_, HEX);
+
+        if (modbus_function >= 0x05) {
+            // Check if value for writing is valid
+            for (uint8_t i = 0; i < qty_; i++) {
+                if (str_ay[value_index + 1 + i][0] < '0' || str_ay[value_index + 1 + i][0] > '9') {
+                    Serial.println("Error: Expected value count mismatch!");
+                    if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+                    return;
+                }
+            }
+            if (debug_sw) {
+                // Output value if modbus_function is write type
+                hydrogeolog1.print_key_delimiter("value");
+                for (uint8_t i = 0; i < qty_; i++) {
+                    uint8_t base = DEC;
+                    if (str_ay[value_index + 1 + i].startsWith("0x")) {
+                        base = HEX;
+                        Serial.print("0x");
+                    } else if (str_ay[value_index + 1 + i].startsWith("0b")) {
+                        base = BIN;
+                        Serial.print("0b");
+                    }
+                    Serial.print((uint16_t) hydrogeolog::str2ul(str_ay[value_index + 1 + i]), base);
+                    Serial.print(DELIMITER);
+                }
+            }
+        }
+
+        ModbusMaster modbus;
+        uint8_t result = ModbusMaster::ku8MBIllegalFunction;
+        mySerial->begin(baud);
+        modbus.begin(slave_id, *mySerial);
+
+        switch (modbus_function) {
+            case 0x01:  // Read Coils
+                result = modbus.readCoils(register_, qty_);
+                break;
+            case 0x02:  // Read Discreet Inputs
+                result = modbus.readDiscreteInputs(register_, qty_);
+                break;
+            case 0x03:  // Read Holding Registers, Default
+                result = modbus.readHoldingRegisters(register_, qty_);
+                break;
+            case 0x04:  // Read Input Registers
+                result = modbus.readInputRegisters(register_, qty_);
+                break;
+            case 0x05:  // Write Single Coil
+                result = modbus.writeSingleCoil(register_, value);
+                break;
+            case 0x06:  // Write Single Register
+                result = modbus.writeSingleRegister(register_, value);
+                break;
+            case 0x0F:  // Write Multiple Coils
+                result = modbus.writeMultipleCoils(register_, value);
+                break;
+            case 0x10:  // Write Multiple Registers
+                for (uint8_t i = 0; i < qty_; i++) {
+                    modbus.setTransmitBuffer(i, hydrogeolog::str2ul(str_ay[value_index + 1 + i]));
+                }
+                result = modbus.writeMultipleRegisters(register_, qty_);
+                break;
+            case 0x16:  // Write Masked Register Write
+            case 0x17:  // Read & Write multiple registers
+                // Currently Not supported
+                break;
+        }
+
+        mySerial->end();
+        if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+
+        if (result == ModbusMaster::ku8MBSuccess) {
+            switch (modbus_function) {
+                case 0x05:  // Write Single Coil
+                case 0x06:  // Write Single Register
+                case 0x0F:  // Write Multiple Coils
+                case 0x01:    // Read Coils
+                case 0x02:    // Read Discreet Inputs
+                case 0x03:    // Read Holding Registers, Default
+                case 0x04: {  // Read Input Registers
+                    hydrogeolog1.print_string_delimiter_value("count", qty_);
+                    hydrogeolog1.print_key_delimiter("result");
+                    for (uint8_t i = 0; i < qty_; i++) {
+                        Serial.print(modbus.getResponseBuffer(i));
+                        if (i + 1 < qty_) Serial.print(DELIMITER);
+                    }
+                } break;
+                case 0x10:  // Write Multiple Registers
+                    hydrogeolog1.print_string_delimiter_value("result", qty_, true);
+                    break;
+                default:
+                    Serial.print("success");
+                    break;
+            }
+        } else {
+            // Print error
+            hydrogeolog1.print_key_delimiter("error");
+            switch (result) {
+                case ModbusMaster::ku8MBInvalidSlaveID:
+                    Serial.print("Received mismatched slave ID");
+                    break;
+                case ModbusMaster:: ku8MBInvalidFunction:
+                    Serial.print("Received mismatched function");
+                    break;
+                case ModbusMaster::ku8MBResponseTimedOut:
+                    Serial.print("Reponse timed out");
+                    break;
+                case ModbusMaster::ku8MBInvalidCRC:
+                    Serial.print("Received invalid CRC");
+                    break;
+                case ModbusMaster::ku8MBIllegalFunction:
+                    Serial.print("Illegal function");
+                    break;
+                case ModbusMaster::ku8MBIllegalDataAddress:
+                    Serial.print("Illegal data address");
+                    break;
+                case ModbusMaster::ku8MBIllegalDataValue:
+                    Serial.print("Illegal data value");
+                    break;
+                case ModbusMaster::ku8MBSlaveDeviceFailure:
+                    Serial.print("Slave device failure");
+                    break;
+                default:
+                    Serial.print(result, HEX);
+                    break;
+            }
+        }
+        Serial.println();
+        modbus.clearTransmitBuffer();
+        modbus.clearResponseBuffer();
+    }
+}
+
 void check_serial(String content)
     /*
      if input abc in serial, arduino will return abc
@@ -844,6 +1040,10 @@ void loop()
                              hydrogeolog1.parse_argument("otno", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);
+
+        modbus_rtu(str_ay_size, debug_sw,
+                   hydrogeolog1.parse_argument("modbus", INVALID, str_ay_size, str_ay),
+                   power_sw_pin, str_ay);
 
         multiplexer_i2c_reset(hydrogeolog1.parse_argument("9548_reset", INVALID, str_ay_size, str_ay, true));
 
