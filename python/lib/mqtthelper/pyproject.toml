@@ -1,0 +1,51 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = [
+    "setuptools >= 40.9.0", # PEP 517
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mqtthelper"
+description = "Hydrogeologger/Pyduino postprocessing helper package"
+authors = [
+    { name = "Lieven Tan" }
+]
+dynamic = ["version"]
+requires-python = ">=2.7"
+keywords = ["hydrogeologger", "mqtt"]
+classifiers = [
+    # Project maturity
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 4 - Beta",
+
+    # Python version support
+    "Programming Language :: Python"
+]
+dependencies = [
+    "paho-mqtt >= 1.6.1"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hydrogeologger/pyduino"
+"Bug Tracker" = "https://github.com/hydrogeologger/pyduino/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "mqtthelper.__version__" }
+
+[tool.setuptools.package-dir] # Directory containing packages
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"] # list of folders that contain the packages (["."] by default)
+include = [
+    "mqtthelper*"
+] # package names should match these glob patterns (["*"] by default)
+exclude = [] # exclude packages matching these glob patterns (empty by default)
