@@ -140,37 +140,37 @@ boolean is_digi_out_pin(int pinName)
 }
 
 
-/*
- * Function power_switch
- * Desc     Sets power pin or initiate PWM for compatible pins.
+/**
+ * @brief Sets power pin or initiate PWM for compatible pins.
  *
- * Note     Power_status of 255 will be treated as power_status = 1 for
+ * Note:    Power_status of 255 will be treated as power_status = 1 for
  *          backwards compatibilityfor backwards compatibility
  *
- * Input    pow_sw: power switch pin number
- *          pow_sw_status: digital state of power switch pin
- *          pwmValue: PWM value between 0 - 255
- * Output   none
- *
  * Logic    PWM refers to any pwm value between 0 and 255 non inclusive
- *          power_status | PWM  | pin state
- *          1 or 255     |  0   | HIGH
- *          1 or 255     | 255  | HIGH
- *          0            | 255  | HIGH
- *          0            |  0   | LOW
- *          1 or 255     | PWM  | PWM for PWM pins
- *          0            | PWM  | PWM for PWM pins
+ * 
+ * power_status | PWM  | pin state        |
+ * :----------- | :--- | :--------------- |
+ * 1 or 255     |  0   | HIGH             |
+ * 1 or 255     | 255  | HIGH             |
+ * 0            | 255  | HIGH             |
+ * 0            |  0   | LOW              |
+ * 1 or 255     | PWM  | PWM for PWM pins |
+ * 0            | PWM  | PWM for PWM pins |
  *
- * Usage    power_switch,46,power_switch_status,1
- *          power_switch,10,pwm_status,50
- *
- * Prints   Prints "Invalid" to serial if incorrect power pin selected
- *          Will print invalid status if incorrect configuration
+ * Usage:
+ * ``` 
+ * power_switch,46,power_switch_status,1
+ * power_switch,10,pwm_status,50
+ * ```
+ * Prints "Invalid" to serial if incorrect power pin selected.
+ * Will print invalid status if incorrect configuration.
+ * 
+ * @param[in] pow_sw power switch pin number
+ * @param[in] pow_sw_status digital state of power switch pin
+ * @param[in] pwmValue PWM value between 0 - 255
  */
-void power_switch(int pow_sw, int pow_sw_status, int pwmValue)
-{
-    if (pow_sw != INVALID)
-    {
+void power_switch(int pow_sw, int pow_sw_status, int pwmValue) {
+    if (pow_sw != INVALID) {
         if (is_pwm_pin(pow_sw) || is_digi_out_pin(pow_sw)) {
             // pwm value protection as max is 255 for arduino
             if (pwmValue >= 255) {
@@ -190,11 +190,28 @@ void power_switch(int pow_sw, int pow_sw_status, int pwmValue)
                 // Treat pin as normal digital pin if pwm is 0 or 255
                 hydrogeolog1.print_string_delimiter_value("power_switch_status", String(pow_sw_status));
                 hydrogeolog1.switch_power(pow_sw, pow_sw_status);
+            } else if (pow_sw_status == HYDROGEOLOG_ERR_EMPTY_INT) {
+                uint8_t bit = digitalPinToBitMask(pow_sw);
+                uint8_t port = digitalPinToPort(pow_sw);
+
+                volatile uint8_t *reg, *out;
+                reg = portModeRegister(port);
+                out = portOutputRegister(port);
+
+                uint8_t mode = INPUT;
+                if (*reg & bit) {
+                    mode = OUTPUT;  // OUTPUT mode
+                } else if (*out & bit) {
+                    mode = INPUT_PULLUP;  // INPUT_PULLUP mode
+                }
+                // hydrogeolog1.print_string_delimiter_value("port", port);
+                // hydrogeolog1.print_string_delimiter_value("bit", port, BIN);
+                hydrogeolog1.print_string_delimiter_value("mode", mode);
+                hydrogeolog1.print_string_delimiter_value("status", digitalRead(pow_sw), true);
             } else {
                 Serial.print("Invalid status");
             }
             Serial.println();
-
         } else {
             // if not valid power pin or pwm pin
             Serial.println("Invalid");
