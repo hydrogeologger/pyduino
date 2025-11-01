@@ -1,109 +1,144 @@
 # mqtthelper: paho.mqtt.client Helper module
+
 This is an MQTT client publishing python helper module.
 Contains support and wrapper functions for MQTT publishing.
 
-# Dependencies
-* paho.mqtt.client
-* json
+> [!IMPORTANT]
+> **Package is NOT distributed on PyPi package indexer!**
 
-# Usage and API
+## Dependencies
+
+- paho-mqtt : paho.mqtt.client
+
+## Usage
+
+For IntelliSense support, it is recommended to use one of the following installation options:
+
+1. [Editable](#editable-installation)
+2. [Regular](#regular-installation)
+
+Non-Installation use is also possible but provides no IntelliSense support. See [No-Install Usage](#no-installation-example).
+
+### Initial Setup
+
+1. Obtain copy of pyduino files.\
+   If Git is installed and you do not want a copy of pyduino files.
+   See [Installation from Git Repository](#installation-from-git-repository)\
+   If git repo method is used, you can skip the following methods.
+2. Traverse to pyduino, python library directory `...\pyduino\python\lib\`.
+3. Install package using [regular](#regular-installation) or [editable](#editable-installation) Installation methods.
+    Alternatively can ignore installation see [No Installation](#no-installation).
+
+#### Editable Installation
+
+Allows module changes to be automatically updated in the python environment.\
+However any package file directory changes will also affect the python environment.
+
+Note: package version does not update automatically, need to perform reinstallation.
+
+```shell
+pip install -e ./mqtthelper
+```
+
+or
+
+```shell
+# if you are in the package directory
+# ...\pyduino\python\lib\mqtthelper
+pip install -e .
+```
+
+#### Regular Installation
+
+Will install the package normally such that any modifications to the package
+files is not reflected in the python environment.
+
+Any changes to the packages need to be reinstalled to take effect.
+
+```shell
+# `pip install PackageName` will not work as the package is not published in PyPi package indexer.
+# Need to traverse into `...\pyduino\python\lib` directory prior to running following command.
+pip install ./mqtthelper
+```
+
+or
+
+```shell
+# if you are in the package directory
+# ...\pyduino\python\lib\mqtthelper
+pip install -e .
+```
+
+##### Installation from Git Repository
+
+This method requires git to be installed on the system and performs a [*regular package installation*](#regular-installation)
+directly from the repository without copying all the pyduino files.\
+It is NOT recommended to perform an editable mode install from the remote git repo.
+
+```shell
+pip install "git+https://github.com/hydrogeologger/pyduino.git#egg=mqtthelper&subdirectory=python/lib/mqtthelper"
+```
+
+### No installation
+
+You may choose to not install. However installation offers IntelliSense support.\
+See [No-Install Usage](#no-installation-example) to learn how to use the package in python scripts if the package is not installed.
+
+### Example
+
 ```python
+import time
+
+import paho.mqtt.client as mqtt
+
+import mqtthelper
+
+client = mqtt.Client()
+# Using access token,
+client.username_pw_set(username="access token")
+# Or Using username password, not to be used with publish_to_thingsboard()
+client.username_pw_set(username="username", password="password")
+client.connect(host="host", port=1883, keepalive=60)
+
+time_since_epoch_millis = time.time() * 1000
+
+data = {
+  "temp": 24.0,
+  "humidity": 50
+}
+
+# Need client loop before publish or else publish will think it always fail due to QOS=1.
+client.loop_start()
+
+try:
+    # publish_result is in tuple (rc, mid) of MQTTMessageInfo class
+    publish_result, _ = mqtthelper.publish_to_thingsboard(
+        client=client,
+        payload=data,
+        ts=time_since_epoch_millis,
+        fifo=False,
+        timeout=3.0,
+        filename="mqtt_queue_demo.json",
+        debug=False
+    )
+except (ValueError, RuntimeError) as error:
+    print(error)
+
+if (client.is_connected()):
+    client.loop_stop()
+    client.disconnect()
+```
+
+#### No-Installation Example
+
+Note this method does not provide IntelliSense support! For IntelliSense please use one of the [installation](#initial-setup) methods.
+
+```python
+# Need to add path to package module files before importing
+sys.path.append("/path/to/pyduino/python/lib/mqtthelper/src")
 import mqtthelper
 ```
 
-## is_json_string()
-```python
-is_json_string(text)
-```
-Checks if the string object contains json document. Does not check if json document has valid structure
-### Params
-* `text` - String to test for json document
+## API
 
-
-## publish_mqtt_queue()
-```python
-publish_mqtt_queue(client, topic, json_payload, timeout=1.0, filename=None, debug=False):
-```
-paho.mqtt.client.publish() wrapper to publish json payload with a qos=1 from a FIFO queue. Archived queue is stored in a json document file.
-
-### Params
-* `client` - The connected paho.mqtt.client.Client() to publish on.
-* `topic` - MQTT topic to publish to.
-* `json_payload` - JSON payload to append to a queue for sending
-* `timeout` - (Optional) Blocking time per publish instruction in seconds, minimum of 1.0 set
-* `filename` - (Optional) JSON file to store payload queue on unsuccessfull publish. Defaults to the calling `mqtt_queue_<callingscript>.json` if filename is not given or empty.
-* `debug` - (Optional) Flag to print to screen the `MQTTMessageInfo()` and payload from each paho.mqtt.client.publish() call. Defaults: False
-
-### Returns
-paho.mqtt.client.MQTTMessageInfo from the last publishing call.
-
-### Raises
-`ValueError` if payload format is not appropriate.
-
-
-## publish_to_thingsboard()
-```python
-publish_to_thingsboard(client, payload, ts=None, timeout=1.0, filename=None, display_payload=False, debug=False)
-```
-paho.mqtt.client.publish() helper for publish to thingsboard using publish_mqtt_queue() helper function. Implements payload archiving queue.
-
-### Params
-* `client` - The connected paho.mqtt.client.Client() to publish on.
-* `payload` - JSON payload to append to a queue for sending
-* `ts` - Timestamp in milliseconds from epoch, if ts=None, payload is sent without timestamp.
-* `timeout` - (Optional) Blocking time per publish instruction in seconds, minimum of 1.0 set
-* `filename` - (Optional) JSON file to store payload queue on unsuccessfull publish. Defaults to the calling `mqtt_queue_<callingscript>.json` if filename is not given or empty.
-* `display_payload` - (Optional) Displays the current payload to be appended. Defaults: False
-* `debug` - (Optional) Flag to print to screen the `MQTTMessageInfo()` and payload from each paho.mqtt.client.publish() call. Defaults: False
-
-### Returns
-paho.mqtt.client.MQTTMessageInfo from the last publishing call.
-
-### Raises
-`ValueError` if payload format is not appropriate or `TypeError` if timestamp is not numeric.
-
-
-## update_json_mqtt_queue()
-```python
-update_json_mqtt_queue(filename, json_payload)
-```
-Get the json mqtt queue data from file including current payload.
-
-### Params
-* `filename` - Name of JSON queue file archive, must include extension in filename, Default - None
-* `payload` - JSON payload for appending to queue
-
-### Returns
-List of mqtt json dictionary items.
-
-### Raises
-`ValueError` if payload format is not appropriate.
-
-
-## save_json_mqtt_queue()
-```python
-save_json_mqtt_queue(filename, json_data, payload_index=None):
-```
-Saves json mqtt queue to file.
-
-### Params
-* `filename` - Name of JSON queue file archive, must include extension in filename, Default - None
-* `json_data` - list of json data
-* `payload_index` - (Optional) List index to start saving from. Defaults: None (Saves all)
-
-
-## package_thingsboard_payload()
-```python
-package_thingsboard_payload(payload, ts=None)
-```
-Prepare payload for thingsboard to include or omit timestamp. 
-
-### Params
-* `payload` - JSON payload for appending to queue
-* `ts` - (Optional) Timestamp in milliseconds from epoch, Default - None, ommits 
-
-### Returns
-JSON payload for thingsboard
-
-### Raises
-`ValueError` if payload format is not appropriate or `TypeError` if timestamp is not numeric.
+See documentation [here](<./docs/readme.md>)
