@@ -56,11 +56,12 @@ function transfer_conf_files_from_path() {
     # echo $(dirname "$0")
     # echo "$1"
     FILE_PATH=$1
-    for file_name in $(find "$FILE_PATH/" -type f); do
-        # echo "$file_name"
+    while IFS= read -r -d '' file_name; do
+        # remove leading $FILE_PATH part from the path
         # echo "${file_name#*"$FILE_PATH"}"
-        cp -v "$file_name" "${file_name#*"$FILE_PATH"}"
-    done
+        local dest="${file_name#"${FILE_PATH}"}"
+        cp -v "$file_name" "$dest"
+    done < <(find "$FILE_PATH" -type f -print0)
 }
 
 function show_no_python_version_declared_message() {
