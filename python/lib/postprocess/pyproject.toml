@@ -29,7 +29,8 @@ dependencies = [
     "pandas>=0.24.2",
     "matplotlib",
     "numpy",
-    "scipy"
+    "scipy",
+    "requests"
 ]
 
 [project.optional-dependencies]
