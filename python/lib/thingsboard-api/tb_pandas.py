@@ -301,6 +301,7 @@ def add_multindex_level(df,  # type: _pd.DataFrame|_pd.Series
                         axis=1,  # type: int|str
                         name=None,  # type:  _Optional[str]
                         na_rep=None,  # type: _Optional[_Any]
+                        dtype=None,  # type: _Optional[_PandasDtype]
                         inplace=False  # type: _Optional[bool]
                         ):  # type: (...) -> None | _pd.MultiIndex
     """Add extra levels to index.
@@ -314,6 +315,9 @@ def add_multindex_level(df,  # type: _pd.DataFrame|_pd.Series
         name (str, optional): New index level name. Defaults to None.
         na_rep (any, optional): Missing data {None, np.nan or empty string} representation
             for level > 0, if None missing data not replaced. Defaults to None.
+        dtype (str, numpy.dtype, or PandasDtype, optional): Data type for the
+            new Index. If not specified, will be inferred from `keys`. Defaults to None.
+            See the :ref:`pandas guide <basics.dtypes>`.
         inplace (bool, optional): Modifies the object directly,
             instead of creating a new DataFrame. Defaults to False.
 
@@ -380,30 +384,22 @@ def add_multindex_level(df,  # type: _pd.DataFrame|_pd.Series
                     if _pd.isna(val) or (isinstance(val, str) and not val.strip())
                     else val for val in keys]
 
-    # Create new index level
-    new_keys = []  # Reference for index level keys
-    for existing_key, insert_key in zip(to_promote, keys):
-        if isinstance(existing_key, tuple):
-            # py2 support
-            new_key = list(existing_key)
-            new_key.insert(level, insert_key)
-            # py3 version
-            # new_key = (*existing_key[:level], insert_key, *existing_key[level:])
-        else:
-            new_key = (existing_key, insert_key) if level else (
-                insert_key, existing_key)
-        new_keys.append(new_key)
-    new_index = _pd.MultiIndex.from_tuples(new_keys)
+    # Extract and preserve all existing levels
+    if to_promote.nlevels > 1:
+        index_levels = [to_promote.get_level_values(i)
+                        for i in range(to_promote.nlevels)]
+    else:
+        index_levels = [to_promote]
 
-    # Update index level names
-    new_names = []  # Reference index level names
-    for l in range(new_index.nlevels):
-        if l == level:
-            n = name
-        else:
-            n = to_promote.names[l - (1 if l >= level else 0)]
-        new_names.append(n)
-    new_index.names = new_names
+    # Convert new keys into pandas Index
+    keys_index = _pd.Index(data=keys, name=name,
+                           dtype=dtype, tupleize_cols=False)
+
+    # Inject the new level array cleanly at the specified position
+    index_levels.insert(level, keys_index)
+
+    # Build final MultiIndex from arrays
+    new_index = _pd.MultiIndex.from_arrays(index_levels)
 
     if not inplace:
         return new_index
