@@ -28,6 +28,10 @@ import pandas as _pd
 
 # Package imports
 # Expose core public functions to namespace
+from .error_handler import (  # pylint: disable=unused-import
+    disable_friendly_exceptions,
+    enable_friendly_exceptions,
+)
 from .tb_rest_api import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 if TYPE_CHECKING:
