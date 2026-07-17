@@ -60,6 +60,80 @@ except NameError:  # Python 3
     long = int  # pylint: disable=invalid-name
 
 
+def _with_metaclass(meta, *bases):
+    """Provide a cross-version compatible way to define a class with a metaclass.
+
+    Bridges the syntax gap between Python 2 (`__metaclass__ = Meta` inside the class body)
+    and Python 3 (`class MyClass(object, metaclass=Meta)`), allowing a base class 
+    to be defined once and inherit its metaclass correctly across both environments.
+
+    Args:
+        meta (type): The metaclass to apply to the created base class.
+        *bases: Tuple of base classes the new class should inherit from (e.g., object).
+
+    Returns:
+        type: A temporary base class configured with the specified metaclass.
+    """
+    # pylint: disable=invalid-name, missing-class-docstring
+    class metaclass(meta):
+        def __new__(cls, name, this_bases, d):
+            """Metaclass helper for Python 2.7 and 3 compatibility."""
+            # pylint: disable=unused-argument
+            return meta(name, bases, d)
+    return type.__new__(metaclass, 'temporary_class', (), {})
+
+
+class _EnumMeta(type):
+    """Metaclass for lightweight enum classes.
+
+    Automatically inspects class attributes during creation to build a 
+    bidirectional mapping dictionary (_NAMES), allowing reverse lookups 
+    from values back to their string names (e.g., {1: 'CUSTOMER_USER'}).
+    """
+    def __new__(mcs, name, bases, dct):
+        """Create and return a new enum class instance with auto-generated _NAMES.
+
+        Scans all public class variables in `dct` (ignoring dunder names, 
+        private attributes starting with an underscore, and methods/callables), 
+        and populates the `_NAMES` dictionary mapping each attribute's value 
+        back to its string name.
+        """
+        names = {}
+        if '_NAMES' in dct:
+            names.update(dct['_NAMES'])
+
+        for key, val in dct.items():
+            if not key.startswith('_') and not callable(val):
+                names[val] = key
+
+        dct['_NAMES'] = names
+        return super(_EnumMeta, mcs).__new__(mcs, name, bases, dct)
+
+
+class _EnumBase(_with_metaclass(_EnumMeta, object)):
+    """Base class for lightweight enums (Python 2.7 & 3 compatible)."""
+    _NAMES = {}
+
+    @classmethod
+    def get_name(cls, val, default=None):
+        """Retrieve the string name for a given value,
+        defaulting to None for programmatic checks."""
+        return cls._NAMES.get(val, default)
+
+    @classmethod
+    def get_value(cls, name, default=None):
+        """Retrieve the value for a given string name,
+        defaulting to None for programmatic checks."""
+        return getattr(cls, name, default)
+
+
+class Authority(_EnumBase):
+    """Thingsboard Authority Roles."""
+    CUSTOMER_USER = 1
+    TENANT_ADMIN = 2
+    SYS_ADMIN = 3
+
+
 class Account():
     """Represents a ThingsBoard account and serves as the primary interface for
     interacting with the account, its devices, and other resources.
@@ -72,6 +146,7 @@ class Account():
         url (str): Thingsboard url including scheme and port if provided (read-write).
         token (str): Account JWT token (read-only).
         refreshToken (str): Account JWT refresh token (read-only).
+        devices (dict[str, Device]): Dictionary of devices registered with account (read-write).
     """
 
     def __init__(self, url):
@@ -83,10 +158,16 @@ class Account():
             url (str): Full URL path to connect to thingsboard, including port,
                 must include scheme http(s). i.e. http(s)://host:port
         """
+        self._customer_id = ""  # type: str
+        """Thingsboard account customerId."""
+        self._authority = None
+        """Authority role of authenticated account."""
         self.url = url  # Use property setter
         """Thingsboard URL, including port if provided."""
         self.__token_info = {"token": None, "refreshToken": None, "exp": 0}
         """Reference to jwt token info (dict[str, str | int])."""
+        self.devices = {}  # type: dict[str, Device]
+        """Dictionary of devices registered with account."""
 
     def __repr__(self):
         return "%s(%r)" % (
@@ -131,13 +212,17 @@ class Account():
         """Returns the JWT refreshToken for the user (`str`, read-only)"""
         return self.__token_info["refreshToken"]
 
-    def authenticate(self, username, password, timeout=3):
-        # type: (str, str, int|float|tuple|None) -> bool
+    def authenticate(self, username, password, fetch_info=False, timeout=3):
+        # type: (str, str, bool|None, int|float|None) -> bool
         """Authenticate with thingsboard server to obtain JWT token for the user.
+
+        Will also query account user info.
 
         Args:
             username (str): Username of user for authentication.
             password (str): Password of user for authentication.
+            fetch_info (bool, optional): Fetch associated account user information
+                from Thingsboard. Defaults to False.
             timeout (int | float | tuple, optional): Request timeout.
                 Seconds to wait before giving up. Accepts a single number to set the
                 same time limit for both connecting and receiving data, or a
@@ -159,7 +244,41 @@ class Account():
         if auth_response.status_code != _HTTPStatus.OK or \
                 not self._save_token(auth_response.json()):
             return False  # Exit early if failed to get/process jwt token
+
+        if fetch_info:
+            # Get account info
+            return self._fetch_user_info(timeout=timeout)
+
         return True
+
+    def _fetch_user_info(self, timeout=5):
+        # type: (int|float|tuple|None) -> bool
+        """Retrieves user information from thingsboard.
+
+        Args:
+            timeout (int | float, optional): Seconds to wait for server response before timing out.
+                Seconds to wait before giving up. Accepts a single number to set the
+                same time limit for both connecting and receiving data, or a
+                `(connect, read)` tuple to set them separately.
+                Defaults to 5.
+
+        Returns:
+            bool: True if the user information was successfully retrieved and
+                processed, False otherwise.
+        """
+        headers = {"Accept": "application/json",
+                   "X-Authorization": "Bearer {}".format(self.token)}
+        url_path = _urljoin(self.url, "/api/auth/user")
+        tb_user_response = _requests.get(url=url_path,
+                                         headers=headers,
+                                         timeout=timeout)
+        if tb_user_response.status_code == _HTTPStatus.OK:
+            user_info = tb_user_response.json()  # type: dict
+            self._customer_id = user_info.get("customerId", {}).get("id")
+            user_authority = user_info.get("authority")
+            self._authority = Authority.get_value(user_authority)
+            return True
+        return False
 
     def update_token(self, timeout=3):
         # type: (int|float|tuple|None) -> bool
@@ -219,6 +338,71 @@ class Account():
     #         return True
     #     else:
     #         return False
+
+    def fetch_devices(self, page_size=10, timeout=10):
+        # type: (int, int|float|tuple|None) -> bool
+        """Perform query of devices belonging to account from Thingsboard.
+
+        Requires `fetch_info` to be True during Account.authenticate().
+
+        Clears existing locally cached devices.
+
+        Implements both tenant and customer devices query.
+        Supports TB 2.x and TB 3.x+ api version.
+
+        Args:
+            page_size (int, optional): Thingsboard pagination parameter.
+                Affects number requests to for retrieval registered devices. Defaults to 10.
+            timeout (int | float | tuple, optional): Request timeout.
+                Seconds to wait before giving up. Accepts a single number to set the
+                same time limit for both connecting and receiving data, or a
+                `(connect, read)` tuple to set them separately.
+                Defaults to 10.
+
+        Returns:
+            bool: True if devices were successfully retrieved and cached, False otherwise.
+        """
+        self.devices.clear()
+        headers = {'Accept': 'application/json',
+                   'X-Authorization': "Bearer {}".format(self.token)
+                   }
+
+        if self._authority == Authority.TENANT_ADMIN:
+            endpoint = "/api/tenant/devices"
+        else:
+            endpoint = "/api/customer/{customerId}/devices".format(
+                customerId=self._customer_id)
+        url_path = _urljoin(self.url, endpoint)
+
+        has_next = True
+        page = 0
+        params = {"limit": page_size, "pageSize": page_size, "page": page}
+        while has_next:
+            response = _requests.get(url=url_path,
+                                     params=params,
+                                     headers=headers,
+                                     timeout=timeout)
+            if response.status_code != _HTTPStatus.OK:
+                return False  # Early exit if request failed
+
+            payload = response.json()  # type: dict
+            raw_devices = payload.get("data", [])  # type: list
+            has_next = payload.get("hasNext", False)  # type: bool
+            for device in raw_devices:
+                device_obj = Device(account=self,
+                                    device_id=device["id"]["id"],
+                                    name=device["name"])
+                setattr(device_obj, "_type", device["type"])
+                self.devices.setdefault(device["name"], device_obj)
+            if has_next:
+                page += 1
+                next_page_link = payload.get("nextPageLink")
+                if next_page_link:
+                    params["idOffset"] = next_page_link.get("idOffset")
+                    params["textOffset"] = next_page_link.get("textOffset")
+                else:
+                    params["page"] = page
+        return True
 
 
 class Device():
