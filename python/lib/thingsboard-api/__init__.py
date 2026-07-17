@@ -11,4 +11,16 @@ Dependencies:
 __version__ = "0.1.0"
 
 # Import base modules
+from .exceptions import (
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    ConflictError,
+    MethodNotAllowedError,
+    NotFoundError,
+    PermissionDeniedError,
+    PreconditionFailedError,
+    RateLimitError,
+    ServerError,
+)
 from .tb_rest_api import *

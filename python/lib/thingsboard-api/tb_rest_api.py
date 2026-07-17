@@ -32,10 +32,26 @@ except ImportError:
 
 # External Dependencies
 # import jwt as _jwt
-import requests as _requests
+
+# Internal Dependencies
+from ._http import _HTTPTransport
+from .exceptions import (
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    ConflictError,
+    MethodNotAllowedError,
+    NotFoundError,
+    PermissionDeniedError,
+    PreconditionFailedError,
+    RateLimitError,
+    ServerError,
+)
 
 if _TYPE_CHECKING:
     from typing import Any as _Any  # pylint: disable=ungrouped-imports
+
+    from ._http import Response as _Response
 
 # Python2/3 Compatibility
 # pylint: disable=consider-using-f-string
@@ -69,6 +85,8 @@ class Account():
             url (str): Full URL path to connect to thingsboard, including port,
                 must include scheme http(s). i.e. http(s)://host:port
         """
+        self._http = _HTTPTransport()  # type: _HTTPTransport
+        """Internal HTTP Transporter."""
         self._customer_id = ""  # type: str
         """Thingsboard account customerId."""
         self._is_tenant_admin = False
@@ -90,6 +108,11 @@ class Account():
         # type: () -> Account
         """Enter the Account context manager."""
         return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # type: (object, object, object) -> None
+        """Exit the Account context manager."""
+        self.end()
 
     @property
     def url(self):
@@ -123,7 +146,7 @@ class Account():
         """Returns the JWT refreshToken for the user (`str`, read-only)"""
         return self.__token_info["refreshToken"]
 
-    def authenticate(self, username, password, fetch_info=False, timeout=3):
+    def authenticate(self, username, password, fetch_info=False, timeout=None):
         # type: (str, str, bool|None, int|float|None) -> bool
         """Authenticate with thingsboard server to obtain JWT token for the user.
 
@@ -138,20 +161,17 @@ class Account():
                 Seconds to wait before giving up. Accepts a single number to set the 
                 same time limit for both connecting and receiving data, or a 
                 `(connect, read)` tuple to set them separately.
-                Defaults to 3.
+                Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
 
         Returns:
             bool: True on successfull authentication, False otherwise.
         """
         # Get JWT token
-        url_path = _urljoin(self.url, "/api/auth/login")
-        headers = {'Content-Type': 'application/json',
-                   'Accept': 'application/json'}
         data = {'username': str(username), 'password': str(password)}
-        auth_response = _requests.post(url=url_path,
-                                       headers=headers,
-                                       json=data,
-                                       timeout=timeout)
+        auth_response = self.request(method="POST",
+                                     endpoint="/api/auth/login",
+                                     json=data,
+                                     timeout=timeout)
         if auth_response.status_code != _HTTPStatus.OK or \
                 not self._save_token(auth_response.json()):
             return False  # Exit early if failed to get/process jwt token
@@ -159,7 +179,6 @@ class Account():
         if fetch_info:
             # Get account info
             return self._fetch_user_info(timeout=timeout)
-
         return True
 
     def _fetch_user_info(self, timeout=5):
@@ -177,12 +196,9 @@ class Account():
             bool: True if the user information was successfully retrieved and
                 processed, False otherwise.
         """
-        headers = {"Accept": "application/json",
-                   "X-Authorization": "Bearer {}".format(self.token)}
-        url_path = _urljoin(self.url, "/api/auth/user")
-        tb_user_response = _requests.get(url=url_path,
-                                         headers=headers,
-                                         timeout=timeout)
+        tb_user_response = self.request(method="GET",
+                                        endpoint="/api/auth/user",
+                                        timeout=timeout)
         if tb_user_response.status_code == _HTTPStatus.OK:
             user_info = tb_user_response.json()  # type: dict
             self._customer_id = user_info.get("customerId", {}).get("id")
@@ -192,7 +208,7 @@ class Account():
             return True
         return False
 
-    def update_token(self, timeout=3):
+    def update_token(self, timeout=None):
         # type: (int|float|tuple|None) -> bool
         """Obtain new token using existing refresh token.
 
@@ -201,7 +217,7 @@ class Account():
                 Seconds to wait before giving up. Accepts a single number to set the 
                 same time limit for both connecting and receiving data, or a 
                 `(connect, read)` tuple to set them separately.
-                Defaults to 3.
+                Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
 
         Returns:
             bool: True on successfull update, False otherwise.
@@ -209,16 +225,11 @@ class Account():
         References:
         - https://github.com/thingsboard/thingsboard/issues/840
         """
-        url_path = _urljoin(self.url, '/api/auth/token')
-        headers = {'Content-Type': 'application/json',
-                   'Accept': 'application/json'}
-        # The following line may not be needed unsure
-        # headers["X-Authorization"] = "Bearer {}".format(self.refreshToken)
         data = {'refreshToken': str(self.refreshToken)}
-        auth_response = _requests.post(url=url_path,
-                                       headers=headers,
-                                       json=data,
-                                       timeout=timeout)
+        auth_response = self.request(method="POST",
+                                     endpoint="/api/auth/token",
+                                     json=data,
+                                     timeout=timeout)
         if auth_response.status_code == _HTTPStatus.OK:
             return self._save_token(auth_response.json())
         return False
@@ -251,7 +262,7 @@ class Account():
     #     else:
     #         return False
 
-    def fetch_devices(self, page_size=10, timeout=10):
+    def fetch_devices(self, page_size=10, timeout=None):
         # type: (int, int|float|tuple|None) -> bool
         """Perform query of devices belonging to account from Thingsboard.
 
@@ -269,31 +280,27 @@ class Account():
                 Seconds to wait before giving up. Accepts a single number to set the 
                 same time limit for both connecting and receiving data, or a 
                 `(connect, read)` tuple to set them separately.
-                Defaults to 10.
+                Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
 
         Returns:
             bool: True on successfull query of account devices, False otherwise.
         """
         self.devices.clear()
-        headers = {'Accept': 'application/json',
-                   'X-Authorization': "Bearer {}".format(self.token)
-                   }
 
         if self._is_tenant_admin:
             endpoint = "/api/tenant/devices"
         else:
             endpoint = "/api/customer/{customerId}/devices".format(
                 customerId=self._customer_id)
-        url_path = _urljoin(self.url, endpoint)
 
         has_next = True
         page = 0
         params = {"limit": page_size, "pageSize": page_size, "page": page}
         while has_next:
-            response = _requests.get(url=url_path,
-                                     params=params,
-                                     headers=headers,
-                                     timeout=timeout)
+            response = self.request(method="GET",
+                                    endpoint=endpoint,
+                                    params=params,
+                                    timeout=timeout)
             if response.status_code != _HTTPStatus.OK:
                 return 1  # Early exit if request failed
 
@@ -315,6 +322,114 @@ class Account():
                 else:
                     params["page"] = page
         return True
+
+    def request(self, method, endpoint,
+                params=None,
+                headers=None,
+                json=None,
+                timeout=_HTTPTransport.DEFAULT_TIMEOUT,
+                **kwargs):  # pylint: disable-next=line-too-long
+        # type: (str, str, dict|bytes|None, dict|None, dict|None, int|float|tuple|None, **object) -> _Response
+        """Execute an authenticated API request.
+
+        The Account instance automatically injects the JWT bearer token
+        into the Authorization header before passing the request to the
+        HTTP transport layer.
+
+        Args:
+            method (str): HTTP method to execute, such as GET, POST, PUT, or DELETE.
+            endpoint (str): Relative API path.
+            params (dict, Optional): Query string parameters.
+            headers (dict, Optional): Additional HTTP headers.
+                Note:
+                    The headers argument may be supplied, but the Authorization
+                    header managed by Account may be modified or overridden.
+            json (object, Optional): JSON serialisable request body.
+            timeout (int | float | tuple, optional): Request timeout.
+                Seconds to wait before giving up. Accepts a single number to set the 
+                same time limit for both connecting and receiving data, or a 
+                `(connect, read)` tuple to set them separately.
+                Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
+            kwargs (dict): Optional arguments supported by requests.Session.request.
+
+                Supported keyword arguments include:
+                - data (dict, bytes, str): Request body data.
+                - cookies (dict): Cookies to send with the request.
+                - files (dict): Files to upload.
+                - auth (tuple, callable): Authentication handler.
+                - allow_redirects (bool): Whether redirects should be followed.
+                - proxies (dict): Proxy configuration.
+                - verify (bool, str): SSL certificate verification option.
+                - stream (bool): Whether to stream the response.
+                - cert (str, tuple): Client certificate configuration.
+
+        Returns:
+            requests.Response: HTTP response object.
+
+        Raises:
+            APIError: If the API returns an error response.
+        """
+        response = self._http.request(
+            method=method,
+            url=_urljoin(self.url, endpoint),
+            params=params,
+            headers=self._prepare_headers(headers=headers),
+            json=json,
+            timeout=timeout,
+            **kwargs
+        )
+        if not response.ok:
+            raise self._error_from_response(response)
+        return response
+
+    def _prepare_headers(self, headers):
+        # type: (dict) -> dict
+        """Apply authentication headers to a request.
+
+        Args:
+            headers (dict): Existing HTTP request headers.
+
+        Returns:
+            dict: Updated HTTP request headers containing authentication.
+        """
+        prepared = dict(headers or {})
+        prepared["X-Authorization"] = "Bearer {}".format(self.token)
+        return prepared
+
+    def _error_from_response(self, response):
+        # type: (_Response) -> APIError
+        """Create an API exception from an HTTP response.
+
+        Args:
+            response (requests.Response): HTTP response.
+
+        Returns:
+            APIError: Appropriate API exception.
+        """
+        if response.status_code == 400:
+            return BadRequestError.from_response(response)
+        if response.status_code == 401:
+            return AuthenticationError.from_response(response)
+        if response.status_code == 403:
+            return PermissionDeniedError.from_response(response)
+        if response.status_code == 404:
+            return NotFoundError.from_response(response)
+        if response.status_code == 405:
+            return MethodNotAllowedError.from_response(response)
+        if response.status_code == 409:
+            return ConflictError.from_response(response)
+        if response.status_code == 412:
+            return PreconditionFailedError.from_response(response)
+        if response.status_code == 429:
+            return RateLimitError.from_response(response)
+        if response.status_code >= 500:
+            return ServerError.from_response(response)
+        return APIError.from_response(response)
+
+    def end(self):
+        # type: () -> None
+        """Close the account HTTP resources."""
+        self._http.close()
 
 
 class Device():
@@ -361,7 +476,7 @@ class Device():
         """Enter the Device context manager."""
         return self
 
-    def fetch_timeseries_keys(self, copy=False, timeout=3):
+    def fetch_timeseries_keys(self, copy=False, timeout=None):
         # type: (bool|None, int|float|tuple|None) -> list[str]|bool|None
         """Retrieve timeseries keys belonging to device from Thingsboard.
 
@@ -371,7 +486,7 @@ class Device():
                 Seconds to wait before giving up. Accepts a single number to set the 
                 same time limit for both connecting and receiving data, or a 
                 `(connect, read)` tuple to set them separately.
-                Defaults to 3.
+                Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
 
         Returns:
             list[str]|False|None: On successfull key retrieval, will return
@@ -381,18 +496,13 @@ class Device():
         API Endpoint:
         > GET /api/plugins/telemetry/{entityType}/{entityId}/keys/timeseries
         """
-        url_header = _urljoin(
-            self.account.url,
-            "/api/plugins/telemetry/{entityType}/{entityId}/keys/timeseries".format(
-                entityType="DEVICE",
-                entityId=self.device_id
-            )
+        endpoint = "/api/plugins/telemetry/{entityType}/{entityId}/keys/timeseries".format(
+            entityType="DEVICE",
+            entityId=self.device_id
         )
-        headers = {"Accept": "application/json",
-                   "X-Authorization": "Bearer {}".format(self.account.token)}
-        response = _requests.get(url_header,
-                                 headers=headers,
-                                 timeout=timeout)
+        response = self.account.request(method="GET",
+                                        endpoint=endpoint,
+                                        timeout=timeout)
         if response.status_code == _HTTPStatus.OK:
             self.keys_ts = response.json()
             if copy:
@@ -410,7 +520,7 @@ class Device():
                        agg=None,  # type: str|None
                        tz_offset=0,  # type: timedelta|int|float
                        useStrictDataTypes=True,  # type: bool # type: pylint: disable=invalid-name
-                       timeout=30,  # type: int|float|tuple|None
+                       timeout=None,  # type: int|float|tuple|None
                        ):  # type: (...) -> dict[str, list[dict[str, _Any]]]|None
         """Retrieves timeseries data belonging to device from Thingsboard.
 
@@ -580,19 +690,14 @@ class Device():
         if useStrictDataTypes:
             params["useStrictDataTypes"] = True
 
-        base_url = _urljoin(
-            self.account.url,
-            "/api/plugins/telemetry/{entityType}/{entityId}/values/timeseries".format(
-                entityType="DEVICE",
-                entityId=self.device_id,
-            )
+        endpoint = "/api/plugins/telemetry/{entityType}/{entityId}/values/timeseries".format(
+            entityType="DEVICE",
+            entityId=self.device_id,
         )
-        headers = {"Accept": "application/json",
-                   "X-Authorization": "Bearer {}".format(self.account.token)}
-        response = _requests.get(url=base_url,
-                                 params=params,
-                                 headers=headers,
-                                 timeout=timeout)
+        response = self.account.request(method="GET",
+                                        endpoint=endpoint,
+                                        params=params,
+                                        timeout=timeout)
         if response.status_code == _HTTPStatus.OK:
             data = response.json()
             if warn_on_limit:
@@ -613,7 +718,7 @@ class Device():
             return data
         return None
 
-    def update_timeseries(self, data, timeout=10):
+    def update_timeseries(self, data, timeout=None):
         # type: (dict[str, _Any] | list[dict[str, _Any]], int|float|tuple|None) -> bool
         """Update/Save Thingsboard device timeseries telemetry (time-series) data.
 
@@ -642,7 +747,7 @@ class Device():
                 Seconds to wait before giving up. Accepts a single number to set the 
                 same time limit for both connecting and receiving data, or a 
                 `(connect, read)` tuple to set them separately.
-                Defaults to 10.
+                Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
 
         Returns:
             bool: Returns true if update was successfull, false otherwise.
@@ -669,7 +774,7 @@ class Device():
                           rewriteLatestIfDeleted=True,  # type: bool|None # pylint: disable=invalid-name
                           deleteAllDataForKeys=False,  # type: bool|None # pylint: disable=invalid-name
                           tz_offset=0,  # type: timedelta|int|float
-                          timeout=10,  # type: int|float|tuple|None
+                          timeout=None,  # type: int|float|tuple|None
                           ):  # type: (...) -> bool
         """Update Thingsboard device timeseries telemetry (time-series) data.
 
@@ -708,7 +813,7 @@ class Device():
                     Seconds to wait before giving up. Accepts a single number to set the 
                     same time limit for both connecting and receiving data, or a 
                     `(connect, read)` tuple to set them separately.
-                    Defaults to 10.
+                    Defaults to None, which applies the internal `DEFAULT_TIMEOUT`.
 
         Returns:
             bool: Returns true if delete was successfull, false otherwise.
@@ -751,19 +856,14 @@ class Device():
         if rewriteLatestIfDeleted:
             params["rewriteLatestIfDeleted"] = True
 
-        base_url = _urljoin(
-            self.account.url,
-            "/api/plugins/telemetry/{entityType}/{entityId}/timeseries/delete".format(
-                entityType="DEVICE",
-                entityId=self.device_id
-            )
+        endpoint = "/api/plugins/telemetry/{entityType}/{entityId}/timeseries/delete".format(
+            entityType="DEVICE",
+            entityId=self.device_id
         )
-        headers = {"Accept": "application/json",
-                   "X-Authorization": "Bearer {}".format(self.account.token)}
-        response = _requests.delete(url=base_url,
-                                    params=params,
-                                    headers=headers,
-                                    timeout=timeout)
+        response = self.account.request(method="DELETE",
+                                        endpoint=endpoint,
+                                        params=params,
+                                        timeout=timeout)
         return response.status_code == _HTTPStatus.OK
 
 
