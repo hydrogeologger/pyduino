@@ -8,9 +8,13 @@ Dependencies:
 """
 
 # Module Info
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 # Import base modules
+from .error_handler import (
+    disable_friendly_exceptions,
+    enable_friendly_exceptions,
+)
 from .exceptions import (
     APIError,
     AuthenticationError,
