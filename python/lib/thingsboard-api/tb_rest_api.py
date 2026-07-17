@@ -61,13 +61,13 @@ from .exceptions import (
     PreconditionFailedError,
     RateLimitError,
     ServerError,
-    ThingsBoardAPIError,
 )
 
 if TYPE_CHECKING:
     from typing import Any
 
     from ._http import Response as _Response
+    from .exceptions import ThingsBoardAPIError
 
 # Python2/3 Compatibility
 # pylint: disable=consider-using-f-string
