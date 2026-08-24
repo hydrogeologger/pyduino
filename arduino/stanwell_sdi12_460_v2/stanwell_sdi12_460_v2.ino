@@ -964,6 +964,100 @@ void modbus_rtu(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_p
     }
 }
 
+void serial_sensor(int str_ay_size, int debug_sw, int8_t serial_pin, int power_sw_pin, String str_ay[], const char* content) {
+    // Serial
+    // serial,<serialPort>,power,<powerPin>,cmd,"<cmd>"
+    // Optional Parameters:
+    // baud (optional): Default to 9600.
+    // end (optional): Line terminator. Default to "\r\n".
+
+    if (serial_pin == INVALID) return;
+
+    hydrogeolog1.print_string_delimiter_value("serial", serial_pin);
+
+    HardwareSerial* mySerial;
+    switch (serial_pin) {
+        case 1:
+            mySerial = &Serial1;
+            break;
+        case 2:
+            mySerial = &Serial2;
+            break;
+        case 3:
+            mySerial = &Serial3;
+            break;
+        default:
+            Serial.println("Invalid serial port");
+            return;
+    }
+
+    long baud = hydrogeolog1.parse_argument("baud", 9600, str_ay_size, str_ay);
+    if (debug_sw) {
+        hydrogeolog1.print_string_delimiter_value("baud", baud);
+        hydrogeolog1.print_string_delimiter_value("power", power_sw_pin);
+    }
+
+    if (power_sw_pin != INVALID) {
+        digitalWrite(power_sw_pin, HIGH);
+        int power_delay_millis = hydrogeolog1.parse_argument("delay", 0, str_ay_size, str_ay);
+        if (debug_sw) {
+            hydrogeolog1.print_string_delimiter_value("delay", power_delay_millis);
+        }
+        if (power_delay_millis > 0) delay(power_delay_millis);
+    }
+
+    mySerial->begin(baud);
+    delay(100);
+
+    char cmd[32] = {"\0"};
+
+    // Capture command string
+    char* cmdStart = strstr(content, "cmd,\"") + 4;
+    if (cmdStart == NULL) {
+        Serial.println();
+        return;
+    }
+    char* cmdEnd = strchr(cmdStart + 1, '"');
+    if (cmdEnd == NULL) {
+        Serial.println();
+        return;
+    }
+    int cmdLen = cmdEnd - (cmdStart + 1);
+    if (cmdLen > 0) {
+        strncpy(cmd, cmdStart + 1, cmdLen);
+        snprintf(cmd + strlen(cmd), sizeof(cmd) - strlen(cmd), "\r\n");
+        cmd[sizeof(cmd) - 1] = '\0';
+
+        while (mySerial->available()) mySerial->read();
+        mySerial->print(cmd);
+        mySerial->flush();
+
+        unsigned long serial_timeout = 1000;
+        unsigned long start_time = millis();
+        uint8_t char_time = (10000 / baud) + 1;
+        while (!mySerial->available() && millis() - start_time < serial_timeout) {
+            delay(char_time);
+        }
+
+        char c = '\0';
+        while (mySerial->available()) {
+            c = mySerial->read();
+            // Skips newline or carriage return characters
+            if (c == '\r' || c == '\n') {
+                c = mySerial->peek();
+                if (c == '\r' || c == '\n') mySerial->read();
+                Serial.print(DELIMITER);
+            } else {
+                Serial.print(c);
+            }
+            delay(char_time);
+        }
+    }
+    mySerial->end();
+    if (power_sw_pin > INVALID) digitalWrite(power_sw_pin, LOW);
+    Serial.println();
+}
+
 void check_serial(String content)
     /*
      if input abc in serial, arduino will return abc
@@ -1036,7 +1130,7 @@ void loop()
         fredlund_measurement(str_ay_size, debug_sw,
                              hydrogeolog1.parse_argument("dgin", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("htpw", INVALID, str_ay_size, str_ay),
-                             hydrogeolog1.parse_argument("itv" , INVALID, str_ay_size, str_ay),
+                             hydrogeolog1.parse_argument("itv", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("otno", INVALID, str_ay_size, str_ay),
                              hydrogeolog1.parse_argument("snpw", INVALID, str_ay_size, str_ay),
                              str_ay);
@@ -1045,10 +1139,14 @@ void loop()
                    hydrogeolog1.parse_argument("modbus", INVALID, str_ay_size, str_ay),
                    power_sw_pin, str_ay);
 
+        serial_sensor(str_ay_size, debug_sw,
+                      hydrogeolog1.parse_argument("serial", INVALID, str_ay_size, str_ay),
+                      power_sw_pin, str_ay, content.c_str());
+
         multiplexer_i2c_reset(hydrogeolog1.parse_argument("9548_reset", INVALID, str_ay_size, str_ay, true));
 
         multiplexer_search(hydrogeolog1.parse_argument("9548_search", INVALID, str_ay_size, str_ay, true),
-                power_sw_pin);
+                           power_sw_pin);
 
         multiplexer_read(str_ay_size, debug_sw,
                          hydrogeolog1.parse_argument_string("type", "", str_ay_size, str_ay),
