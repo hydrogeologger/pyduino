@@ -6,5 +6,6 @@ data structures.
 """
 
 __all__ = [
-    "openmeteo"
+    "openmeteo",
+    "silo"
 ]
