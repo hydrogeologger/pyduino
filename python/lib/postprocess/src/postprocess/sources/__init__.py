@@ -7,8 +7,10 @@ data structures.
 
 from . import (
     openmeteo,
+    silo,
 )
 
 __all__ = [
     "openmeteo",
+    "silo",
 ]
