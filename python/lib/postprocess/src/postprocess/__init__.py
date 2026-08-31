@@ -10,6 +10,12 @@ Dependencies:
 __version__ = "0.1.0"
 
 from . import log
+from .conversion import (  # Temperature Utilities; Rate Utilities
+    celsius_to_kelvin,
+    kelvin_to_celsius,
+    per_second_to_daily,
+    per_second_to_hourly,
+)
 from .interpolation import Interpolation
 from .pandas_utils import (
     flatten_column_headers,
