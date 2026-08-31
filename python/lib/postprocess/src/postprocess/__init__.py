@@ -23,6 +23,16 @@ from .transformation import (
 
 from .interpolation import Interpolation
 
+from .conversion import (
+    # Temperature Utilities
+    celsius_to_kelvin,
+    kelvin_to_celsius,
+
+    # Rate Utilities
+    per_second_to_hourly,
+    per_second_to_daily,
+)
+
 from ._logging import (
     configure_output,
     disable_output,
