@@ -968,6 +968,7 @@ void serial_sensor(int str_ay_size, int debug_sw, int8_t serial_pin, int power_s
     // Serial
     // serial,<serialPort>,power,<powerPin>,cmd,"<cmd>"
     // Optional Parameters:
+    // passthrough: passthrough duration in minutes after last command, default to 0.
     // baud (optional): Default to 9600.
     // end (optional): Line terminator. Default to "\r\n".
 
@@ -1009,48 +1010,103 @@ void serial_sensor(int str_ay_size, int debug_sw, int8_t serial_pin, int power_s
     mySerial->begin(baud);
     delay(100);
 
-    char cmd[32] = {"\0"};
+    long passthroughTimer = hydrogeolog1.parse_argument("passthrough", 0, str_ay_size, str_ay);
 
-    // Capture command string
-    char* cmdStart = strstr(content, "cmd,\"") + 4;
-    if (cmdStart == NULL) {
-        Serial.println();
-        return;
-    }
-    char* cmdEnd = strchr(cmdStart + 1, '"');
-    if (cmdEnd == NULL) {
-        Serial.println();
-        return;
-    }
-    int cmdLen = cmdEnd - (cmdStart + 1);
-    if (cmdLen > 0) {
-        strncpy(cmd, cmdStart + 1, cmdLen);
-        snprintf(cmd + strlen(cmd), sizeof(cmd) - strlen(cmd), "\r\n");
-        cmd[sizeof(cmd) - 1] = '\0';
+    char c = '\0';
+    if (passthroughTimer >= 1) {
+        hydrogeolog1.print_string_delimiter_value("passthrough", passthroughTimer);
+        passthroughTimer = passthroughTimer * 60 * 1000; // Convert timer from minutes to milliseconds
+        // Pass through mode
+        String myCommand = "";
+        String response = "";
+        while (true) {
+            while (Serial.available() > 0) {
+                // Read all characters
+                c = Serial.read();
+                myCommand += String(c);
+                delay(2);  // 1 character ~ 1.04 ms @ 9600 baud
+            }
 
-        while (mySerial->available()) mySerial->read();
-        mySerial->print(cmd);
-        mySerial->flush();
+            // Pass through mode escape
+            if (myCommand == "SERIALEXIT" || millis() >= passthroughTimer) {
+                Serial.println("serial,END!");
+                break;
+            }
 
-        unsigned long serial_timeout = 1000;
-        unsigned long start_time = millis();
-        uint8_t char_time = (10000 / baud) + 1;
-        while (!mySerial->available() && millis() - start_time < serial_timeout) {
-            delay(char_time);
+            if (myCommand.length() > 0 || c == '\n' || c == '\r') {
+                reset_timer();  // Reset timer for pass through time limit
+                mySerial->println(myCommand.c_str());
+                myCommand = "";
+                c = '\0';
+
+                // Wait for maximum duration for reply
+                for (uint16_t i = 0; i < 5000u; i++) {
+                    delay(1);
+                    if (mySerial->available()) {
+                        break;
+                    }
+                }
+            }
+
+            while (mySerial->available() > 0) {
+                c = mySerial->read();
+                if (c == '\r' || c == '\n') {
+                    Serial.println(response);  // write the response to the screen
+                    Serial.flush();
+                    response = "";
+                    c = '\0';
+                    break;
+                } else if (c >= 32 && c <= 126) {
+                    response += String(c);
+                }
+                delay(2);  // 1 character ~ 1.04 ms @ 9600 baud
+            }
         }
 
-        char c = '\0';
-        while (mySerial->available()) {
-            c = mySerial->read();
-            // Skips newline or carriage return characters
-            if (c == '\r' || c == '\n') {
-                c = mySerial->peek();
-                if (c == '\r' || c == '\n') mySerial->read();
-                Serial.print(DELIMITER);
-            } else {
-                Serial.print(c);
+    } else {
+        // Normal command mode
+        char cmd[32] = {"\0"};
+
+        // Capture command string
+        char* cmdStart = strstr(content, "cmd,\"") + 4;
+        if (cmdStart == NULL) {
+            Serial.println();
+            return;
+        }
+        char* cmdEnd = strchr(cmdStart + 1, '"');
+        if (cmdEnd == NULL) {
+            Serial.println();
+            return;
+        }
+        int cmdLen = cmdEnd - (cmdStart + 1);
+        if (cmdLen > 0) {
+            strncpy(cmd, cmdStart + 1, cmdLen);
+            snprintf(cmd + strlen(cmd), sizeof(cmd) - strlen(cmd), "\r\n");
+            cmd[sizeof(cmd) - 1] = '\0';
+
+            while (mySerial->available()) mySerial->read();
+            mySerial->print(cmd);
+            mySerial->flush();
+
+            unsigned long serial_timeout = 1000;
+            unsigned long start_time = millis();
+            uint8_t char_time = (10000 / baud) + 1;
+            while (!mySerial->available() && millis() - start_time < serial_timeout) {
+                delay(char_time);
             }
-            delay(char_time);
+
+            while (mySerial->available()) {
+                c = mySerial->read();
+                // Skips newline or carriage return characters
+                if (c == '\r' || c == '\n') {
+                    c = mySerial->peek();
+                    if (c == '\r' || c == '\n') mySerial->read();
+                    Serial.print(DELIMITER);
+                } else {
+                    Serial.print(c);
+                }
+                delay(char_time);
+            }
         }
     }
     mySerial->end();
