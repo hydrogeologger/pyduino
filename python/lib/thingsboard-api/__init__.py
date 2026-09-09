@@ -8,7 +8,7 @@ Dependencies:
 """
 
 # Module Info
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # Import base modules
 from .tb_rest_api import *
