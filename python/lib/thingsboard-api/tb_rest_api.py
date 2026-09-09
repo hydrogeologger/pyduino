@@ -452,8 +452,7 @@ class Device():
         order_by_desc=True,  # type: bool
         limit=50000,  # type: int|None
         warn_on_limit=True,  # type: bool|None
-        interval=None,  # type: timedelta|int|None
-        agg=None,  # type: str|None
+        agg_params=None,  # type: dict|None
         tz_offset=0,  # type: timedelta|int|float|tuple|list
         useStrictDataTypes=True,  # type: bool
         timeout=30,  # type: int|float|tuple|None
@@ -498,11 +497,17 @@ class Device():
             warn_on_limit (bool, optional): If True, emits a UserWarning when field
                 counts reached or exceeds the specified limit. If False, no warning
                 is triggered if limit is reached. Defaults to True.
-            interval (timedelta|int, optional): Aggregation interval in milliseconds.
-                Also accepts a `timedelta` object. Required if `agg` is set. Defaults to None.
-            agg (str, optional): Aggregation function to apply over each interval.
-                Common values include `"AVG"`, `"SUM"`, `"MIN"`, `"MAX"`, `"COUNT"`.
-                If not provided, raw telemetry points are returned. Defaults to None.
+            agg_params (dict, optional): Parameters used to configure time-series
+                aggregation. Supported parameters include:
+
+                - ``agg`` (str): Aggregation function to apply over each interval.
+                    Supported values are ``MIN``, ``MAX``, ``AVG``, ``SUM``, ``COUNT``, ``NONE``.
+                    Defaults to None.
+                - ``interval`` (timedelta or int): The aggregation interval in milliseconds.
+                    Also accepts a `timedelta` object. Required if `agg` is set.
+
+                These parameters are grouped separately to allow
+                aggregation-specific handling and validation.
             tz_offset (int | float | timedelta | tuple | list, optional): Timezone offset
                 from UTC for `startTs` and `endTs` if they are provided in local time
                 rather than UTC. Numeric values are specified in hours (e.g., `10` for UTC+10).
@@ -530,7 +535,8 @@ class Device():
 
         Raises:
             ValueError: 
-                - If `agg` or `interval` is missing when aggregation is requested.
+                - If `agg_params` is empty or not a dictionary.
+                - If `agg` or `interval` is missing from `agg_params`.
                 - If `agg` is not one of `MIN`, `MAX`, `AVG`, `SUM`, or `COUNT`.
                 - If `startTs` or `endTs` is missing when aggregation is used.
                 - If the `tz_offset` tuple/list `(start_offset, end_offset)` does not
@@ -630,9 +636,24 @@ class Device():
             raise type(e)("Invalid limit value: {}".format(limit))
         params["limit"] = limit
 
-        # Build "interval" param
-        SECONDS_2_MILLIS = 1000  # Seconds to Milliseconds factor. # pylint: disable=invalid-name
-        if interval:
+        # Perform aggregate parameter checking
+        if agg_params is not None:
+            if not isinstance(agg_params, dict) or not agg_params:
+                raise ValueError(
+                    "`agg_params` must be a non-empty dict or None")
+
+            interval = agg_params.get("interval")
+            agg = agg_params.get("agg")
+
+            if interval is None or agg is None:
+                raise ValueError(
+                    "`agg` and `interval` must both be provided.")
+            if startTs is None or endTs is None:
+                raise ValueError(
+                    "`startTs` and `endTs` are required when aggregation is used.")
+
+            # Build "interval" param
+            SECONDS_2_MILLIS = 1000  # Seconds to Milliseconds factor. # pylint: disable=invalid-name
             if isinstance(interval, timedelta):
                 interval = round(interval.total_seconds() * SECONDS_2_MILLIS)
             elif isinstance(interval, float):
@@ -645,19 +666,17 @@ class Device():
                 )
             ):
                 raise TypeError("Invalid interval value")
-            params["interval"] = interval
 
-        # build "agg" param
-        if agg:
+            # build "agg" param
             if not isinstance(agg, str) or \
                     agg.upper() not in ("MIN", "MAX", "AVG", "SUM", "COUNT"):
                 raise ValueError(
                     "Invalid \"agg\" value, Only Accepts one of MIN, MAX, AVG, SUM, COUNT")
-            params["agg"] = agg
 
-        if ((any((interval, agg)) and not all((startTs, endTs))) or bool(interval) ^ bool(agg)):
-            raise ValueError(
-                "One or more arguments `agg`, `interval`, `startTs` or `endTs` is missing.")
+            # Pass through aggregate params and override with processed agg_params
+            params.update(agg_params)
+            params["interval"] = interval
+            params["agg"] = agg
 
         if useStrictDataTypes:
             params["useStrictDataTypes"] = True
