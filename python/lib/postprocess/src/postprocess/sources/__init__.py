@@ -4,3 +4,11 @@ The modules in this package provide integrations with external APIs and
 encapsulate the logic required to request, retrieve, and handle source-specific
 data structures.
 """
+
+from . import (
+    openmeteo,
+)
+
+__all__ = [
+    "openmeteo",
+]
