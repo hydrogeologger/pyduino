@@ -103,7 +103,7 @@ def test_generate_monthly_dates():
             [date(2026, 4, 30)],
         ),
         (
-            "unique_month",
+            "unique",
             date(2026, 5, 20),
             [date(2026, 5, 20)],
         ),
