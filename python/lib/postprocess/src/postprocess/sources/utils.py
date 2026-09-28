@@ -119,7 +119,7 @@ def generate_monthly_dates(start_date, end_date, end_date_behaviour="exclude"):
         end_date_behaviour (str, optional): Controls how an ``end_date`` that does
             not fall on the monthly sequence is handled. Defaults to ``"exclude"``.
             - ``"exclude"``: Do not include ``end_date``.
-            - ``"unique_month"``: Include ``end_date`` if its month is not already
+            - ``"unique"``: Include ``end_date`` if its month is not already
             represented.
             - ``"append"``: Always include ``end_date``.
 
@@ -129,13 +129,13 @@ def generate_monthly_dates(start_date, end_date, end_date_behaviour="exclude"):
 
     Raises:
         ValueError: If ``end_date_behaviour`` is not one of ``"exclude"``,
-            ``"unique_month"``, or ``"append"``.
+            ``"unique"``, or ``"append"``.
     """
-    valid_behaviours = {"exclude", "unique_month", "append"}
+    valid_behaviours = {"exclude", "unique", "append"}
     if end_date_behaviour not in valid_behaviours:
         raise ValueError(
             "`end_date_behaviour` must be `exclude`, "
-            "`unique_month`, or `append`"
+            "`unique`, or `append`"
         )
     dates = []
     current_date = start_date
@@ -154,7 +154,7 @@ def generate_monthly_dates(start_date, end_date, end_date_behaviour="exclude"):
         current_date = next_date
 
     if dates[-1] != end_date:
-        if end_date_behaviour == "unique_month":
+        if end_date_behaviour == "unique":
             last_date = dates[-1]
             if (last_date.year, last_date.month) != (
                 end_date.year,
