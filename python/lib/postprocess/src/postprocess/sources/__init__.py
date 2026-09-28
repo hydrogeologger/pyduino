@@ -6,11 +6,13 @@ data structures.
 """
 
 __all__ = [
+    "bom",
     "silo",
     "openmeteo",
 ]
 
 from . import (
+    bom,
     silo,
     openmeteo,
 )
