@@ -22,3 +22,10 @@ from .transformation import (
 )
 
 from .interpolation import Interpolation
+
+from ._logging import (
+    configure_output,
+    disable_output,
+)
+# Enable logging output as default for the whole package
+configure_output()
