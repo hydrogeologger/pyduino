@@ -9,6 +9,7 @@ Dependencies:
 # Module Info
 __version__ = "0.1.0"
 
+from . import log
 from .interpolation import Interpolation
 from .pandas_utils import (
     flatten_column_headers,
@@ -20,3 +21,6 @@ from .transformation import (
     calculate_delta,
     normalise,
 )
+
+# Enable logging output as default for the whole package
+log.configure()
