@@ -4,6 +4,7 @@
 
 ## Modules
 
+- [`postprocess.conversion`](./postprocess.conversion.md#module-postprocessconversion): Utilities for converting between common units and rates.
 - [`postprocess.extern`](./postprocess.extern.md#module-postprocessextern): This is a subpackage of postprocess containing repackaged modules from external sources.
 - [`postprocess.file_matching`](./postprocess.file_matching.md#module-postprocessfile_matching): Utilities for matching files to external data records.
 - [`postprocess.interpolation`](./postprocess.interpolation.md#module-postprocessinterpolation): Post processing interpolation module.
@@ -43,6 +44,17 @@
 
 ## Functions
 
+- [`conversion.cardinal_to_degrees`](./postprocess.conversion.md#function-cardinal_to_degrees): Convert an abbreviated cardinal direction string to its degree angle.
+- [`conversion.celsius_to_kelvin`](./postprocess.conversion.md#function-celsius_to_kelvin): Convert a temperature from degrees Celsius to Kelvin.
+- [`conversion.daily_to_hourly`](./postprocess.conversion.md#function-daily_to_hourly): Convert a daily rate to an equivalent hourly rate.
+- [`conversion.daily_to_per_second`](./postprocess.conversion.md#function-daily_to_per_second): Convert a daily rate to an equivalent per-second rate.
+- [`conversion.hourly_to_daily`](./postprocess.conversion.md#function-hourly_to_daily): Convert an hourly rate to an equivalent daily rate.
+- [`conversion.hourly_to_per_second`](./postprocess.conversion.md#function-hourly_to_per_second): Convert an hourly rate to an equivalent per-second rate.
+- [`conversion.kelvin_to_celsius`](./postprocess.conversion.md#function-kelvin_to_celsius): Convert a temperature from Kelvin to degrees Celsius.
+- [`conversion.kmh_to_ms`](./postprocess.conversion.md#function-kmh_to_ms): Convert speed from kilometers per hour (km/h) to meters per second (m/s).
+- [`conversion.ms_to_kmh`](./postprocess.conversion.md#function-ms_to_kmh): Convert speed from meters per second (m/s) to kilometers per hour (km/h).
+- [`conversion.per_second_to_daily`](./postprocess.conversion.md#function-per_second_to_daily): Convert a per-second rate to an equivalent daily rate.
+- [`conversion.per_second_to_hourly`](./postprocess.conversion.md#function-per_second_to_hourly): Convert a per-second rate to an equivalent hourly rate.
 - [`pandas_utils.flatten_column_headers`](./postprocess.pandas_utils.md#function-flatten_column_headers): Flatten a MultiIndex of column headers into a list of strings.
 - [`pandas_utils.insert_index_level`](./postprocess.pandas_utils.md#function-insert_index_level): Add extra levels to index.
 - [`pandas_utils.swap_index`](./postprocess.pandas_utils.md#function-swap_index): Inplace swap of DataFrame index with existing given keys.
