@@ -668,7 +668,10 @@ class SmoothSpline(PPform):
         # Make sure it uses symmetric matrix solver
         ddydx = diff(dydx, axis=0)
         # sp.linalg.use_solver(useUmfpack=True)
-        u = 2 * sparse.linalg.spsolve((QQ + QQ.T), ddydx)  # @UndefinedVariable
+
+        # Explicitly convert to CSC to satisfy spsolve and avoid efficiency warnings
+        matrix_sum = (QQ + QQ.T).tocsc()
+        u = 2 * sparse.linalg.spsolve(matrix_sum, ddydx)  # @UndefinedVariable
         return np.reshape(u, (n - 2, -1))
 
 
