@@ -29,8 +29,8 @@ trap "redirect;" DEBUG
 PROMPT_COMMAND='undirect;'
 
 echo "Starting serial communication with arduino\n"
-stty raw -echo < /dev/ttyS0
-stty -F /dev/ttyS0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts
+stty raw -echo < /dev/serial0
+stty -F /dev/serial0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts
 
 # Check if error ocurred
 if [ "$?" -ne 0 ]; then
@@ -45,7 +45,7 @@ echo "Session begins, type 'exit' to stop"
 
 # Capture PID of background process so it is possible to terminate it when done
 
-cat </dev/ttyS0&
+cat </dev/serial0&
 bgPid="$!"
 
 printf "\n"
@@ -53,7 +53,7 @@ printf "\n"
 while [ "$cmd" != "exit" ]
 do
    read -r cmd
-   echo -ne $cmd > /dev/ttyS0
+   echo -ne $cmd > /dev/serial0
 done
 
 # Terminate background read process
