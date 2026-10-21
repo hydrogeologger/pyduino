@@ -19,6 +19,7 @@ tb.Account(url)                 # From thingsboard_api core
 tb.convert_to_dataframe(data)   # From tb.py
 ```
 """
+import logging as _logging
 from typing import (
     TYPE_CHECKING,
     Iterable as _Iterable,
@@ -28,6 +29,7 @@ import pandas as _pd
 
 # Package imports
 # Expose core public functions to namespace
+from . import log  # pylint: disable=unused-import
 from .error_handler import (  # pylint: disable=unused-import
     disable_friendly_exceptions,
     enable_friendly_exceptions,
@@ -52,6 +54,9 @@ if TYPE_CHECKING:
 
 # python2 compatiblity
 # pylint: disable=consider-using-f-string
+
+
+logger = _logging.getLogger(__name__)
 
 
 def convert_to_dataframes(data, type_conversion, keys=None, drop_ts=True, verbose=False):  # pylint: disable-next=line-too-long
@@ -109,7 +114,7 @@ def convert_to_dataframes(data, type_conversion, keys=None, drop_ts=True, verbos
         keys (tuple|list|set, optional): Limit dataframe creation to specified
             telemetry keys only. Defaults to None.
         drop_ts (bool, optional): Drop "ts" column from DataFrame. Defaults to True.
-        verbose (bool, optional): Verbosity, False only outputs errors. Defaults to False.
+        verbose (bool, optional): Force verbosity, False only outputs errors. Defaults to False.
 
     Raises:
         ValueError: Empty dataset for conversion.
@@ -128,9 +133,13 @@ def convert_to_dataframes(data, type_conversion, keys=None, drop_ts=True, verbos
     if keys is None:
         keys = data.keys()
 
-    dataframes = {}  # type: dict[str, _pd.DataFrame]
     if verbose:
-        print("Converting timeseries keys to Dataframe:")
+        original_logging_level = logger.getEffectiveLevel()
+        logger.setLevel(_logging.DEBUG)
+
+    logger.debug("Converting timeseries keys to Dataframe:")
+
+    dataframes = {}  # type: dict[str, _pd.DataFrame]
     for key in keys:
         # pdb.set_trace()
         try:
@@ -148,44 +157,57 @@ def convert_to_dataframes(data, type_conversion, keys=None, drop_ts=True, verbos
             if drop_ts:
                 dataframes[key].reset_index(level=1, inplace=True, drop=True)
         except KeyError:
-            print("Failed: {}. {}".format(key, "Key not found."))
+            logger.error("Failed: %s. Key not found.", key)
         except Exception as err:  # pylint: disable=broad-exception-caught
-            print("Failed: {}. {}".format(key, type(err)))
+            logger.exception(
+                "Failed: %s. Unexpected error type: %s",
+                key,
+                type(err).__name__
+            )
         else:
             dataframes[key].sort_index(axis="index",
                                        ascending=True,
                                        inplace=True)
 
-            # Convert values from string to numeric
-            target_type = None
-            if type_conversion is True or \
-                    (isinstance(type_conversion, _Iterable) and
-                     not isinstance(type_conversion, (str, dict)) and key in type_conversion):
-                target_type = "numeric"
-            elif isinstance(type_conversion, dict):
-                target_type = type_conversion.get(key)
-                target_type = target_type.lower() if target_type else None
+            try:
+                # Convert values from string to numeric
+                target_type = None
+                if type_conversion is True or \
+                        (isinstance(type_conversion, _Iterable) and
+                         not isinstance(type_conversion, (str, dict)) and key in type_conversion):
+                    target_type = "numeric"
+                elif isinstance(type_conversion, dict):
+                    target_type = type_conversion.get(key)
+                    target_type = target_type.lower() if target_type else None
 
-            series = dataframes[key]["value"]
-            if target_type in ('numeric', 'float', 'int', 'number'):
-                dataframes[key]["value"] = _pd.to_numeric(
-                    series, errors="coerce")
-            elif target_type in ('datetime', 'date', 'timestamp'):
-                dataframes[key]["value"] = _pd.to_datetime(series,
-                                                           errors="coerce",
-                                                           infer_datetime_format=True
-                                                           )
-            elif target_type in ('bool', 'boolean', 'logical'):
-                dataframes[key]["value"] = series.astype('boolean')
-            elif target_type in ('category', 'categorical'):
-                dataframes[key]["value"] = series.astype('category')
-            elif target_type in ('string', 'str'):
-                dataframes[key]["value"] = series.astype('string')
+                series = dataframes[key]["value"]
+                if target_type in ('numeric', 'float', 'int', 'number'):
+                    dataframes[key]["value"] = _pd.to_numeric(
+                        series, errors="coerce")
+                elif target_type in ('datetime', 'date', 'timestamp'):
+                    dataframes[key]["value"] = _pd.to_datetime(series,
+                                                               errors="coerce",
+                                                               infer_datetime_format=True
+                                                               )
+                elif target_type in ('bool', 'boolean', 'logical'):
+                    dataframes[key]["value"] = series.astype('boolean')
+                elif target_type in ('category', 'categorical'):
+                    dataframes[key]["value"] = series.astype('category')
+                elif target_type in ('string', 'str'):
+                    dataframes[key]["value"] = series.astype('string')
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                logger.exception(
+                    "Failed Conversion: %s. Unexpected error type: %s",
+                    key,
+                    type(err).__name__
+                )
 
             # Rename column headings from value to key name
             # result_df[key].rename(columns={'value': key}, inplace=True)
-            if verbose:
-                print("Success: {}".format(key))
+            logger.debug("Success: %s", key)
+
+    if verbose:
+        logger.setLevel(original_logging_level)
     return dataframes
 
 
@@ -239,7 +261,7 @@ def convert_to_dataframe(data, type_conversion, keys=None, drop_ts=True, verbose
         keys (tuple|list, optional): Limit columns to specified telemetry keys only.
             Defaults to None.
         drop_ts (bool, optional): Drop "ts" column from DataFrame. Defaults to True.
-        verbose (bool, optional): Verbosity, False only outputs errors. Defaults to False.
+        verbose (bool, optional): Force verbosity, False only outputs errors. Defaults to False.
 
     Raises:
         ValueError: Empty dataset for conversion.
